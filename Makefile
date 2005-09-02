@@ -48,7 +48,7 @@ clean:
 	rm -f ITVal
 	rm -f fwlang.tab.c
 	rm -f lex.yy.c
-	rm -f work/*
+	rm -f work/*.o
 
 FDDL/fddl.so: FDDL/mdd.h 
 	make -C FDDL
