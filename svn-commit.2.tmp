@@ -1,0 +1,20 @@
+Added hooks for NETMAP target.  Need to implement algorithm.
+--This line, and those below, will be ignored--
+
+D    svn-commit.2.tmp
+D    svn-commit.3.tmp
+M    nat_iface.cc
+D    svn-commit.4.tmp
+D    svn-commit.5.tmp
+D    svn-commit.6.tmp
+D    svn-commit.7.tmp
+D    svn-commit.8.tmp
+D    svn-commit.9.tmp
+M    nat.cc
+M    FDDL/fddl.so
+M    FDDL/mdd.h
+M    FDDL/api.cc
+M    ITVal
+D    svn-commit.tmp
+M    iface.h
+M    main.c

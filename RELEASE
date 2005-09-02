@@ -1,0 +1,5 @@
+Version 0.2 introduces many bugfixes, provides support for NAT, 
+and can process multiple firewalls in series. 
+
+The command line parameters for launching ITVal have now changed. The correct
+format is now: ITVal queryfile filter1 nat1 {filter2 nat2 ...}

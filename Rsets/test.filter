@@ -1,0 +1,14 @@
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+new_chain  all  -- !192.168.1.0/24       0.0.0.0/0           
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain new_chain (1 references)
+target     prot opt source               destination         
+DROP       tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:65506 
+DROP       tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:65535 
