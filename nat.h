@@ -51,6 +51,22 @@ class   nat_range {
    }
 };
 
+class nmap_range {
+   public:
+	address_range addys;
+	port_range ports;
+	nmap_range *next;
+	
+	int mask;
+
+	int low[21];
+	int high[21];
+
+	nmap_range() {
+      next = NULL;
+	}
+};
+
 class   nat_tuple:public rule_tuple {
  public:
 	nat_range * nat;
