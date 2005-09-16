@@ -4,11 +4,11 @@ debug: GXX = c++ -g -Wall -DDEBUG
 
 all: ITVal 
 
-debug: fwlang.tab.c main.c work/nat.o work/structures.o work/iface.o work/netconvert.o work/rules.o work/rule_parser.o work/build.o FDDL/fddl.so work/nat_iface.o work/firewall.o
-	$(GXX) lex.yy.c fwlang.tab.c work/nat.o work/structures.o work/iface.o work/netconvert.o work/rules.o work/rule_parser.o work/build.o work/nat_iface.o main.c work/firewall.o FDDL/fddl.so debug.c -o ITVal 
+debug: fwlang.tab.c main.c work/nat.o work/structures.o work/iface.o work/netconvert.o work/rules.o work/rule_parser.o work/chains.o FDDL/fddl.so work/nat_iface.o work/firewall.o
+	$(GXX) lex.yy.c fwlang.tab.c work/nat.o work/structures.o work/iface.o work/netconvert.o work/rules.o work/rule_parser.o work/chains.o work/nat_iface.o main.c work/firewall.o FDDL/fddl.so debug.c -o ITVal 
         
-ITVal: fwlang.tab.c main.c work/nat.o work/structures.o work/iface.o work/netconvert.o work/rules.o work/rule_parser.o work/build.o work/firewall.o FDDL/fddl.so work/nat_iface.o
-	$(GXX) lex.yy.c fwlang.tab.c work/nat.o work/structures.o work/iface.o work/netconvert.o work/rules.o work/rule_parser.o work/nat_iface.o work/build.o work/firewall.o main.c FDDL/fddl.so debug.c -o ITVal 
+ITVal: fwlang.tab.c main.c work/nat.o work/structures.o work/iface.o work/netconvert.o work/rules.o work/rule_parser.o work/chains.o work/firewall.o FDDL/fddl.so work/nat_iface.o
+	$(GXX) lex.yy.c fwlang.tab.c work/nat.o work/structures.o work/iface.o work/netconvert.o work/rules.o work/rule_parser.o work/nat_iface.o work/chains.o work/firewall.o main.c FDDL/fddl.so debug.c -o ITVal 
 
 fwlang.tab.c: fwlang.y lex.yy.c
 	bison -d fwlang.y
@@ -16,8 +16,8 @@ fwlang.tab.c: fwlang.y lex.yy.c
 lex.yy.c: fwlang.l
 	flex fwlang.l
         
-work/build.o: build.c rules.h ranges.h iface.h chains.h debug.h
-	$(GXX) -c build.c -o work/build.o
+work/chains.o: chains.cc rules.h ranges.h iface.h chains.h debug.h
+	$(GXX) -c chains.cc -o work/chains.o
 
 work/rule_parser.o: rule_parser.c rules.h
 	$(GXX) -c rule_parser.c -o work/rule_parser.o
