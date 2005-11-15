@@ -1,13 +1,17 @@
 Chain INPUT (policy ACCEPT)
 target     prot opt source               destination         
-DROP       tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:65535 
+ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:22 flags:0x16/0x02 
+ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           
+ACCEPT     udp  --  128.239.2.0/24       0.0.0.0/0           
+ACCEPT     tcp  --  128.239.2.0/24       0.0.0.0/0           
+ACCEPT     udp  --  128.239.26.0/24      0.0.0.0/0           
+ACCEPT     tcp  --  128.239.26.0/24      0.0.0.0/0           
+REJECT     tcp  --  0.0.0.0/0            0.0.0.0/0           tcp flags:0x16/0x02 reject-with icmp-port-unreachable 
+REJECT     udp  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-port-unreachable 
 
 Chain FORWARD (policy ACCEPT)
 target     prot opt source               destination         
 DROP       tcp  --  0.0.0.0/0            0.0.0.0/0           tcp dpt:65535 
 
 Chain OUTPUT (policy ACCEPT)
-target     prot opt source               destination         
-
-Chain new_chain (0 references)
 target     prot opt source               destination         
