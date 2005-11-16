@@ -1,0 +1,39 @@
+ITVal-0.4: November 9, 2005 Robert Marmorstein 
+   Queries may now use the "INFACE" and "OUTFACE" operators to specify
+   a network interface for incoming or outgoing connections.  These
+   queries only make sense when using the verbose firewall input.
+
+ITVal-0.4: November 8, 2005 Robert Marmorstein 
+    Introduced several changes to the command line.  The -f command
+    loads a "normal" filter file.  The -F command loads a verbose filter
+    file.  Similarly, -n loads a normal NAT file, while -N loads a
+    verbose NAT file.  I believe it is a bad idea to mix and match file
+    types for a single firewall.  Firewalls specified with the -f and -n
+    flags assume that every rule matches ALL interfaces.  To use -F and
+    -N, a topology file MUST be specified.
+
+ITVal-0.4: November 2, 2004 Robert Marmorstein 
+    Changed the format of the command line options to allow reordering
+    of the flags.   Multiple NAT files are now associated with the most
+    recent filter file.  Topology files can be specified with the -t
+    flag.
+
+ITVal-0.4: November 1, 2005 Robert Marmorstein 
+    Added support for topology files.  Each line of the topology file
+    consists of a space seperated list of the form: 
+    <interface> <ip address>
+
+ITVal-0.4: November 1, 2005 Robert Marmorstein
+    Migrated ITVal make system to use the GNU autoconf tools.
+
+ITVal-0.3: August 5, 2005 Robert Marmorstein
+    Primarily a bugfix release.  Some improvements to the printing
+    system and some preparation for interface support.
+
+ITVal-0.2: April 30, 2005 Robert Marmorstein
+    Introduced several bugfixes, added support for NAT and for
+    analysis of multiple serially connected firewalls.
+
+ITVal-0.1: October 15, 2004 Robert Marmorstein
+    Initial release of ITVal.  Support for simple queries on a single
+    firewall.

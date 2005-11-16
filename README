@@ -1,0 +1,122 @@
+ITVal is a tool for iptables configuration analysis.  It can be used to:
+
+1.  Detect vulnerabilities the firewall does not protect.
+2.  Determine whether certain services are blocked by the firewall.
+3.  Validate changes to the firewall policy.
+
+ITVal implements a query engine based on a simple query language that a
+system administrator can use to investigate firewall behaviors.
+
+COMMAND LINE OPTIONS:
+
+ITVal understands the following flags:
+
+   -q <query file>	
+        Full Path to a query file.
+   
+   -t <topology file>
+        Full Path to a topology mapping 
+        
+        The topology mapping is optional.  It should be formatted as a
+        list of network interface, ip address pairs.  For example:
+	      eth0	   192.168.1.1
+	      eth1	   70.5.123.110
+	       
+   -f <filter file>	
+        Full Path to a filtering rule set file.  This file is the output
+        of `iptables -L -n'.
+        
+   -n <NAT file>		
+        Full Path to a NAT rule set file.  This file is the output of
+        `iptables -t nat -L -n'.
+
+   -F <verbose filter file >	
+        Full Path to a filtering rule set file.  This file is the output
+        of `iptables -v -L -n'.
+
+   -N <verbose NAT file>		
+        Full Path to a NAT rule set file.  This file is the output of
+        `iptables -t nat -v -L -n'.
+
+The output of the query engine can be modified and used as a query file.
+
+CONSTRUCTING QUERIES:
+
+An ITVal query file consists of a number of group and service
+definitions, followed by query statements.
+
+*GROUP DEFINITIONS*
+
+A group definition allows the user to name a list of IP addresses for
+easier future reference.  The syntax is as follows:
+
+GROUP <name> <list>;
+
+The name must be unique and must be alphanumeric.  The list is a
+space-separated sequence of ip addresses in dot notation.  It is
+permissible to use the '*' character as a wildcard.
+
+Example:
+
+GROUP mail_clients 192.168.1.1 192.168.1.3 192.168.2.*;
+
+*SERVICE DEFINITIONS*
+
+A service definition is analagous to a group definition, but for various
+network services, specified by port number.  The syntax is:
+
+SERVICE <name> <list>;
+
+Where name is unique and list is a space separated list of <protocol>
+<port> pairs.  The '*' character may be used as a wildcard for the port
+number and the protocol "BOTH" can be used to specify both TCP -AND- UDP
+connections.
+
+Example:
+
+SERVICE mail TCP 25 TCP 110 TCP 993;
+
+*QUERY STATEMENTS*
+
+Queries have the syntax:
+
+QUERY <subject> [<input>] <condition>;
+
+The "subject" parameter specifies what information ITVal should display
+for packets that match the query condition.  The valid subjects are:
+
+SADDY       Source Address
+DADDY       Destination Address
+SPORT       Source Port
+DPORT       Destination Port
+STATE       Connection State
+
+The optional "input" parameter tells ITVal which chain of the filter to
+consider.  It must be one of the built-in chains INPUT, OUTPUT, or
+FORWARD.  If no input chains is specified, ITVal will use "FORWARD" as a
+default.
+
+The "condition" parameter specifies criteria against which all packets
+will be considered.  All packets that match the conditions are are
+accepted by the firewall will be displayed.  The query condition is
+built from nine primitives:
+
+FROM <source>      Matches source address
+TO <destination>   Matches destinatino address
+ON <source>        Matches source port
+FOR <destination>  Matches destination port
+IN <state>         Matches connection state
+WITH <flag>        Matches active TCP flag
+INFACE <iface>     Matches incoming network interface
+OUTFACE <iface>    Matches outgoing network interface
+LOGGED             Matches if there is a rule that MAY log the packet.
+
+These primitives can be combined with the logical operators "AND", "OR",
+and "NOT".  Parentheses can be used to disambiguate expressions.
+Otherwise, precedence is from left to right.
+
+Examples:
+
+QUERY SADDY FROM 192.168.1.1 AND FOR mail;
+QUERY DPORT (NOT FROM mail_clients OR TO 192.168.1.4) AND NOT LOGGED;
+QUERY DPORT NOT FROM 192.168.1.* AND IFACE eth0;
