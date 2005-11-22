@@ -45,6 +45,8 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
   int output_chain;
 
   FWForest = F;
+  T = top;
+
   num_nat_chains = -1;
   num_chains = -1;
   for (int i = 0; i < 256; i++)
@@ -64,9 +66,9 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
   FWForest->MakeMDDFromTuple (low, high, OutputLog);
   FWForest->MakeMDDFromTuple (low, high, ForwardLog);
 
-  BuildFWRules (filterName, top);
+  BuildFWRules (filterName);
   if (strncmp(natName, "NONAT",5)){
-     BuildNATRules (natName, top);
+     BuildNATRules (natName);
   }
   forward_chain = FindChain ("FORWARD");
   input_chain = FindChain ("INPUT");
@@ -103,6 +105,7 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
   int output_chain;
 
   FWForest = F;
+  T = top;
   num_nat_chains = -1;
   num_chains = -1;
   for (int i = 0; i < 256; i++)
@@ -122,9 +125,9 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
   FWForest->MakeMDDFromTuple (low, high, OutputLog);
   FWForest->MakeMDDFromTuple (low, high, ForwardLog);
 
-  BuildVerboseFWRules (filterName, top);
+  BuildVerboseFWRules (filterName);
   if (strncmp(natName, "NONAT",5)){
-     BuildNATRules (natName, top);
+     BuildNATRules (natName);
   }
   forward_chain = FindChain ("FORWARD");
   input_chain = FindChain ("INPUT");

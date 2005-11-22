@@ -28,6 +28,7 @@
 
 class Firewall
 {
+  Topology* T;
   int num_chains;
   int num_nat_chains;
 
@@ -40,9 +41,9 @@ class Firewall
   processed_nat_rule *natHead;
 
   void ReadChain (char *line, ssize_t length, chain * newChain);
-  void BuildFWRules (char *fname, Topology* top);
-  void BuildVerboseFWRules (char *fname, Topology* top);
-  void BuildNATRules (char *fname, Topology* top);
+  void BuildFWRules (char *fname);
+  void BuildVerboseFWRules (char *fname);
+  void BuildNATRules (char *fname);
   void BuildChains (int input_chain, mdd_handle & outputMDD,
 		    mdd_handle & logMDD);
 

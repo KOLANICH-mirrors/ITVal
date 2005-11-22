@@ -75,7 +75,7 @@ Firewall::ReadChain (char *line, ssize_t length, chain * newChain)
 // represents the set of packets that MAY be logged.
 
 void
-Firewall::BuildFWRules (char *fname, Topology* top)
+Firewall::BuildFWRules (char *fname)
 {
   FILE *ruleFile;
   char *line;			// Current line of input
@@ -114,7 +114,7 @@ Firewall::BuildFWRules (char *fname, Topology* top)
   newChain = NULL;
   phead = NULL;
 
-  rp = new rule_parser(top);
+  rp = new rule_parser(T);
   
   // First, parse the rule file into rule structs.
   cur = new rule;
@@ -244,7 +244,7 @@ Firewall::BuildFWRules (char *fname, Topology* top)
 #endif
       // Convert cur to a processed_rule, storing it in pcur.
       pcur = new processed_rule;
-      ProcessRule (cur, pcur, rp, top);
+      ProcessRule (cur, pcur, rp, T);
 
 #ifdef DEBUG
       printf ("=======\n");
@@ -288,7 +288,7 @@ Firewall::BuildFWRules (char *fname, Topology* top)
 }
 
 void
-Firewall::BuildVerboseFWRules (char *fname, Topology* top)
+Firewall::BuildVerboseFWRules (char *fname)
 {
   FILE *ruleFile;
   char *line;			// Current line of input
@@ -326,7 +326,7 @@ Firewall::BuildVerboseFWRules (char *fname, Topology* top)
   newChain = NULL;
   phead = NULL;
 
-  rp = new rule_parser(top);
+  rp = new rule_parser(T);
   
   // First, parse the rule file into rule structs.
   cur = new rule;
@@ -456,7 +456,7 @@ Firewall::BuildVerboseFWRules (char *fname, Topology* top)
 #endif
       // Convert cur to a processed_rule, storing it in pcur.
       pcur = new processed_rule;
-      ProcessRule (cur, pcur, rp, top);
+      ProcessRule (cur, pcur, rp, T);
 
 #ifdef DEBUG
       printf ("=======\n");
@@ -502,7 +502,7 @@ Firewall::BuildVerboseFWRules (char *fname, Topology* top)
 // Perform NAT on the Filter and LOG MDDs.
 
 void
-Firewall::BuildNATRules (char *fname, Topology* top)
+Firewall::BuildNATRules (char *fname)
 {
   FILE *natFile;
   char *line;			// Current line of input
@@ -542,7 +542,7 @@ Firewall::BuildNATRules (char *fname, Topology* top)
   newNATChain = NULL;
   natHead = NULL;
 
-  rp = new rule_parser(top);
+  rp = new rule_parser(T);
   
   // First, parse the rule file into rule structs.
   cur = new rule;

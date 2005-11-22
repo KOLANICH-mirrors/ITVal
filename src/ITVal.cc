@@ -40,6 +40,7 @@ typedef struct filename_node{
    int verbose_input;
    char filterName[256];
    char natName[256];
+   char topName[256];
    filename_node* next;
 }filename_node;
 
@@ -110,10 +111,14 @@ main (int argc, char **argv)
 	      printf("Error: Flag -t requires an argument!\n");
               return 1;
 	   }
-	   if (top != NULL)
-		   delete top;
-           top = new Topology(argv[i+1]);
-           top->PrintMapping();
+           if (!fileList){
+	      printf("Error: Topology file %s precedes filter file!\n", argv[i+1]);
+              return 1;
+	   }
+	   if (strncmp(fn->topName, "NOTOP", 5) != 0){
+              printf("Warning: Topology file %s overrides Topology file %s for filter %s.\n",argv[i+1], fileList->topName, fileList->filterName);
+	   }
+	   strncpy(fileList->topName, argv[i+1],256);
         break;
 	case 'F':
 	case 'f':
@@ -124,6 +129,7 @@ main (int argc, char **argv)
 	   fn = new filename_node;
 	   strncpy(fn->filterName, argv[i+1],256);
 	   strncpy(fn->natName, "NONAT", 5);
+	   strncpy(fn->topName, "NOTOP", 5);
 	   fn->verbose_input = 0;
 	   fn->next = fileList;
 	   fileList = fn;
@@ -166,6 +172,10 @@ main (int argc, char **argv)
   i = 0;
   while (fileList != NULL){
      filename_node* del;
+     if (top != NULL)
+        delete top;
+     top = new Topology(fileList->topName);
+     top->PrintMapping();
      if (fileList->verbose_input == 1)
         fws[i] = new Firewall (fileList->filterName, fileList->natName, FWForest, top, 1);
      else
