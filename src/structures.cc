@@ -62,7 +62,6 @@ ServiceLookup (char *name)
   {
     if (strncmp (name, services[i]->name, 256) == 0)
     {
-      delete[]name;
       return services[i];
     }
   }
@@ -733,7 +732,6 @@ DefineService (char *name, port * list)
 
   s = new service;
   strncpy (s->name, name, 256);
-  delete[]name;
   s->named = 1;
   s->list = list;
   services[num_services] = s;
