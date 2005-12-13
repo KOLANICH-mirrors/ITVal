@@ -1801,7 +1801,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=ITVal
- VERSION=0.4
+ VERSION=0.4-r1
 
 
 cat >>confdefs.h <<_ACEOF

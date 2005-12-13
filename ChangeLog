@@ -1,3 +1,7 @@
+ITVal-0.4-r1: December 13, 2005 Robert Marmorstein
+    Fixed a bug in Makefile.am that broke "make dist" so that .h files
+    were not distributed with the package.
+
 ITVal-0.4: November 9, 2005 Robert Marmorstein 
    Queries may now use the "INFACE" and "OUTFACE" operators to specify
    a network interface for incoming or outgoing connections.  These

@@ -41,9 +41,9 @@ host_triplet = @host@
 bin_PROGRAMS = ITVal$(EXEEXT)
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure AUTHORS COPYING \
-	ChangeLog INSTALL NEWS config/config.guess config/config.sub \
-	config/depcomp config/install-sh config/ltmain.sh \
-	config/missing fwlang.cc
+	ChangeLog INSTALL NEWS TODO config/config.guess \
+	config/config.sub config/depcomp config/install-sh \
+	config/ltmain.sh config/missing fwlang.cc
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -209,7 +209,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AM_YFLAGS = -d
-ITVal_SOURCES = src/fwlang.ll src/fwlang.tab.cc src/ITVal.cc src/chains.cc src/debug.cc src/firewall.cc src/iface.cc src/nat.cc src/nat_iface.cc src/netconvert.cc src/parser_interface.cc src/rule_parser.cc src/rules.cc src/structures.cc src/fwmdd.cc src/topology.cc
+ITVal_SOURCES = src/fwlang.ll src/fwlang.tab.cc src/ITVal.cc src/chains.cc src/debug.cc src/firewall.cc src/iface.cc src/nat.cc src/nat_iface.cc src/netconvert.cc src/parser_interface.cc src/rule_parser.cc src/rules.cc src/structures.cc src/fwmdd.cc src/topology.cc src/chains.h src/debug.h src/firewall.h src/fwmdd.h src/iface.h src/location.hh src/nat.h src/parser_interface.hh src/position.hh src/ranges.h src/rule_parser.h src/rules.h src/stack.hh src/structures.h src/topology.h src/fwlang.tab.hh
 ITVal_LDADD = @LEXLIB@ FDDL/libFDDL.la
 SUBDIRS = FDDL
 all: all-recursive

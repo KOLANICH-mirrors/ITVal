@@ -218,6 +218,7 @@ main (int argc, char **argv)
 }
 
 /* Create a Meta-Firewall */
+/* Need to do something about Topologies, here. */
 Firewall *
 MergeFWs (fw_fddl_forest * FWForest, Firewall ** fws, int n)
 {
