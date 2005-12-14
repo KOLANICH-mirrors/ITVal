@@ -708,6 +708,57 @@ Firewall::FindChain (char *name)
 {
   int i;
 
+  if (strncmp(name, "TCPMSS",6)==0)
+     return 0;
+     
+  if (strncmp(name, "BALANCE",7)==0)
+     return 0;
+
+  if (strncmp(name, "CLASSIFY",8)==0)
+     return 0;
+
+  if (strncmp(name, "CLUSTERIP",9)==0)
+     return 0;
+
+  if (strncmp(name, "CONNMARK",8)==0)
+     return 0;
+
+  if (strncmp(name, "DSCP",4)==0)
+     return 0;
+
+  if (strncmp(name, "ECN",3)==0)
+     return 0;
+
+  if (strncmp(name, "MARK",4)==0)
+     return 0;
+
+  if (strncmp(name, "MIRROR",6)==0)
+     return 0;
+
+  if (strncmp(name, "NOTRACK",7)==0)
+     return 0;
+
+  if (strncmp(name, "REDIRECT",8)==0)
+     return 0;
+
+  if (strncmp(name, "ROUTE",5)==0)
+     return 0;
+
+  if (strncmp(name, "SET",3)==0)
+     return 0;
+
+  if (strncmp(name, "TOS",3)==0)
+     return 0;
+
+  if (strncmp(name, "TRACE",5)==0)
+     return 0;
+
+  if (strncmp(name, "TTL",3)==0)
+     return 0;
+
+  if (strncmp(name, "ULOG",4)==0)
+     return 0;
+
   for (i = 0; i < num_chains; i++)
   {
     if (strncmp (name, chain_array[i]->name, 256) == 0)
