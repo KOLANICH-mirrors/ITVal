@@ -5,4 +5,6 @@ ITVal_SOURCES = src/fwlang.ll src/fwlang.tab.cc src/ITVal.cc src/chains.cc src/d
 
 ITVal_LDADD = @LEXLIB@ FDDL/libFDDL.la
 
-SUBDIRS = FDDL
+EXTRA_DIST = COPYING ChangeLog LICENSE
+
+SUBDIRS = FDDL doc

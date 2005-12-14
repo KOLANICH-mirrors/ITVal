@@ -84,6 +84,11 @@ Firewall::ProcessTarget (processed_rule * pr, rule_tuple * tup,
     // user-defined chain.  We add 4 to distinguish it from the
     // builtin targets.
     val = FindChain (pr->target);
+    
+    //If it's a special target not handle by ITVal (TCPMSS, i.e.)
+    if (val == -2) 
+       return;
+       
     if (val < 0)
     {
       printf ("Could not find target: %s\n", pr->target);

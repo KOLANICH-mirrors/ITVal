@@ -1,9 +1,9 @@
 AC_INIT(src/ITVal.cc)
 AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(ITVal,0.4-r1)
+AM_INIT_AUTOMAKE(ITVal,0.4-r2)
 AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_LEX
 AC_PROG_YACC
 AC_PROG_LIBTOOL
-AC_OUTPUT(Makefile FDDL/Makefile)
+AC_OUTPUT(Makefile FDDL/Makefile doc/Makefile doc/Examples/Makefile doc/Rsets/Makefile)
