@@ -1,3 +1,7 @@
+ITVal-0.4-r2: December 13, 2005 Robert Marmorstein
+    Fixed a bug in src/chains.cc and src/iface.cc that caused ITVal to
+    crash when encountering a "strange" target like TCPMSS.
+    
 ITVal-0.4-r1: December 13, 2005 Robert Marmorstein
     Fixed a bug in Makefile.am that broke "make dist" so that .h files
     were not distributed with the package.
