@@ -28,7 +28,7 @@ public:
   //Handling the parser.
   void parse (const std::string & f);
 
-    std::string file;
+  std::string file;
   bool trace_parsing;
 
   // Error handling.

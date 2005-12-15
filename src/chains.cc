@@ -143,9 +143,9 @@ Firewall::BuildFWRules (char *fname)
 
     if (length == 0)
     {				// If the line is empty, ignore.
-//#ifdef DEBUG
+#ifdef DEBUG
         printf("%d: Ignoring empty line.\n", lineNo);
-//#endif
+#endif
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
@@ -169,13 +169,13 @@ Firewall::BuildFWRules (char *fname)
       // Grab its name from the input line
       ReadChain (line, length, newChain);
 
-//#ifdef DEBUG
+#ifdef DEBUG
       if (newChain == NULL){
           printf("%d: Bad chain definition\n", lineNo);
 	  exit(-1);
       }
       printf("%d: Chain %s\n", lineNo, newChain->name);
-//#endif DEBUG
+#endif DEBUG
 
       current_chain++;
       // Set number of chains
@@ -242,9 +242,9 @@ Firewall::BuildFWRules (char *fname)
   while (i < num_chains)
   {				// For each chain
     newChain = chain_array[i];
-//#ifdef DEBUG
+#ifdef DEBUG
     printf ("Chain: %s\n", newChain->name);
-//#endif
+#endif
     cur = newChain->rules;
 
     //If empty target, ignore the rule.
@@ -461,9 +461,9 @@ Firewall::BuildVerboseFWRules (char *fname)
   while (i < num_chains)
   {				// For each chain
     newChain = chain_array[i];
-//#ifdef DEBUG
+#ifdef DEBUG
     printf ("Chain: %s\n", newChain->name);
-//#endif
+#endif
     cur = newChain->rules;
 
     //If empty target, ignore the rule.
