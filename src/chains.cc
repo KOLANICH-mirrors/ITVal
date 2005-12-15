@@ -43,14 +43,14 @@
 void
 Firewall::ReadChain (char *line, ssize_t length, chain * newChain)
 {
-  char dummy[7];		// The word CHAIN 
-  char name[256];		// The name of the chain
+  char dummy[8];		// The word CHAIN 
+  char name[257];		// The name of the chain
 
-  char spam[256];		// Dummy characters that surround
+  char spam[257];		// Dummy characters that surround
 
   // the default policy.
   
-  sscanf (line, "%6s %256s %7s %256s", dummy, name, dummy, spam);
+  sscanf (line, "%7s %256s %7s %256s", dummy, name, dummy, spam);
 
   strncpy (newChain->name, name, 256);
   newChain->Default = 0;	// Assume PASS if no default is specified.
@@ -96,9 +96,12 @@ Firewall::BuildFWRules (char *fname)
 			        // chain. 
 
   rule_parser* rp;
+
+  int lineNo;
   
   int i;
 
+  lineNo = 0;
   num_chains = 0;
 
   ruleFile = fopen (fname, "r");
@@ -119,6 +122,7 @@ Firewall::BuildFWRules (char *fname)
   // First, parse the rule file into rule structs.
   cur = new rule;
   length = getline (&line, &bufsize, ruleFile);
+  lineNo++;
   oldLine = line;
   if (line == NULL || strstr (line, "Chain") < 0)
   {
@@ -139,9 +143,13 @@ Firewall::BuildFWRules (char *fname)
 
     if (length == 0)
     {				// If the line is empty, ignore.
+//#ifdef DEBUG
+        printf("%d: Ignoring empty line.\n", lineNo);
+//#endif
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
+      lineNo++;
       oldLine = line;
       if (length == -1)		// If at the end of the file, done.
 	break;
@@ -161,6 +169,14 @@ Firewall::BuildFWRules (char *fname)
       // Grab its name from the input line
       ReadChain (line, length, newChain);
 
+//#ifdef DEBUG
+      if (newChain == NULL){
+          printf("%d: Bad chain definition\n", lineNo);
+	  exit(-1);
+      }
+      printf("%d: Chain %s\n", lineNo, newChain->name);
+//#endif DEBUG
+
       current_chain++;
       // Set number of chains
       num_chains = current_chain + 1;
@@ -174,12 +190,14 @@ Firewall::BuildFWRules (char *fname)
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
+      lineNo++;
       oldLine = line;
 
       // Priming read
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
+      lineNo++;
       oldLine = line;
 
       if (length == -1)		// IF EOF, done.
@@ -201,6 +219,7 @@ Firewall::BuildFWRules (char *fname)
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
+      lineNo++;
       oldLine = line;
     }
   }
@@ -223,9 +242,9 @@ Firewall::BuildFWRules (char *fname)
   while (i < num_chains)
   {				// For each chain
     newChain = chain_array[i];
-#ifdef DEBUG
+//#ifdef DEBUG
     printf ("Chain: %s\n", newChain->name);
-#endif
+//#endif
     cur = newChain->rules;
 
     //If empty target, ignore the rule.
@@ -310,8 +329,10 @@ Firewall::BuildVerboseFWRules (char *fname)
   rule_parser* rp;
   
   int i;
+  int lineNo;
 
   num_chains = 0;
+  lineNo = 0;
 
   ruleFile = fopen (fname, "r");
   if (!ruleFile)
@@ -331,6 +352,7 @@ Firewall::BuildVerboseFWRules (char *fname)
   // First, parse the rule file into rule structs.
   cur = new rule;
   length = getline (&line, &bufsize, ruleFile);
+  lineNo++;
   oldLine = line;
   if (line == NULL || strstr (line, "Chain") < 0)
   {
@@ -354,6 +376,7 @@ Firewall::BuildVerboseFWRules (char *fname)
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
+      lineNo++;
       oldLine = line;
       if (length == -1)		// If at the end of the file, done.
 	break;
@@ -386,12 +409,14 @@ Firewall::BuildVerboseFWRules (char *fname)
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
+      lineNo++;
       oldLine = line;
 
       // Priming read
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
+      lineNo++;
       oldLine = line;
 
       if (length == -1)		// IF EOF, done.
@@ -413,6 +438,7 @@ Firewall::BuildVerboseFWRules (char *fname)
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
+      lineNo++;
       oldLine = line;
     }
   }
@@ -435,9 +461,9 @@ Firewall::BuildVerboseFWRules (char *fname)
   while (i < num_chains)
   {				// For each chain
     newChain = chain_array[i];
-#ifdef DEBUG
+//#ifdef DEBUG
     printf ("Chain: %s\n", newChain->name);
-#endif
+//#endif
     cur = newChain->rules;
 
     //If empty target, ignore the rule.
@@ -527,7 +553,10 @@ Firewall::BuildNATRules (char *fname)
   
   int i;
 
+  int lineNo;
+
   num_nat_chains = 0;
+  lineNo = 0;
 
   natFile = fopen (fname, "r");
   if (!natFile)
@@ -547,6 +576,7 @@ Firewall::BuildNATRules (char *fname)
   // First, parse the rule file into rule structs.
   cur = new rule;
   length = getline (&line, &bufsize, natFile);
+  lineNo++;
   oldLine = line;
   while (length != -1)
   {
@@ -563,6 +593,7 @@ Firewall::BuildNATRules (char *fname)
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, natFile);
+      lineNo++;
       oldLine = line;
       if (length == -1)		// If at the end of the file, done.
 	break;
@@ -597,12 +628,14 @@ Firewall::BuildNATRules (char *fname)
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, natFile);
+      lineNo++;
       oldLine = line;
 
       // Priming read
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, natFile);
+      lineNo++;
       oldLine = line;
 
       if (length == -1)		// IF EOF, done.
@@ -626,6 +659,7 @@ Firewall::BuildNATRules (char *fname)
     free (oldLine);
     line = NULL;
     length = getline (&line, &bufsize, natFile);
+    lineNo++;
     oldLine = line;
   }
   free (oldLine);

@@ -174,8 +174,13 @@ main (int argc, char **argv)
      filename_node* del;
      if (top != NULL)
         delete top;
-     top = new Topology(fileList->topName);
-     top->PrintMapping();
+     if (strncmp(fileList->topName, "NOTOP",5) != 0){
+        top = new Topology(fileList->topName);
+	top->PrintMapping();
+     }
+     else{
+        top = NULL;
+     }
      if (fileList->verbose_input == 1)
         fws[i] = new Firewall (fileList->filterName, fileList->natName, FWForest, top, 1);
      else

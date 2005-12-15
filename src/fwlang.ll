@@ -34,7 +34,7 @@ int FWLANG_LINE_NO = 0;
 %option noyywrap nounput batch debug
 
 NUM [0-9]*|"*"
-ALPHANUM [a-zA-Z][a-zA-Z0-9\+\*]*
+ALPHANUM [a-zA-Z][_a-zA-Z0-9\+\*]*
 COMMENT "#".*
 
 %{

@@ -54,7 +54,9 @@ public:
     newRules = NULL;
     tup = NULL;
     Default = -1;
-  } chain (char *fileName)
+  } 
+    
+    chain (char *fileName)
   {
     rules = NULL;
     newRules = NULL;

@@ -81,7 +81,6 @@ GroupLookup (char *name)
   {
     if (strncmp (name, groups[i]->name, 256) == 0)
     {
-      delete[]name;
       return groups[i];
     }
   }
@@ -748,7 +747,6 @@ DefineGroup (char *name, address * list)
 
   g = new group;
   strncpy (g->name, name, 256);
-  delete[]name;
   g->named = 1;
   g->list = list;
   groups[num_groups] = g;
