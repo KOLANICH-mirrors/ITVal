@@ -144,6 +144,40 @@ class print_node{
       char ch;
       for (int k=K;k>0;k--){
          if (mask[k] == 1){
+				if (k==14){
+               if (low[k]==0 && high[k]==mV[k]){
+					   printf("ALL ");
+					   continue;
+					}
+					else{
+                  for (int i=low[k];i<=high[k];i++){
+                     if (i==0){
+                        printf("ICMP ");
+							}
+							else if (i==1){
+                        printf("UDP ");
+							}
+							else if (i==2){
+                        printf("TCP ");
+							}
+						}
+						continue;
+					}
+				}
+		      if (k==13 || k==11){
+					if (low[k]==0 && high[k]==mV[k] && low[k-1]==0 &&
+							  high[k-1]==mV[k-1]){
+                  printf("*%c",ch);
+	            }
+					else if (low[k]==high[k] && low[k-1] == high[k-1])
+   					printf("%d", low[k]*256 + low[k-1]);
+					else
+   					printf("%d-%d", low[k]*256 + low[k-1], high[k]*256+high[k-1]);
+               continue;
+				}
+				if (k==12 || k==10)
+				   continue;
+
             ch = ' ';
             if (k<=22 && k>=20)
                ch = '.';
@@ -160,7 +194,7 @@ class print_node{
 	         }
 	      }
       }
-      printf("\n");
+      printf(" ");
    }
 };
 

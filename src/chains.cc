@@ -175,7 +175,7 @@ Firewall::BuildFWRules (char *fname)
 	  exit(-1);
       }
       printf("%d: Chain %s\n", lineNo, newChain->name);
-#endif DEBUG
+#endif 
 
       current_chain++;
       // Set number of chains

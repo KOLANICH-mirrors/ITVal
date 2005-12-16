@@ -918,6 +918,7 @@ fddl_forest::PrintRanges(mdd_handle root, level* mask)
       p = p->next;
       delete stack;
    }
+   printf("\n");
 }
 
 void 

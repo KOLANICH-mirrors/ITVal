@@ -660,6 +660,7 @@ PerformQuery (int subject, condition * c, int input_chain)
   case 1:
     printf ("# Ports: ");
     // Source port starts at level 13
+    mask[14] = 1;
     mask[13] = 1;
     mask[12] = 1;
     FW->FWForest->PrintRanges (result, mask);
@@ -667,6 +668,7 @@ PerformQuery (int subject, condition * c, int input_chain)
   case 2:
     printf ("# Ports: ");
     // Destination port starts at level 11
+    mask[14] = 1;
     mask[11] = 1;
     mask[10] = 1;
     FW->FWForest->PrintRanges (result, mask);
