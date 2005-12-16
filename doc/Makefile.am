@@ -1,2 +1,2 @@
 SUBDIRS = Rsets Examples
-EXTRA_DIST =
+EXTRA_DIST = Topology

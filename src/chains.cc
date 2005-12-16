@@ -793,6 +793,12 @@ Firewall::FindChain (char *name)
   if (strncmp(name, "ULOG",4)==0)
      return -2;
 
+  if (strncmp(name, "MASQUERADE",4)==0)
+     return -2;
+
+  if (strncmp(name, "REDIRECT",4)==0)
+     return -2;
+
   for (i = 0; i < num_chains; i++)
   {
     if (strncmp (name, chain_array[i]->name, 256) == 0)

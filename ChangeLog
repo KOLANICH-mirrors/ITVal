@@ -1,3 +1,14 @@
+ITVal-0.4-r3: December 13, 2005 Robert Marmorstein
+	 Fixed some memory access bugs that caused ITVal to crash when
+	 the parser freed names already freed by the MDD query constrution
+	 code.  Also changed the output of the "Ports" subject to be more
+	 readable.  Fixed other minor problems.  ITVal now ignores
+	 "MASQUERADE" and "REDIRECT" targets.  It used to NAT them to
+	 127.0.0.1, which is not realistic.  (It had no topology file to work 
+	 with at that point).  Now that we have the topology file, implementing 
+	 realistic MASQ is on the TODO list and ITVal temporarily 
+	 ignores these targets.
+	 
 ITVal-0.4-r2: December 13, 2005 Robert Marmorstein
     Fixed a bug in src/chains.cc and src/iface.cc that caused ITVal to
     crash when encountering a "strange" target like TCPMSS.
