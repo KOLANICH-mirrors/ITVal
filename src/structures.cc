@@ -84,6 +84,8 @@ GroupLookup (char *name)
       return groups[i];
     }
   }
+  printf("\nError: Could not find group <%s>.  Did you define it?\n", name);
+  exit(-1);
   return NULL;
 }
 
