@@ -2,3 +2,8 @@ Realistic MASQUERADE (per interface) and REDIRECT.
 Limit rules?
 TCPMSS rules.
 Fix port queries.
+
+More general Topology handling (how to handle merged topologies?)
+Better example rule sets
+Write -GOOD- man pages.
+Equivalence class checking.
