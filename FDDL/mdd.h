@@ -413,9 +413,11 @@ class   fddl_forest {
 		delete[]tail;
 		delete  UT;
 	}
+	
 	int     Last(level k) {
 		return last[k];
 	}
+
 	int     GetMaxVal(level k);
 	int     ChangeMaxVal(level k, int maxval);
 
@@ -440,7 +442,6 @@ class   fddl_forest {
 						 mdd_handle & result);
 
 	int     ProjectOnto(mdd_handle p, mdd_handle q, mdd_handle & result);
-
 
 	void    PrintVals(mdd_handle root, level k);
 	node_idx ProjectVals(level k, node_idx p, level cutoff);
@@ -511,6 +512,9 @@ class   fddl_forest {
 	node_idx InternalCombine(level k, node_idx p, node_idx q, int chain_index);
 	node_idx InternalSelect(level k, node_idx p, int num_chains,
 									node_idx *all_chains);
+	node_idx InternalShift(level k, node_idx p);
+
+	int     FindRange(level k);
 	void    InternalPruneMDD(level k, node_idx p, int flag);
 	void    FlushCaches(level k);
 
@@ -520,6 +524,7 @@ class   fddl_forest {
 
 	void    SaveMDD(char *filename);
 	void    LoadMDD(char *filename);
+	
 };
 
 #endif

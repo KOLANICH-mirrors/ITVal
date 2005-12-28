@@ -1015,3 +1015,49 @@ fddl_forest::ChangeMaxVal(level k, int maxval)
 	maxVals[k] = maxval;
 	return SUCCESS;
 }
+
+int fddl_forest::FindRange(level k){
+   int i;
+	int maxVal;
+	node* nodeP;
+	maxVal = 0;
+	for (i=1;i<last[k];i++){
+           nodeP = &FDDL_NODE(k,i);
+		if (IS_SPARSE(nodeP)){
+         if (SPARSE_ARC(k,nodeP,nodeP->size-1) > maxVal)
+			   maxVal = SPARSE_INDEX(k,nodeP, nodeP->size-1);
+		}
+		else{
+         if (nodeP->size > maxVal)
+		      maxVal = nodeP->size;
+		}
+	}
+	return maxVal;
+}
+
+node_idx fddl_forest::InternalShift(level k, node_idx p){
+   node_idx r;
+	int maxVal;
+	node* nodeP;
+	nodeP = &FDDL_NODE(k,p);
+	r = NewNode(k);
+	maxVal = FindRange(k-1);
+   for (int val=0;val<maxVal;val++){
+      node_idx t;
+		t = NewNode(k-1);
+		for (int i=0;i<nodeP->size;i++){
+         node_idx j;
+			node_idx n;
+			j = FDDL_ARC(k,nodeP, i);
+			node* nodeJ = &FDDL_NODE(k-1, j);
+			if (val<nodeJ->size){
+			   n = FDDL_ARC(k-1, nodeJ, val);
+			   SetArc(k-1,t,i,n);
+			}
+		}
+		t = CheckIn(k-1,t);
+		SetArc(k,r,val, t);
+	}
+	r = CheckIn(k,r);
+	return r;
+}
