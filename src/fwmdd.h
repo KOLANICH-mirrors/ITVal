@@ -100,6 +100,9 @@ public:
   node_idx InternalSNAT (level k, node_idx p, node_idx q, nat_tuple * pnr);
   int NETMAP (mdd_handle p, nat_tuple * pnr, mdd_handle & result);
   node_idx InternalNMAP (level k, node_idx p, node_idx q, nat_tuple * pnr);
+
+ int SwapLevels(mdd_handle p, level oldTop, int numLevels, level newTop, mdd_handle &result); 
+
 };
 
 #endif

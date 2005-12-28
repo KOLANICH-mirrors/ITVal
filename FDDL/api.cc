@@ -34,6 +34,9 @@ Williamsburg, VA 23185
 #define MAX(a, b) (a>b ? a : b)
 #define MIN(a, b) (a<b ? a : b)
 
+#define NON_DEBUG 1
+
+
 int
 fddl_forest::MakeMDDFromTuple(int *low, int *high, mdd_handle & ref)
 {
@@ -1041,23 +1044,50 @@ node_idx fddl_forest::InternalShift(level k, node_idx p){
 	node* nodeP;
 	nodeP = &FDDL_NODE(k,p);
 	r = NewNode(k);
+#ifndef NON_DEBUG
+   printf("Created node: %d\n", r);
+#endif
 	maxVal = FindRange(k-1);
+#ifndef NON_DEBUG
+   printf("Range(%d): %d\n", k-1,maxVal);
+#endif
    for (int val=0;val<maxVal;val++){
       node_idx t;
 		t = NewNode(k-1);
+#ifndef NON_DEBUG
+   printf("Created node: %d\n", t);
+#endif
 		for (int i=0;i<nodeP->size;i++){
          node_idx j;
 			node_idx n;
 			j = FDDL_ARC(k,nodeP, i);
+#ifndef NON_DEBUG
+   printf("<%d,%d>[%d] = %d\n", k,p,i,j);
+#endif
 			node* nodeJ = &FDDL_NODE(k-1, j);
 			if (val<nodeJ->size){
 			   n = FDDL_ARC(k-1, nodeJ, val);
+#ifndef NON_DEBUG
+   printf("<%d,%d>[%d] = %d\n", k-1,j,val,n);
+#endif
 			   SetArc(k-1,t,i,n);
+#ifndef NON_DEBUG
+   printf("Setting Arc from <%d,%d>[%d] to %d\n", k-1,t,i,n);
+#endif
 			}
 		}
 		t = CheckIn(k-1,t);
+#ifndef NON_DEBUG
+   printf("Checked in Node.  Result: %d\n", t);
+#endif
 		SetArc(k,r,val, t);
+#ifndef NON_DEBUG
+   printf("Setting Arc from <%d,%d>[%d] to %d\n", k,r,val,t);
+#endif
 	}
 	r = CheckIn(k,r);
+#ifndef NON_DEBUG
+   printf("Checked in Node.  Result: %d\n", r);
+#endif
 	return r;
 }

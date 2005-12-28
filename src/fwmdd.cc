@@ -583,3 +583,18 @@ node_idx fw_fddl_forest::InternalQIntersect (level k, node_idx p, node_idx q)
   QIntersectCache[k]->Add (p, q, result);
   return result;
 }
+
+int fw_fddl_forest::SwapLevels(mdd_handle p, level oldTop, int numLevels, level newTop, mdd_handle& r){
+   level tmp;
+   if (numLevels <1 || numLevels > K)
+      return -1;
+   
+   if (newTop<oldTop){
+      tmp = newTop;
+      newTop = oldTop;
+      oldTop = tmp;
+   }
+
+   
+   
+}
