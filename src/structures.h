@@ -157,6 +157,7 @@ condition *IntersectConditions (condition * c1, condition * c2);
 //Intersect the set of accepted packets with the query filter and
 //display the result.
 query *PerformQuery (int s, condition * c, int input_chain);
+void PrintClasses();
 
 //Add address "newAddy" to the linked list "list".
 address *AppendAddy (address * list, address * newAddy);

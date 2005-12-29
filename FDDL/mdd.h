@@ -225,6 +225,7 @@ class   fddl_forest {
 	cache **ProjectOntoCache;
 	cache **ReplaceStrictCache;
 	tuple_cache **SelectCache;
+	cache **ShiftCache;
 	cache **PrintCache;
 
 	int     Value(level k, node_idx p, int *tup);
@@ -300,6 +301,7 @@ class   fddl_forest {
 		ReplaceStrictCache = new cache *[K + 1];
 		PrintCache = new cache *[K + 1];
 		SelectCache = new tuple_cache *[K + 1];
+		ShiftCache = new cache *[K + 1];
 
 		for (int k = 1; k <= K; k++) {
 			FDDL_NODE(k, 0).in = 0;
@@ -320,6 +322,7 @@ class   fddl_forest {
 			ProjectOntoCache[k] = new cache;
 			ReplaceStrictCache[k] = new cache;
 			SelectCache[k] = new tuple_cache;
+			ShiftCache[k] = new cache;
 			PrintCache[k] = new cache;
 		}
 
@@ -382,7 +385,10 @@ class   fddl_forest {
 				delete  ReplaceStrictCache[k];
 
 			if (SelectCache[k])
-				delete  SelectCache[k];
+				delete SelectCache[k];
+
+			if (ShiftCache[k])
+				delete ShiftCache[k];
 
 			if (PrintCache[k])
 				delete  PrintCache[k];
@@ -404,6 +410,7 @@ class   fddl_forest {
 		delete[]ReplaceCache;
 		delete[]ProjectOntoCache;
 		delete[]ReplaceStrictCache;
+		delete[]ShiftCache;
 		delete[]SelectCache;
 		delete[]PrintCache;
 		delete[]arcs;
@@ -437,6 +444,8 @@ class   fddl_forest {
 						 mdd_handle & result);
 	int     Select(mdd_handle p, int num_chains, mdd_handle * chains,
 						mdd_handle & result);
+	
+	int     Shift(mdd_handle p, level kold, level knew, mdd_handle & result);
 	
         int     Replace(mdd_handle p, mdd_handle q, bool strict,
 						 mdd_handle & result);
@@ -512,7 +521,7 @@ class   fddl_forest {
 	node_idx InternalCombine(level k, node_idx p, node_idx q, int chain_index);
 	node_idx InternalSelect(level k, node_idx p, int num_chains,
 									node_idx *all_chains);
-	node_idx InternalShift(level k, node_idx p);
+	node_idx InternalShift(level k, node_idx p, level target);
 
 	int     FindRange(level k);
 	void    InternalPruneMDD(level k, node_idx p, int flag);

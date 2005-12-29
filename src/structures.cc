@@ -804,3 +804,7 @@ DoCleanup ()
   FW->FWForest->DestroyMDD (FW->OutputLog);
   FW->FWForest->DestroyMDD (FW->ForwardLog);
 }
+
+void PrintClasses(){
+
+}

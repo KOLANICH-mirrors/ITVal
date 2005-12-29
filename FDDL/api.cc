@@ -1038,12 +1038,59 @@ int fddl_forest::FindRange(level k){
 	return maxVal;
 }
 
-node_idx fddl_forest::InternalShift(level k, node_idx p){
+int fddl_forest::Shift(mdd_handle h, level kold, level knew, mdd_handle& result){
+	int temp;
+	if (h.index < 0)
+	   return COMPLEMENT_FAILED;
+
+	node_idx newresult;
+	
+	for (level k = K; k > 0; k--)
+		ShiftCache[k]->Clear();
+
+	//Make sure knew > kold.
+        if (kold>knew){
+           temp = kold;
+	   knew = kold;
+	   kold = temp;
+	}
+
+	level current=knew;
+        newresult = h.index;
+	while (current >= kold){
+	   newresult = InternalShift(K, newresult, current);
+	   current--;
+	}
+
+	if (result.index != newresult) {
+		ReallocHandle(result);
+		Attach(result, newresult);
+	}
+	return SUCCESS;
+}
+
+
+node_idx fddl_forest::InternalShift(level k, node_idx p, level target){
    node_idx r;
 	int maxVal;
 	node* nodeP;
 	nodeP = &FDDL_NODE(k,p);
+
+	r = ShiftCache[k]->Hit(p, target);
+	if (r>=0)
+	   return r;
+
 	r = NewNode(k);
+
+   if (k>target){
+      for (int i=0;i<nodeP->size;i++){
+          SetArc(k,p,i,InternalShift(k-1, FDDL_ARC(k,nodeP,i), target));
+		}
+		r = CheckIn(k,r);
+		ShiftCache[k]->Add(p,target,r);
+		return r;
+	}
+	
 #ifndef NON_DEBUG
    printf("Created node: %d\n", r);
 #endif
@@ -1089,5 +1136,6 @@ node_idx fddl_forest::InternalShift(level k, node_idx p){
 #ifndef NON_DEBUG
    printf("Checked in Node.  Result: %d\n", r);
 #endif
+	ShiftCache[k]->Add(p,target,r);
 	return r;
 }

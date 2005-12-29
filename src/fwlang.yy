@@ -39,9 +39,10 @@ int yyerror(char* str);
 %left <group_rec> GROUP	      "group"
 %left <service_rec> SERVICE   "service"
 %left <query_rec> QUERY	      "query"
+%left <sub> CLASSES "special classes query"
 
 %token <input_chain> INPUT FORWARD OUTPUT "selected chain"
-%token <sub> PACKET SPORT DPORT SADDY DADDY STATE  "query subject"
+%token <sub> PACKET SPORT DPORT SADDY DADDY STATE "query subject"
 %token <prot> UDP TCP ICMP BOTH	    "protocol"
 %token <val> NUM		 "number"
 %token <char> DOT		 "."
@@ -93,7 +94,8 @@ port_list: port_list complete_port {$$ = AppendPort($1, $2);}
             | complete_port {$$ = AppendPort(NULL, $1);};
 
 query_expression:  QUERY subject condition {$$ = PerformQuery($2, $3, 1);}
-          | QUERY subject input_chain condition{$$ = PerformQuery($2, $4, $3)} ;
+          | QUERY subject input_chain condition{$$ = PerformQuery($2, $4, $3)} 
+			 | QUERY CLASSES {PrintClasses()};
 
 input_chain: INPUT {$$ = 0;}
            | FORWARD {$$ = 1;}

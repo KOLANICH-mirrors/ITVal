@@ -48,6 +48,7 @@ COMMENT "#".*
 "LOGGED" { ECHO; return LOGGED;}
 "PACKET" { ECHO; return PACKET; }
 "SPORT" { ECHO; return SPORT; }
+"CLASSES" { ECHO; return CLASSES; }
 "DPORT" { ECHO; return DPORT; }
 "SADDY" { ECHO; return SADDY; }
 "DADDY" { ECHO; return DADDY; }
