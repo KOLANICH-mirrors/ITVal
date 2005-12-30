@@ -132,4 +132,5 @@ public:
       FWForest->DestroyMDD (Forward);
       FWForest->DestroyMDD (ForwardLog);
   }
+	int PrintClasses();
 };

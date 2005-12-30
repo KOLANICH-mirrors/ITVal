@@ -159,3 +159,43 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
 #endif
 }
 
+int Firewall::PrintClasses(){
+	eClass* sources;
+	int numSources;
+   eClass* dests;	
+	int numDests;
+
+	//Collect groups by source address
+	FWForest->ExtractClasses(Input, sources, numSources);
+	
+	//Shift Destination Addresses to Top.
+   mdd_handle newChain;
+   FWForest->Shift(Input,18,22,newChain);
+   FWForest->Shift(newChain,17,21,newChain);
+   FWForest->Shift(newChain,16,20,newChain);
+   FWForest->Shift(newChain,15,19,newChain);
+
+	//Collect groups by destination
+	FWForest->ExtractClasses(Input, dests, numDests);
+	if (sources == NULL){
+			  printf("Could not extract source classes.\n");
+			  return 0;
+	}
+	
+	if (dests == NULL){
+			  printf("Could not extract destination classes.\n");
+			  return 0;
+	}
+	
+   for (int i=0;i<numSources;i++)
+   	sources[i].Print();
+
+   for (int i=0;i<numDests;i++)
+   	dests[i].Print();
+
+	//TBD: "Intersect" the groups
+	//allClasses = IntersectClasses(sources, dests);
+   //for (int i=0;i<numDests;i++)
+   //	allClasses[i]->Print();
+	return 1;
+}

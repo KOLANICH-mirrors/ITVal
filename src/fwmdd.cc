@@ -507,23 +507,13 @@ node_idx
 
 node_idx fw_fddl_forest::InternalQIntersect (level k, node_idx p, node_idx q)
 {
-  arc_idx
-    i;
-  node_idx
-    result,
-    u;
-  node *
-  nodeP, *
-    nodeQ;
-  int
-    psize,
-    qsize;
-  int
-    dummy;
-  arc_idx *
-    ptemp;
-  arc_idx *
-    qtemp;
+  arc_idx i;
+  node_idx result, u;
+  node * nodeP, * nodeQ;
+  int psize, qsize;
+  int dummy;
+  arc_idx * ptemp;
+  arc_idx * qtemp;
 
   if (p == 0)
     return 0;			//If it's not accepted
@@ -584,17 +574,105 @@ node_idx fw_fddl_forest::InternalQIntersect (level k, node_idx p, node_idx q)
   return result;
 }
 
-int fw_fddl_forest::SwapLevels(mdd_handle p, level oldTop, int numLevels, level newTop, mdd_handle& r){
-   level tmp;
-   if (numLevels <1 || numLevels > K)
-      return -1;
-   
-   if (newTop<oldTop){
-      tmp = newTop;
-      newTop = oldTop;
-      oldTop = tmp;
-   }
+int fw_fddl_forest::ExtractClasses(mdd_handle p, eClass*& output, int& numClasses){
+   eClass* cur;
+	int* low;
+	int* high;
+	low = new int[4];
+	high = new int[4];
+//   printf("Warning: Class Extraction has not yet been implemented.\n");
+	numClasses = 0;
+	PrintMDD();
+   output = NULL;
+   InternalExtract(K, p.index, low, high, output, numClasses);
+   delete[] low;
+   delete[] high;
+	return 1;
+}
 
-   
-   
+int fw_fddl_forest::InternalExtract(level k, node_idx p, int* low, int* high, eClass*& output, int& numClasses){
+   node* nodeP;
+	printf("Extracting <%d,%d>\n", k, p);
+	nodeP = &FDDL_NODE(k,p);
+	if (k==19){ //Level fourth from the top is special.
+		int lastVal;
+		int first;
+	   eClass* newClass;
+		eClass::eNode* node;
+		newClass = new eClass;
+		if (output == NULL)
+		   newClass->head = NULL;
+		else
+		   newClass->head = output->head;	
+
+		first = 0;
+      lastVal = FDDL_ARC(k,nodeP,0);
+      for (int i=0;i<nodeP->size;i++){
+         if (lastVal != FDDL_ARC(k,nodeP,i)){
+		      low[22-k] = first;
+			   high[22-k] = i;
+				node = new eClass::eNode;
+				numClasses++;
+				node->next = newClass->head;
+				for (int j=0;j<4;j++){
+				   node->high[j]=high[j];
+				   node->low[j]=low[j];
+				}
+				newClass->head = node;
+            first = i;
+				lastVal = FDDL_ARC(k,nodeP,i);
+			}
+		}
+      if (lastVal == FDDL_ARC(k,nodeP, nodeP->size-1)){
+		   low[22-k] = first;
+			high[22-k] = nodeP->size-1;
+			node = new eClass::eNode;
+			numClasses++;
+			node->next = newClass->head;
+			for (int j=0;j<4;j++){
+			   node->high[j]=high[j];
+				node->low[j]=low[j];
+			}
+			newClass->head = node;
+		}
+		output = newClass;
+	}
+	else{
+		int lastVal;
+		int first;
+		first = 0;
+      lastVal = FDDL_ARC(k,nodeP,0);
+      for (int i=0;i<nodeP->size;i++){
+         if (lastVal != FDDL_ARC(k,nodeP,i)){
+		      low[22-k] = first;
+			   high[22-k] = i;
+			   InternalExtract(k-1, FDDL_ARC(k,nodeP,i),low,high,output,numClasses);	
+            first = i;
+				lastVal = FDDL_ARC(k,nodeP,i);
+			}
+		}
+		if (lastVal == FDDL_ARC(k,nodeP,nodeP->size-1)){
+		      low[22-k] = first;
+			   high[22-k] = nodeP->size-1;
+			   InternalExtract(k-1, FDDL_ARC(k,nodeP,nodeP->size-1),low,high,output,numClasses);	
+		}
+	}
+   return 1;
+}
+void eClass::Print(){
+			eNode* cur;
+			char ch;
+
+			cur = head;
+			printf("%s: \n", name);
+			while (cur != NULL){
+			   printf("   ");
+			   ch = '.';
+            for (int i=0;i<4;i++){
+					if (i==3)
+					   ch = '\n';
+               printf("%d-%d%c", cur->low[i],cur->high[i],ch);
+		}
+	   cur = cur->next;
+   }
 }

@@ -43,6 +43,26 @@ Williamsburg, VA 23185
  * printing Firewall query results.
  */
 
+class eClass
+{
+	
+   public:
+		struct eNode{
+         int low[4];
+	      int high[4];
+		   eNode* next;
+	   };
+		
+   	eNode* head;
+		char name[256];
+
+	   eClass(){
+         head = NULL;
+			strncpy(name, "Anonymous Class",16);
+		}
+      void Print();	
+};
+ 
 class fw_fddl_forest:public fddl_forest
 {
 private:
@@ -101,8 +121,9 @@ public:
   int NETMAP (mdd_handle p, nat_tuple * pnr, mdd_handle & result);
   node_idx InternalNMAP (level k, node_idx p, node_idx q, nat_tuple * pnr);
 
- int SwapLevels(mdd_handle p, level oldTop, int numLevels, level newTop, mdd_handle &result); 
-
+  int ExtractClasses(mdd_handle p, eClass *& groupList, int& numGroups);
+  int InternalExtract(level k, node_idx p, int* low, int* high, eClass*& groupList, int& numGroups);
+  
 };
 
 #endif

@@ -354,6 +354,7 @@ BuildConditionFromService (service * s, int op)
       // Otherwise, just copy the protocol value into position 12.
       high[14] = low[14] = cur->protocol;
     }
+
     // 1 means in the query, 0 means not in the query.
     high[0] = low[0] = 1;
 
@@ -805,6 +806,21 @@ DoCleanup ()
   FW->FWForest->DestroyMDD (FW->ForwardLog);
 }
 
-void PrintClasses(){
+int 
+PrintClasses(){
+   FW->PrintClasses(); //Nodes at level 19.
+}
 
+void
+PrintAddyList (address* list)
+{
+  address *cur;
+
+  cur = list;
+  while (cur != NULL)
+  {
+    printf ("%d.%d.%d.%d ", cur->val[0], cur->val[1], cur->val[2], cur->val[3]);
+    cur = cur->next;
+  }
+  printf("\n");
 }
