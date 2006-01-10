@@ -474,6 +474,7 @@ fddl_forest::CheckIn(level k, node_idx p)
 	}
 	node_idx q;
 
+	thisForest = this;
 	q = UT->Add(k, p);
 	node   *nodeQ = &FDDL_NODE(k, q);
 
@@ -547,6 +548,7 @@ fddl_forest::DeleteDownstream(level k, node_idx p)
 		return;
 	numnodes--;
 	nodeP->flags |= DELETED;
+	thisForest = this;
 	UT->Delete(k, p);
 	for (int i = 0; i < nodeP->size; i++) {
 		SetArc(k, p, i, 0);
@@ -567,6 +569,7 @@ fddl_forest::CompactTopLevel()
 	int numvalidnodes = 1;		  //Start at 1, because 0 is valid
 
 	//node_remap_array[K] = new dynarray <node_idx> (0);
+	thisForest = this;
 	for (i = 1; i < last[K]; i++)
 		UT->Delete(K, i);
 	for (i = 1; i < last[K]; i++) {	//Scan throught the NODE list (except node 0)
@@ -591,6 +594,7 @@ fddl_forest::CompactTopLevel()
 				}
 			}
 			nodeI->down = newdown;
+	      thisForest = this;
 			UT->Add(K, i);
 			numvalidnodes++;
 		}
@@ -636,6 +640,7 @@ fddl_forest::Compact(level k)
 	}
 	node_remap_array[k] = new dynarray < node_idx >(0);
 
+	//thisForest = this;
 	//UT->ClearLevelOfUT(k+1);
 
 	node_idx i;
@@ -673,6 +678,7 @@ fddl_forest::Compact(level k)
 			numvalidnodes++;
 		}
 		else {
+	      thisForest = this;
 			UT->Delete(k, i);
 			if (k >= 2) {			  //If it IS deleted, "DeleteDownstream" it.
 				for (j = 0; j < nodeI->size; j++) {
@@ -694,6 +700,7 @@ fddl_forest::Compact(level k)
 
 	nodes[k] = node_temp_array;
 
+	thisForest = this;
 	UT->Remap(k, node_remap_array[k]);	//Update all the unique table entries
 
 	delete arcs[k];
@@ -727,6 +734,7 @@ fddl_forest::Compact(level k)
 		node   *nodeI = &FDDL_NODE(k + 1, i);
 
 		if ((nodeI->flags & CHECKED_IN) && !IS_DELETED(nodeI)) {
+	      thisForest = this;
 			int s = UT->Add(k + 1, i);
 
 			assert(s == i);

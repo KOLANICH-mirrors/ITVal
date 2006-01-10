@@ -93,9 +93,9 @@ addy_list: addy_list addr {$$ = AppendAddy($1,$2);}
 port_list: port_list complete_port {$$ = AppendPort($1, $2);}
             | complete_port {$$ = AppendPort(NULL, $1);};
 
-query_expression: QUERY CLASSES{PrintClasses();}
+query_expression: QUERY CLASSES {$$ = PrintClasses();}
           | QUERY subject condition {$$ = PerformQuery($2, $3, 1);}
-          | QUERY subject input_chain condition{$$ = PerformQuery($2, $4, $3);} 
+          | QUERY subject input_chain condition {$$ = PerformQuery($2, $4, $3);} 
 			 ;
 
 input_chain: INPUT {$$ = 0;}

@@ -159,7 +159,7 @@ condition *IntersectConditions (condition * c1, condition * c2);
 query *PerformQuery (int s, condition * c, int input_chain);
 
 //Compute Host Equivalence Classes and print them.
-int PrintClasses();
+query* PrintClasses();
 
 //Add address "newAddy" to the linked list "list".
 address *AppendAddy (address * list, address * newAddy);

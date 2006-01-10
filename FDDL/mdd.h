@@ -249,7 +249,6 @@ class   fddl_forest {
 	int     compare(level k, node_idx p, node_idx q);
 
 	fddl_forest(int numlevels, int *maxvals) {
-		thisForest = this;
 		node_remap_array = NULL;
 		sparseEnabled = true;
 		K = numlevels - 1;
@@ -445,7 +444,7 @@ class   fddl_forest {
 	int     Select(mdd_handle p, int num_chains, mdd_handle * chains,
 						mdd_handle & result);
 	
-	int     Shift(mdd_handle p, level kold, level knew, mdd_handle & result);
+	int     Shift(mdd_handle p, level kold, mdd_handle & result);
 	
         int     Replace(mdd_handle p, mdd_handle q, bool strict,
 						 mdd_handle & result);

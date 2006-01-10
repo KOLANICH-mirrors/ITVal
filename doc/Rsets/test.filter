@@ -6,8 +6,8 @@ ACCEPT     udp  --  128.239.2.0/24       0.0.0.0/0
 ACCEPT     tcp  --  128.239.2.0/24       0.0.0.0/0           
 ACCEPT     udp  --  128.239.26.0/24      0.0.0.0/0           
 ACCEPT     tcp  --  128.239.26.0/24      0.0.0.0/0           
-REJECT     tcp  --  0.0.0.0/0            0.0.0.0/0           tcp flags:0x16/0x02 reject-with icmp-port-unreachable 
-REJECT     udp  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-port-unreachable 
+DROP       tcp  --  0.0.0.0/0            0.0.0.0/0           tcp flags:0x16/0x02 reject-with icmp-port-unreachable 
+DROP       udp  --  0.0.0.0/0            0.0.0.0/0           reject-with icmp-port-unreachable 
 
 Chain FORWARD (policy ACCEPT)
 target     prot opt source               destination         

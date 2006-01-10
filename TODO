@@ -1,3 +1,4 @@
+Deal with NODE_ZERO in equivalence class testing.
 Realistic MASQUERADE (per interface) and REDIRECT.
 Limit rules?
 TCPMSS rules.

@@ -97,7 +97,8 @@ class Firewall
 			 nat_tuple * tup, nat_tuple * &stack);
 
 public:
-    fw_fddl_forest * FWForest;
+  fw_fddl_forest * FWForest;
+  fw_fddl_forest * ClassForest;
   mdd_handle Input;
   mdd_handle InputLog;
   mdd_handle Output;

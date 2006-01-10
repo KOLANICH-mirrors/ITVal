@@ -28,6 +28,13 @@
  * that it generates numeric addresses and port numbers.
  */
 
+#include <unistd.h>
+#include <stdio.h>
+
+#ifndef HAVE_GETLINE
+ssize_t getline(char**, size_t*, FILE*);
+#endif
+
 #include <errno.h>
 
 #include "rule_parser.h"

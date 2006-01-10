@@ -43,26 +43,6 @@ Williamsburg, VA 23185
  * printing Firewall query results.
  */
 
-class eClass
-{
-	
-   public:
-		struct eNode{
-         int low[4];
-	      int high[4];
-		   eNode* next;
-	   };
-		
-   	eNode* head;
-		char name[256];
-
-	   eClass(){
-         head = NULL;
-			strncpy(name, "Anonymous Class",16);
-		}
-      void Print();	
-};
- 
 class fw_fddl_forest:public fddl_forest
 {
 private:
@@ -70,6 +50,8 @@ private:
   cache **DNATCache;		//Caches for embedded operations 
   cache **SNATCache;		//Caches for embedded operations 
   cache **QIntersectCache;
+  cache **BuildCache;
+  cache **JoinCache;
 
 public:
 
@@ -80,6 +62,8 @@ public:
     DNATCache = new cache *[K + 1];
     SNATCache = new cache *[K + 1];
     QIntersectCache = new cache *[K + 1];
+    BuildCache = new cache *[K + 1];
+    JoinCache = new cache *[K + 1];
 
     for (int k = 1; k <= K; k++)
     {
@@ -87,8 +71,10 @@ public:
       DNATCache[k] = new cache;
       SNATCache[k] = new cache;
       QIntersectCache[k] = new cache;
+      JoinCache[k] = new cache;
+      BuildCache[k] = new cache;
     }
-
+	 JoinCache[0] = new cache;
   }
 
   //Clean up data structures used by the forest
@@ -104,11 +90,19 @@ public:
 	delete SNATCache[k];
       if (QIntersectCache[k])
 	delete QIntersectCache[k];
+      if (JoinCache[k])
+	delete JoinCache[k];
+      if (BuildCache[k])
+	delete BuildCache[k];
     }
+	 if (JoinCache[0])
+				delete JoinCache[0];
 
     delete[]NMAPCache;
     delete[]DNATCache;
     delete[]SNATCache;
+    delete[]BuildCache;
+    delete[]JoinCache;
     delete[]QIntersectCache;
   }
 
@@ -121,9 +115,14 @@ public:
   int NETMAP (mdd_handle p, nat_tuple * pnr, mdd_handle & result);
   node_idx InternalNMAP (level k, node_idx p, node_idx q, nat_tuple * pnr);
 
-  int ExtractClasses(mdd_handle p, eClass *& groupList, int& numGroups);
-  int InternalExtract(level k, node_idx p, int* low, int* high, eClass*& groupList, int& numGroups);
-  
+  int BuildClassMDD(mdd_handle p, fddl_forest* forest, mdd_handle& r, int& numClasses);
+  int InternalBuildClassMDD(fddl_forest* forest, level k, node_idx p, int& numClasses);
+
+  int JoinClasses(mdd_handle p, mdd_handle q, mdd_handle& r, int& outNumClasses);  
+  node_idx InternalJoinClasses(level k, node_idx p, node_idx q, int& numClasses);  
+
+  int PrintClasses(mdd_handle p, int numClasses);
+  void InternalPrintClasses(level k, node_idx p, int* low, int* high, int classNum);
 };
 
 #endif

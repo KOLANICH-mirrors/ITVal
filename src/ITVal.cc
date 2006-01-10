@@ -176,7 +176,7 @@ main (int argc, char **argv)
         delete top;
      if (strncmp(fileList->topName, "NOTOP",5) != 0){
         top = new Topology(fileList->topName);
-	top->PrintMapping();
+	     top->PrintMapping();
      }
      else{
         top = NULL;

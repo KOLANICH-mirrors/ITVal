@@ -67,7 +67,7 @@ fddl_forest::MakeMDDFromTuple(int *low, int *high, mdd_handle & ref)
 		ReallocHandle(ref);
 		Attach(ref, child);
 	}
-	return 0;
+	return SUCCESS;
 }
 
 int 
@@ -126,7 +126,7 @@ fddl_forest::LessThan(mdd_handle root, int value, mdd_handle & result)
 		ReallocHandle(result);
 		Attach(result, newresult);
 	}
-	return 0;
+	return SUCCESS;
 }
 
 int
@@ -141,7 +141,7 @@ fddl_forest::ValRestrict(mdd_handle root, int value, mdd_handle & result)
 		ReallocHandle(result);
 		Attach(result, newresult);
 	}
-	return 0;
+	return SUCCESS;
 }
 
 int
@@ -166,7 +166,7 @@ fddl_forest::Select(mdd_handle root, int num_chains, mdd_handle * all_roots, mdd
 		ReallocHandle(result);
 		Attach(result, newresult);
 	}
-	return 0;
+	return SUCCESS;
 }
 
 int 
@@ -194,7 +194,7 @@ fddl_forest::Replace(mdd_handle p, mdd_handle q, bool strict,
 		ReallocHandle(result);
 		Attach(result, newresult);
 	}
-	return 0;
+	return SUCCESS;
 }
 
 int 
@@ -218,7 +218,7 @@ fddl_forest::ProjectOnto(mdd_handle p, mdd_handle q, mdd_handle & result)
 		ReallocHandle(result);
 		Attach(result, newresult);
 	}
-	return 0;
+	return SUCCESS;
 }
 
 int
@@ -236,7 +236,7 @@ fddl_forest::Combine(mdd_handle root, mdd_handle root2, int chain_index,
 		ReallocHandle(result);
 		Attach(result, newresult);
 	}
-	return 0;
+	return SUCCESS;
 }
 
 node_idx 
@@ -935,7 +935,7 @@ fddl_forest::DestroyMDD(mdd_handle mdd)
 	if (FDDL_NODE(K, mdd.index).in < 1) {
 		DeleteDownstream(K, mdd.index);
 	}
-	return 0;
+	return SUCCESS;
 }
 
 void
@@ -1038,7 +1038,8 @@ int fddl_forest::FindRange(level k){
 	return maxVal;
 }
 
-int fddl_forest::Shift(mdd_handle h, level kold, level knew, mdd_handle& result){
+//Bring level "kold" to the top of the MDD.
+int fddl_forest::Shift(mdd_handle h, level kold, mdd_handle& result){
 	int temp;
 	if (h.index < 0)
 	   return COMPLEMENT_FAILED;
@@ -1048,18 +1049,12 @@ int fddl_forest::Shift(mdd_handle h, level kold, level knew, mdd_handle& result)
 	for (level k = K; k > 0; k--)
 		ShiftCache[k]->Clear();
 
-	//Make sure knew > kold.
-        if (kold>knew){
-           temp = kold;
-	   knew = kold;
-	   kold = temp;
-	}
-
-	level current=knew;
-        newresult = h.index;
-	while (current >= kold){
-	   newresult = InternalShift(K, newresult, current);
-	   current--;
+	level current=kold;
+   newresult = h.index;
+	while (current < K){
+      //Swap level "current" with level "current+1".
+	   newresult = InternalShift(K, newresult, current+1);
+	   current++;
 	}
 
 	if (result.index != newresult) {
@@ -1074,6 +1069,11 @@ node_idx fddl_forest::InternalShift(level k, node_idx p, level target){
    node_idx r;
 	int maxVal;
 	node* nodeP;
+
+
+	if (p==0) return 0;
+	if (k==0) return p; //Probably Not Correct.
+	
 	nodeP = &FDDL_NODE(k,p);
 
 	r = ShiftCache[k]->Hit(p, target);
@@ -1084,20 +1084,21 @@ node_idx fddl_forest::InternalShift(level k, node_idx p, level target){
 
    if (k>target){
       for (int i=0;i<nodeP->size;i++){
-          SetArc(k,p,i,InternalShift(k-1, FDDL_ARC(k,nodeP,i), target));
+			 node_idx m;
+			 m = FDDL_ARC(k,nodeP,i);
+          SetArc(k,r,i,InternalShift(k-1, m, target));
 		}
 		r = CheckIn(k,r);
 		ShiftCache[k]->Add(p,target,r);
 		return r;
 	}
 	
-#ifndef NON_DEBUG
-   printf("Created node: %d\n", r);
-#endif
 	maxVal = FindRange(k-1);
+
 #ifndef NON_DEBUG
    printf("Range(%d): %d\n", k-1,maxVal);
 #endif
+
    for (int val=0;val<maxVal;val++){
       node_idx t;
 		t = NewNode(k-1);
@@ -1121,15 +1122,15 @@ node_idx fddl_forest::InternalShift(level k, node_idx p, level target){
 #ifndef NON_DEBUG
    printf("Setting Arc from <%d,%d>[%d] to %d\n", k-1,t,i,n);
 #endif
-			}
-		}
-		t = CheckIn(k-1,t);
+         }
+      }
+      t = CheckIn(k-1,t);
 #ifndef NON_DEBUG
-   printf("Checked in Node.  Result: %d\n", t);
+      printf("Checked in Node.  Result: %d\n", t);
 #endif
-		SetArc(k,r,val, t);
+      SetArc(k,r,val, t);
 #ifndef NON_DEBUG
-   printf("Setting Arc from <%d,%d>[%d] to %d\n", k,r,val,t);
+      printf("Setting Arc from <%d,%d>[%d] to %d\n", k,r,val,t);
 #endif
 	}
 	r = CheckIn(k,r);

@@ -806,9 +806,10 @@ DoCleanup ()
   FW->FWForest->DestroyMDD (FW->ForwardLog);
 }
 
-int 
+query* 
 PrintClasses(){
    FW->PrintClasses(); //Nodes at level 19.
+	return NULL;
 }
 
 void
