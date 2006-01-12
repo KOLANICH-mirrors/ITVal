@@ -42,7 +42,7 @@ int yyerror(char* str);
 
 %token <input_chain> INPUT FORWARD OUTPUT "selected chain"
 %token <sub> PACKET SPORT DPORT SADDY DADDY STATE "query subject"
-%token <sub> CLASSES "equivalence classes"
+%token <query_rec> CLASSES "equivalence classes"
 %token <prot> UDP TCP ICMP BOTH	    "protocol"
 %token <val> NUM		 "number"
 %token <char> DOT		 "."

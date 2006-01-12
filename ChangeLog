@@ -1,3 +1,11 @@
+ITVal-0.5: January 11, 2006 Robert Marmorstein
+	Implemented a new "CLASSES" query which decomposes the set of all IP
+	addresses into groups based on how the firewall treats all packets
+	originating from or destined for them.  Two hosts in an equivalence class
+	are always treated identically by the firewall with respect to filtering.
+	This is useful for visualizing the firewall configuration and potentially
+	for future development of the tool.
+	
 ITVal-0.4-r3: December 13, 2005 Robert Marmorstein
 	 Fixed some memory access bugs that caused ITVal to crash when
 	 the parser freed names already freed by the MDD query constrution
