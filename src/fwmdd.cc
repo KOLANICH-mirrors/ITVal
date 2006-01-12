@@ -622,7 +622,7 @@ int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest* forest,
       BuildCache[k]->Clear();
    }
   
-   numClasses = 1;
+   numClasses = 0;
    newresult = InternalBuildClassMDD(forest, K, p.index, numClasses);
    if (r.index != newresult)
    {
@@ -635,13 +635,14 @@ int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest* forest,
 node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest* forest, level k, node_idx p, int& numClasses){
    node_idx r;
 	
-	if (p==0){
-      return 0;
-   }
-
    r = BuildCache[k]->Hit(k,p);
    if (r>=0)
       return r;
+	
+	if (p==0){
+		numClasses++;
+      return numClasses-1;
+   }
    
    if (k-18 == 0){
       BuildCache[k]->Add(k,p, numClasses);
@@ -699,7 +700,7 @@ node_idx fw_fddl_forest::InternalJoinClasses(level k, node_idx p, node_idx q, in
 	}
    nodeP = &FDDL_NODE(k,p);
    nodeQ = &FDDL_NODE(k,q);
-	for (arc_idx i=0;i<maxVals[k];i++){
+	for (arc_idx i=0;i<=maxVals[k];i++){
       SetArc(k,r,i,InternalJoinClasses(k-1, i<nodeP->size ? FDDL_ARC(k,nodeP,i) : 0, i<nodeQ->size ? FDDL_ARC(k,nodeQ, i) : 0,numClasses)); 
 	}
 	r = CheckIn(k,r);
