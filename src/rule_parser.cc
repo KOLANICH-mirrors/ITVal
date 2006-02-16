@@ -51,7 +51,7 @@ rule_parser::BreakPort (char *word, char *which, char *port)
     ch++;
   }
   which[ch - word] = '\0';
-  ch++;				// Advance past ':'
+  ch++;            // Advance past ':'
 
   // Now grab the list of ports.
   word = ch;
@@ -101,7 +101,7 @@ rule_parser::BreakState (char *word, int *state)
       *state |= NEW;
     else if (!strncmp (curword, "RELATED", 1024))
       *state |= RELATED;
-    ch++;			// Advance past comma
+    ch++;         // Advance past comma
     word = ch;
     length -= (strlen (curword) + 1);
   }
@@ -113,21 +113,21 @@ rule_parser::BreakState (char *word, int *state)
 void
 rule_parser::BreakFlags (char *word, int *flags)
 {
-  char word1[1024];		// Flags to examine (Hex string)
-  char word2[1024];		// Flags that must be set to match 
+  char word1[1024];      // Flags to examine (Hex string)
+  char word2[1024];      // Flags that must be set to match 
 
   // (Hex string)
 
-  int mask_num;			// Flags to examine (integer)
-  int val_num;			// Flags that must be set to match
+  int mask_num;         // Flags to examine (integer)
+  int val_num;         // Flags that must be set to match
 
   // (integer)
 
-  int mask[6];			// Boolean array of flags to examine 
-  int value[6];			// Boolean array of flags that must be set
+  int mask[6];         // Boolean array of flags to examine 
+  int value[6];         // Boolean array of flags that must be set
 
-  char *ch;			// Current character to consider.
-  int length;			// Length of the string.
+  char *ch;         // Current character to consider.
+  int length;         // Length of the string.
 
   int i;
 
@@ -140,7 +140,7 @@ rule_parser::BreakFlags (char *word, int *flags)
   {
 
     ch += 6;
-    word = ch;			// Consume the word "flags"
+    word = ch;         // Consume the word "flags"
     length -= 6;
 
     // Grab the mask part
@@ -327,7 +327,7 @@ rule_parser::ReadVerboseRule (rule * newRule, char *line, size_t length)
   int numcons;
 
   for (int i=0;i<1024;i++)
-	  info[i] = (char)0x0;
+     info[i] = (char)0x0;
   
   numcons= 0;
   

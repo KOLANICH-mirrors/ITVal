@@ -16,7 +16,7 @@ class Interface{
 };
 
 class Topology{
-	
+   
    private:
    int numIfaces;
    Interface** ifaces;
@@ -37,20 +37,20 @@ class Topology{
       if (!iFile)
          return;
       while (EOF != fscanf(iFile, "%256s %3d.%3d.%3d.%3d", name, &ip[0], &ip[1],
-			      &ip[2], &ip[3]))
+               &ip[2], &ip[3]))
       {
          ifaces[numIfaces] = new Interface(name, ip);
-	      numIfaces++;
+         numIfaces++;
          if (numIfaces>256){
-		 printf("Warning: ITVal cannot handle more than 256 interfaces!\n");
-		 return;
-	 }
+       printf("Warning: ITVal cannot handle more than 256 interfaces!\n");
+       return;
+    }
       }
       fclose(iFile);
    }
    ~Topology(){
       for (int i=0;i<numIfaces;i++)
-	      delete ifaces[i];
+         delete ifaces[i];
       delete[] ifaces;
    }
 };

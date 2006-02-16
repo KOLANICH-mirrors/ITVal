@@ -47,7 +47,7 @@
 
 void
 Firewall::ProcessTarget (processed_rule * pr, rule_tuple * tup,
-			 rule_tuple * &stack)
+          rule_tuple * &stack)
 {
   rule_tuple *newTup;
   int val;
@@ -70,12 +70,12 @@ Firewall::ProcessTarget (processed_rule * pr, rule_tuple * tup,
     tup->low[0] = tup->high[0] = ACCEPT;
   }
   else if (strncmp (pr->target, "REJECT", 6) == 0)
-  {				// If it's a
+  {            // If it's a
     // "REJECT" 
     tup->low[0] = tup->high[0] = REJECT;
   }
   else if (strncmp (pr->target, "DROP", 4) == 0)
-  {				// If it's a drop.
+  {            // If it's a drop.
     tup->low[0] = tup->high[0] = DROP;
   }
   else
@@ -115,7 +115,7 @@ Firewall::ProcessTarget (processed_rule * pr, rule_tuple * tup,
 
 void
 Firewall::ProcessFlags (processed_rule * pr, rule_tuple * tup,
-			rule_tuple * &stack)
+         rule_tuple * &stack)
 {
   int i;
 
@@ -143,7 +143,7 @@ Firewall::ProcessFlags (processed_rule * pr, rule_tuple * tup,
 
 void
 Firewall::ProcessState (processed_rule * pr, rule_tuple * tup,
-			rule_tuple * &stack)
+         rule_tuple * &stack)
 {
   int state = pr->state;
 
@@ -178,7 +178,7 @@ Firewall::ProcessState (processed_rule * pr, rule_tuple * tup,
 
 void
 Firewall::ProcessIfaces (processed_rule * pr, rule_tuple * tup,
-		rule_tuple * &stack){
+      rule_tuple * &stack){
    if (pr->in >=0)  
       tup->low[9] = tup->high[9] = pr->in;
    else{
@@ -204,7 +204,7 @@ Firewall::ProcessIfaces (processed_rule * pr, rule_tuple * tup,
 
 void
 Firewall::ProcessDport (processed_rule * pr, rule_tuple * tup,
-			rule_tuple * &stack)
+         rule_tuple * &stack)
 {
   port_range *cur;
 
@@ -239,7 +239,7 @@ Firewall::ProcessDport (processed_rule * pr, rule_tuple * tup,
 
 void
 Firewall::ProcessSport (processed_rule * pr, rule_tuple * tup,
-			rule_tuple * &stack)
+         rule_tuple * &stack)
 {
   port_range *cur;
 
@@ -273,18 +273,18 @@ Firewall::ProcessSport (processed_rule * pr, rule_tuple * tup,
 
 void
 Firewall::ProcessProt (processed_rule * pr, rule_tuple * tup,
-		       rule_tuple * &stack)
+             rule_tuple * &stack)
 {
   switch (pr->protocol)
   {
   case 'i':
-    tup->low[14] = tup->high[14] = ICMP;	// icmp
+    tup->low[14] = tup->high[14] = ICMP;   // icmp
     break;
   case 'u':
-    tup->low[14] = tup->high[14] = UDP;	// udp
+    tup->low[14] = tup->high[14] = UDP;   // udp
     break;
   case 't':
-    tup->low[14] = tup->high[14] = TCP;	// tcp
+    tup->low[14] = tup->high[14] = TCP;   // tcp
     break;
   default:
     // If it's 'a', any protocol matches.
@@ -303,7 +303,7 @@ Firewall::ProcessProt (processed_rule * pr, rule_tuple * tup,
 
 void
 Firewall::ProcessDest (processed_rule * pr, rule_tuple * tup,
-		       rule_tuple * &stack)
+             rule_tuple * &stack)
 {
   tup->low[15] = pr->to->low % 256;
   tup->low[16] = pr->to->low / 256 % 256;
@@ -323,7 +323,7 @@ Firewall::ProcessDest (processed_rule * pr, rule_tuple * tup,
 
 void
 Firewall::ProcessSource (processed_rule * pr, rule_tuple * tup,
-			 rule_tuple * &stack)
+          rule_tuple * &stack)
 {
   tup->low[19] = pr->from->low % 256;
   tup->low[20] = (pr->from->low / 256) % 256;
@@ -362,14 +362,14 @@ Firewall::ProcessSource (processed_rule * pr, rule_tuple * tup,
 void
 Firewall::BuildRules (processed_rule * head, rule_tuple * &stack)
 {
-  rule_tuple *tup;		// A placeholder output tuple
+  rule_tuple *tup;      // A placeholder output tuple
 
-  if (head == NULL)		// If the list is empty, we're done.
+  if (head == NULL)      // If the list is empty, we're done.
     return;
 
   tup = new rule_tuple;
-  BuildRules (head->next, stack);	// In Reverse order.
-  ProcessSource (head, tup, stack);	// Initiate the processing chain.
+  BuildRules (head->next, stack);   // In Reverse order.
+  ProcessSource (head, tup, stack);   // Initiate the processing chain.
   delete tup;
 }
 
@@ -388,8 +388,8 @@ Firewall::BuildRules (processed_rule * head, rule_tuple * &stack)
 
 void
 Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
-			rule_tuple * tup, mdd_handle & outMDD,
-			mdd_handle & logMDD)
+         rule_tuple * tup, mdd_handle & outMDD,
+         mdd_handle & logMDD)
 {
   // criteriaMDD represents the set of packets that match tup.
   mdd_handle criteriaMDD;
@@ -407,7 +407,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
   ProcessChain (chain_array, inMDD, tup->next, outMDD, logMDD);
 
 #ifdef VERBOSE_DEBUG
-  PrintRuleTuple (tup);		// For debugging
+  PrintRuleTuple (tup);      // For debugging
   printf ("Before:\n");
   for (level k = 22; k > 0; k--)
     FWForest->Compact (k);
@@ -467,7 +467,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
 
 #ifdef VERBOSE_DEBUG
     printf ("Assign Target: %d\n", outMDD.index);
-    PrintRuleTuple (tup);	// For debugging
+    PrintRuleTuple (tup);   // For debugging
     for (level k = 22; k > 0; k--)
       FWForest->Compact (k);
     FWForest->PrintMDD ();
@@ -481,7 +481,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
 
     tup->low[0] = tup->high[0] = 0;
     FWForest->Assign (logMDD, tup->low, tup->high, logMDD);
-    tup->low[0] = tup->high[0] = -1;	// In case a later query
+    tup->low[0] = tup->high[0] = -1;   // In case a later query
     // needs it.
 
   }
@@ -491,7 +491,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
     // chain first.  But only that PART of the chain which matches
     // the tuple we're working on.  So . . .
 
-    chain *nextChain;		// The chain this rule targets.
+    chain *nextChain;      // The chain this rule targets.
 
     nextChain = chain_array[tup->low[0] - 4];
 
@@ -508,7 +508,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
 
 #ifdef VERBOSE_DEBUG
     printf ("Restrict: %d\n", resultMDD.index);
-    PrintRuleTuple (tup);	// For debugging
+    PrintRuleTuple (tup);   // For debugging
     for (level k = 22; k > 0; k--)
       FWForest->Compact (k);
     FWForest->PrintMDD ();
@@ -520,7 +520,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
 
 #ifdef VERBOSE_DEBUG
     printf ("Clean Up Criteria MDD\n");
-    PrintRuleTuple (tup);	// For debugging
+    PrintRuleTuple (tup);   // For debugging
     for (level k = 22; k > 0; k--)
       FWForest->Compact (k);
     FWForest->PrintMDD ();
@@ -535,7 +535,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
 
 #ifdef VERBOSE_DEBUG
     printf ("Replace: %d\n", targetMDD.index);
-    PrintRuleTuple (tup);	// For debugging
+    PrintRuleTuple (tup);   // For debugging
     for (level k = 22; k > 0; k--)
       FWForest->Compact (k);
     FWForest->PrintMDD ();
@@ -544,7 +544,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
     FWForest->DestroyMDD (resultMDD);
 #ifdef VERBOSE_DEBUG
     printf ("Clean Result MDD:\n");
-    PrintRuleTuple (tup);	// For debugging
+    PrintRuleTuple (tup);   // For debugging
     for (level k = 22; k > 0; k--)
       FWForest->Compact (k);
     FWForest->PrintMDD ();
@@ -552,7 +552,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
     FWForest->DestroyMDD (targetMDD);
 #ifdef VERBOSE_DEBUG
     printf ("Clean Target MDD:\n");
-    PrintRuleTuple (tup);	// For debugging
+    PrintRuleTuple (tup);   // For debugging
     for (level k = 22; k > 0; k--)
       FWForest->Compact (k);
     FWForest->PrintMDD ();
@@ -563,7 +563,7 @@ Firewall::ProcessChain (chain ** chain_array, mdd_handle inMDD,
 // Initiate construction of outMDD and logMDD.
 void
 Firewall::AssembleChains (chain ** chain_array, chain * chain,
-			  mdd_handle & outMDD, mdd_handle & logMDD)
+           mdd_handle & outMDD, mdd_handle & logMDD)
 {
   // Here we set the default policy for the builtin chain.
 
@@ -572,41 +572,41 @@ Firewall::AssembleChains (chain ** chain_array, chain * chain,
   int low[23];
   int high[23];
 
-  low[0] = high[0] = chain->Default;	// Set default policy
+  low[0] = high[0] = chain->Default;   // Set default policy
   low[1] = 0;
-  high[1] = 1;			// Any value for FIN flag
+  high[1] = 1;         // Any value for FIN flag
   low[2] = 0;
-  high[2] = 1;			// SYN flag
+  high[2] = 1;         // SYN flag
   low[3] = 0;
-  high[3] = 1;			// RST flag
+  high[3] = 1;         // RST flag
   low[4] = 0;
-  high[4] = 1;			// PSH flag
+  high[4] = 1;         // PSH flag
   low[5] = 0;
-  high[5] = 1;			// ACK flag
+  high[5] = 1;         // ACK flag
   low[6] = 0;
-  high[6] = 1;			// URG flag
+  high[6] = 1;         // URG flag
   low[7] = 0;
-  high[7] = 3;			// Any state
-  low[8] = 0;		        
-  high[8] = 255;		// Any Output Interface
+  high[7] = 3;         // Any state
+  low[8] = 0;              
+  high[8] = 255;      // Any Output Interface
   low[9] = 0;
-  high[9] = 255;	        // Any Input Interface
+  high[9] = 255;           // Any Input Interface
   low[10] = 0;
   
-  high[10] = 255;		// Any destination port
+  high[10] = 255;      // Any destination port
   low[11] = 0;
   high[11] = 255;
   low[12] = 0;
   
-  high[12] = 255;		// Any source port
+  high[12] = 255;      // Any source port
   low[13] = 0;
   high[13] = 255;
   low[14] = 0;
 
-  high[14] = 2;			// Any Protocol
+  high[14] = 2;         // Any Protocol
   low[15] = 0;
   
-  high[15] = 255;		// Any destination IP
+  high[15] = 255;      // Any destination IP
   low[16] = 0;
   high[16] = 255;
   low[17] = 0;
@@ -615,7 +615,7 @@ Firewall::AssembleChains (chain ** chain_array, chain * chain,
   high[18] = 255;
   low[19] = 0;
   
-  high[19] = 255;		// Any source IP
+  high[19] = 255;      // Any source IP
   low[20] = 0;
   high[20] = 255;
   low[21] = 0;

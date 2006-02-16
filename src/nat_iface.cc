@@ -30,7 +30,7 @@
 
 void
 Firewall::DoNAT (nat_tuple * tup, mdd_handle inMDD,
-		 mdd_handle & outMDD, mdd_handle & logMDD)
+       mdd_handle & outMDD, mdd_handle & logMDD)
 {
 
   mdd_handle interMDD;
@@ -56,7 +56,7 @@ Firewall::DoNAT (nat_tuple * tup, mdd_handle inMDD,
     FWForest->NETMAP (logMDD, tup, logMDD);
   }
   else if (tup->low[0] == ACCEPT || tup->low[0] == DROP
-	   || tup->low[0] == REJECT)
+      || tup->low[0] == REJECT)
   {
     // If it was an ACCEPT or DROP rule
 
@@ -78,18 +78,18 @@ Firewall::DoNAT (nat_tuple * tup, mdd_handle inMDD,
 
 void
 Firewall::NATChains (int chain_num, mdd_handle inMDD,
-		     mdd_handle & outMDD, mdd_handle & logMDD)
+           mdd_handle & outMDD, mdd_handle & logMDD)
 {
   nat_tuple *stack;
 
   stack = NULL;
   ConvertNATRules (nat_chains[chain_num]->natRules, stack);
-  DoNAT (stack, inMDD, outMDD, logMDD);	// To reverse the order
+  DoNAT (stack, inMDD, outMDD, logMDD);   // To reverse the order
 }
 
 void
 Firewall::ProcessNATTarget (processed_nat_rule * pr, nat_tuple * tup,
-			    nat_tuple * &stack)
+             nat_tuple * &stack)
 {
   nat_tuple *newTup;
   int val;
@@ -105,20 +105,20 @@ Firewall::ProcessNATTarget (processed_nat_rule * pr, nat_tuple * tup,
     tup->low[0] = tup->high[0] = ACCEPT;
   }
   else if (strncmp (pr->target, "REJECT", 6) == 0)
-  {				// If it's a
+  {            // If it's a
     // "REJECT" 
     tup->low[0] = tup->high[0] = REJECT;
   }
   else if (strncmp (pr->target, "DROP", 4) == 0)
-  {				// If it's a drop.
+  {            // If it's a drop.
     tup->low[0] = tup->high[0] = DROP;
   }
   else if (strncmp (pr->target, "DNAT", 4) == 0)
-  {				// If it's a NAT.
+  {            // If it's a NAT.
     tup->low[0] = tup->high[0] = DNAT;
   }
   else if (strncmp (pr->target, "NETMAP", 6) == 0)
-  {				// If it's a NETMAP.
+  {            // If it's a NETMAP.
     tup->low[0] = tup->high[0] = NETMAP;
   }
   else
@@ -150,7 +150,7 @@ Firewall::ProcessNATTarget (processed_nat_rule * pr, nat_tuple * tup,
 // through tup[6].
 void
 Firewall::ProcessNATFlags (processed_nat_rule * pr, nat_tuple * tup,
-			   nat_tuple * &stack)
+            nat_tuple * &stack)
 {
   int i;
 
@@ -175,7 +175,7 @@ Firewall::ProcessNATFlags (processed_nat_rule * pr, nat_tuple * tup,
 // Store information about state in the tuple.
 void
 Firewall::ProcessNATState (processed_nat_rule * pr, nat_tuple * tup,
-			   nat_tuple * &stack)
+            nat_tuple * &stack)
 {
   int state = pr->state;
 
@@ -214,7 +214,7 @@ Firewall::ProcessNATState (processed_nat_rule * pr, nat_tuple * tup,
 // we can actually generate several tuples here instead of just one.
 void
 Firewall::ProcessNATDport (processed_nat_rule * pr, nat_tuple * tup,
-			   nat_tuple * &stack)
+            nat_tuple * &stack)
 {
   port_range *cur;
 
@@ -246,7 +246,7 @@ Firewall::ProcessNATDport (processed_nat_rule * pr, nat_tuple * tup,
 // pr has multiple port_ranges.
 void
 Firewall::ProcessNATSport (processed_nat_rule * pr, nat_tuple * tup,
-			   nat_tuple * &stack)
+            nat_tuple * &stack)
 {
   port_range *cur;
 
@@ -278,18 +278,18 @@ Firewall::ProcessNATSport (processed_nat_rule * pr, nat_tuple * tup,
 
 void
 Firewall::ProcessNATProt (processed_nat_rule * pr, nat_tuple * tup,
-			  nat_tuple * &stack)
+           nat_tuple * &stack)
 {
   switch (pr->protocol)
   {
   case 'i':
-    tup->low[12] = tup->high[12] = ICMP;	// icmp
+    tup->low[12] = tup->high[12] = ICMP;   // icmp
     break;
   case 'u':
-    tup->low[12] = tup->high[12] = UDP;	// udp
+    tup->low[12] = tup->high[12] = UDP;   // udp
     break;
   case 't':
-    tup->low[12] = tup->high[12] = TCP;	// tcp
+    tup->low[12] = tup->high[12] = TCP;   // tcp
     break;
   default:
     // If it's 'a', any protocol matches.
@@ -305,7 +305,7 @@ Firewall::ProcessNATProt (processed_nat_rule * pr, nat_tuple * tup,
 // (Partitioning also helps readability when debugging).
 void
 Firewall::ProcessNATDest (processed_nat_rule * pr, nat_tuple * tup,
-			  nat_tuple * &stack)
+           nat_tuple * &stack)
 {
   tup->low[13] = pr->to->low % 256;
   tup->low[14] = pr->to->low / 256 % 256;
@@ -323,7 +323,7 @@ Firewall::ProcessNATDest (processed_nat_rule * pr, nat_tuple * tup,
 // IP addresses are partitioned into four bytes.
 void
 Firewall::ProcessNATSource (processed_nat_rule * pr, nat_tuple * tup,
-			    nat_tuple * &stack)
+             nat_tuple * &stack)
 {
   tup->low[17] = pr->from->low % 256;
   tup->low[18] = (pr->from->low / 256) % 256;
@@ -343,15 +343,15 @@ Firewall::ProcessNATSource (processed_nat_rule * pr, nat_tuple * tup,
 void
 Firewall::ConvertNATRules (processed_nat_rule * head, nat_tuple * &stack)
 {
-  nat_tuple *tup;		// A placeholder output tuple
+  nat_tuple *tup;      // A placeholder output tuple
 
-  if (head == NULL)		// If the list is empty, we're done.
+  if (head == NULL)      // If the list is empty, we're done.
     return;
 
-  ConvertNATRules ((processed_nat_rule *) head->next, stack);	// In
+  ConvertNATRules ((processed_nat_rule *) head->next, stack);   // In
   // Reverse 
   // order.
   tup = new nat_tuple;
-  ProcessNATSource (head, tup, stack);	// Initiate the processing chain.
+  ProcessNATSource (head, tup, stack);   // Initiate the processing chain.
   delete tup;
 }

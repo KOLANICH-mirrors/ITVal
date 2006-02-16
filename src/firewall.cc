@@ -185,73 +185,73 @@ int Firewall::PrintClasses(){
 
    //FWForest->PrintMDD();
    FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses);
-//	printf("There are %d Forward Source classes:\n", numClasses);
+//   printf("There are %d Forward Source classes:\n", numClasses);
    //ClassForest->PrintMDD();
-	
-//	ClassForest->PrintClasses(FWSourceClass, numClasses);
+   
+//   ClassForest->PrintClasses(FWSourceClass, numClasses);
    FWForest->BuildClassMDD(Input, ClassForest, INSourceClass, numClasses);
-//	printf("There are %d Input Source classes:\n", numClasses);
+//   printf("There are %d Input Source classes:\n", numClasses);
    //ClassForest->PrintMDD();
-//	ClassForest->PrintClasses(INSourceClass, numClasses);
+//   ClassForest->PrintClasses(INSourceClass, numClasses);
    FWForest->BuildClassMDD(Output, ClassForest, OUTSourceClass, numClasses);
-//	printf("There are %d Output Source classes:\n", numClasses);
+//   printf("There are %d Output Source classes:\n", numClasses);
    //ClassForest->PrintMDD();
-//	ClassForest->PrintClasses(OUTSourceClass, numClasses);
+//   ClassForest->PrintClasses(OUTSourceClass, numClasses);
 
    //Shift Destination Addresses to Top.
-	FWForest->Shift(Forward,15,newChain);
-	FWForest->Shift(newChain,15,newChain);
-	FWForest->Shift(newChain,15,newChain);
-	FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(Forward,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
 // As we move lower levels to the top, the top levels move down!
 //   FWForest->Shift(newChain,16,newChain);
 //   FWForest->Shift(newChain,17,newChain);
 //   FWForest->Shift(newChain,18,newChain);
 
    FWForest->BuildClassMDD(newChain, ClassForest, FWDestClass, numClasses);
-//	printf("There are %d Forward Destination classes:\n", numClasses);
-//	ClassForest->PrintClasses(FWDestClass, numClasses);
+//   printf("There are %d Forward Destination classes:\n", numClasses);
+//   ClassForest->PrintClasses(FWDestClass, numClasses);
 
-	//Debug
-//	printf("FWDestClass: %d\n", FWDestClass.index);
+   //Debug
+//   printf("FWDestClass: %d\n", FWDestClass.index);
 //   ClassForest->PrintMDD();
-	//End Debug
+   //End Debug
 
    FWForest->Shift(Input,15,newChain);
-	FWForest->Shift(newChain,15,newChain);
-	FWForest->Shift(newChain,15,newChain);
-	FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
    FWForest->BuildClassMDD(newChain, ClassForest, INDestClass, numClasses);
-//	printf("There are %d Input Destination classes:\n", numClasses);
+//   printf("There are %d Input Destination classes:\n", numClasses);
 //   ClassForest->PrintMDD();
 //   ClassForest->PrintClasses(INDestClass, numClasses);
 
    FWForest->Shift(Output,15,newChain);
-	FWForest->Shift(newChain,15,newChain);
-	FWForest->Shift(newChain,15,newChain);
-	FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
 //   FWForest->Shift(newChain,16,newChain);
 //   FWForest->Shift(newChain,17,newChain);
 //   FWForest->Shift(newChain,18,newChain);
    FWForest->BuildClassMDD(newChain, ClassForest, OUTDestClass, numClasses);
-//	printf("There are %d Output Destination classes:\n", numClasses);
+//   printf("There are %d Output Destination classes:\n", numClasses);
    //ClassForest->PrintMDD();
-//	ClassForest->PrintClasses(OUTDestClass, numClasses);
+//   ClassForest->PrintClasses(OUTDestClass, numClasses);
 
-	ClassForest->JoinClasses(FWSourceClass,INSourceClass, resultClass,numClasses);
-	
-	ClassForest->JoinClasses(resultClass,OUTSourceClass, resultClass, numClasses);
-	
+   ClassForest->JoinClasses(FWSourceClass,INSourceClass, resultClass,numClasses);
+   
+   ClassForest->JoinClasses(resultClass,OUTSourceClass, resultClass, numClasses);
+   
 //   printf("Join Result and OUTSource: \n");
-//	ClassForest->PrintClasses(resultClass, numClasses);
-	
-	ClassForest->JoinClasses(resultClass,FWDestClass, resultClass,numClasses);
-	ClassForest->JoinClasses(resultClass,INDestClass, resultClass,numClasses);
-	ClassForest->JoinClasses(resultClass,OUTDestClass, resultClass,numClasses);
+//   ClassForest->PrintClasses(resultClass, numClasses);
+   
+   ClassForest->JoinClasses(resultClass,FWDestClass, resultClass,numClasses);
+   ClassForest->JoinClasses(resultClass,INDestClass, resultClass,numClasses);
+   ClassForest->JoinClasses(resultClass,OUTDestClass, resultClass,numClasses);
 
-	printf("There are %d total host classes:\n",numClasses);
-	ClassForest->PrintClasses(resultClass, numClasses);
-	
+   printf("There are %d total host classes:\n",numClasses);
+   ClassForest->PrintClasses(resultClass, numClasses);
+   
 }
 
 group* Firewall::GetClasses(){
@@ -321,10 +321,10 @@ MergeFWs (fw_fddl_forest * FWForest, Firewall ** fws, int n)
   if (prerouting >= 0)
   {
     fws[0]->NATChains (postrouting, fws[0]->Forward, f->Forward,
-		       f->ForwardLog);
+             f->ForwardLog);
     fws[0]->NATChains (postrouting, fws[0]->Input, f->Input, f->InputLog);
     fws[0]->NATChains (postrouting, fws[n - 1]->Output, f->Output,
-		       f->OutputLog);
+             f->OutputLog);
   }
   else
   {

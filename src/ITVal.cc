@@ -29,7 +29,7 @@ topology file.\n      -F or -f <rulefile> : Append a filter rule set file. \
 <REQUIRED>\n      -N or -n <natfile> : Append a NAT rule set file.\n\n"
 
 #include <stdio.h>
-#include "structures.h"
+#include "parser.h"
 #include "firewall.h"
 #include <FDDL/mdd.h>
 #include "parser_interface.hh"
@@ -54,8 +54,8 @@ main (int argc, char **argv)
   int i;
   char queryName[256];
   parser_interface pi;
-  Firewall **fws;		/* Array of independent firewalls   */
-  int num_fws=0;			/* Number of firewalls in the array */
+  Firewall **fws;      /* Array of independent firewalls   */
+  int num_fws=0;         /* Number of firewalls in the array */
   Topology* top = NULL;
   filename_node* fileList = NULL;
   char flag;
@@ -65,19 +65,19 @@ main (int argc, char **argv)
 
   filename_node* fn;
 
-  int ranges[23] = { 256,	/* Target Chain                 */
-    1, 1, 1, 1, 1, 1,		/* Flags (FIN, SYN, RST, PSH, ACK, URG) */
-    3,				/* Connection State             */
-    255, 255,		        /* Output and Input Interface   */
-    255, 255,			/* Destination Port             */
-    255, 255,			/* Source Port                  */
-    2,				/* Protocol                     */
-    255, 255, 255, 255,		/* Destination Address          */
-    255, 255, 255, 255		/* Source Address               */
+  int ranges[23] = { 256,   /* Target Chain                 */
+    1, 1, 1, 1, 1, 1,      /* Flags (FIN, SYN, RST, PSH, ACK, URG) */
+    3,            /* Connection State             */
+    255, 255,              /* Output and Input Interface   */
+    255, 255,         /* Destination Port             */
+    255, 255,         /* Source Port                  */
+    2,            /* Protocol                     */
+    255, 255, 255, 255,      /* Destination Address          */
+    255, 255, 255, 255      /* Source Address               */
   };
   
   FWForest = new fw_fddl_forest (23, ranges);
-  FWForest->ToggleSparsity (false);	/* @BUG@: Sparse nodes don't work. */
+  FWForest->ToggleSparsity (false);   /* @BUG@: Sparse nodes don't work. */
 
   strncpy(queryName, "NOQUERY", 7);
   
@@ -95,70 +95,70 @@ main (int argc, char **argv)
      switch (flag){
         default:
         printf(SYNTAX);
-	return 1;
-	case 'q':
-	   if (i+1>=argc){
-	      printf("Error: Flag -q requires an argument!\n");
+   return 1;
+   case 'q':
+      if (i+1>=argc){
+         printf("Error: Flag -q requires an argument!\n");
               return 1;
-	   }
-	   strncpy(queryName, argv[i+1], 256);
+      }
+      strncpy(queryName, argv[i+1], 256);
         break;
-	case 't':
-	   if (i+1>=argc){
-	      printf("Error: Flag -t requires an argument!\n");
+   case 't':
+      if (i+1>=argc){
+         printf("Error: Flag -t requires an argument!\n");
               return 1;
-	   }
+      }
            if (!fileList){
-	      printf("Error: Topology file %s precedes filter file!\n", argv[i+1]);
+         printf("Error: Topology file %s precedes filter file!\n", argv[i+1]);
               return 1;
-	   }
-	   if (strncmp(fn->topName, "NOTOP", 5) != 0){
+      }
+      if (strncmp(fn->topName, "NOTOP", 5) != 0){
               printf("Warning: Topology file %s overrides Topology file %s for filter %s.\n",argv[i+1], fileList->topName, fileList->filterName);
-	   }
-	   strncpy(fileList->topName, argv[i+1],256);
+      }
+      strncpy(fileList->topName, argv[i+1],256);
         break;
-	case 'F':
-	case 'f':
-	   if (i+1>=argc){
-	      printf("Error: Flag -f requires an argument!\n");
+   case 'F':
+   case 'f':
+      if (i+1>=argc){
+         printf("Error: Flag -f requires an argument!\n");
               return 1;
-	   }
-	   fn = new filename_node;
-	   strncpy(fn->filterName, argv[i+1],256);
-	   strncpy(fn->natName, "NONAT", 5);
-	   strncpy(fn->topName, "NOTOP", 5);
-	   fn->verbose_input = 0;
-	   fn->next = fileList;
-	   fileList = fn;
-	   num_fws++;
-	break;
-	case 'N':
-	case 'n':
-	   if (i+1>=argc){
-	      printf("Error: Flag -n requires an argument!\n");
+      }
+      fn = new filename_node;
+      strncpy(fn->filterName, argv[i+1],256);
+      strncpy(fn->natName, "NONAT", 5);
+      strncpy(fn->topName, "NOTOP", 5);
+      fn->verbose_input = 0;
+      fn->next = fileList;
+      fileList = fn;
+      num_fws++;
+   break;
+   case 'N':
+   case 'n':
+      if (i+1>=argc){
+         printf("Error: Flag -n requires an argument!\n");
               return 1;
-	   }
+      }
            if (!fileList){
-	      printf("Error: NAT file %s precedes filter files!\n", argv[i+1]);
+         printf("Error: NAT file %s precedes filter files!\n", argv[i+1]);
               return 1;
-	   }
-	   if (strncmp(fn->natName, "NONAT", 5) != 0){
+      }
+      if (strncmp(fn->natName, "NONAT", 5) != 0){
               printf("Warning: NAT file %s overrides NAT file %s for filter %s.\n",argv[i+1], fileList->natName, fileList->filterName);
-	   }
-	   strncpy(fileList->natName, argv[i+1],256);
+      }
+      strncpy(fileList->natName, argv[i+1],256);
         break;
      }
      if (flag == 'F')
-	     fileList->verbose_input = 1;
+        fileList->verbose_input = 1;
      if (flag == 'N' && fileList->verbose_input == 0){
-	     printf("Error: NAT and filter files must match in type.\n");
-	     return 1;
+        printf("Error: NAT and filter files must match in type.\n");
+        return 1;
      }
   }
 
   if (!strncmp(queryName, "NOQUERY", 7)){
-	  printf("Error: No query file specified!\n");
-	  return 1;
+     printf("Error: No query file specified!\n");
+     return 1;
   }
   
   /* Initialize the firewall array */
@@ -173,7 +173,7 @@ main (int argc, char **argv)
         delete top;
      if (strncmp(fileList->topName, "NOTOP",5) != 0){
         top = new Topology(fileList->topName);
-	     top->PrintMapping();
+        top->PrintMapping();
      }
      else{
         top = NULL;

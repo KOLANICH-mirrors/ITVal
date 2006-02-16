@@ -50,25 +50,25 @@ ssize_t getline(char**, size_t*, FILE*);
 void
 Firewall::ReadChain (char *line, ssize_t length, chain * newChain)
 {
-  char dummy[8];		// The word CHAIN 
-  char name[257];		// The name of the chain
+  char dummy[8];      // The word CHAIN 
+  char name[257];      // The name of the chain
 
-  char spam[257];		// Dummy characters that surround
+  char spam[257];      // Dummy characters that surround
 
   // the default policy.
   
   sscanf (line, "%7s %256s %7s %256s", dummy, name, dummy, spam);
 
   strncpy (newChain->name, name, 256);
-  newChain->Default = 0;	// Assume PASS if no default is specified.
+  newChain->Default = 0;   // Assume PASS if no default is specified.
 
   // The default policy can only be "ACCEPT" or "DROP".
   if (strncmp (&dummy[1], "policy", 6) == 0)
   {
     if (spam[0] == 'D')
-      newChain->Default = 1;	// DROP
+      newChain->Default = 1;   // DROP
     else if (spam[0] == 'A')
-      newChain->Default = 3;	// ACCEPT
+      newChain->Default = 3;   // ACCEPT
     else
     {
       printf ("Chain %s has invalid default policy %s\n", name, spam);
@@ -85,22 +85,22 @@ void
 Firewall::BuildFWRules (char *fname)
 {
   FILE *ruleFile;
-  char *line;			// Current line of input
-  char *oldLine;		// Placeholder so that we can free the
+  char *line;         // Current line of input
+  char *oldLine;      // Placeholder so that we can free the
 
   // line
 
   // After we've modified it.
 
-  ssize_t length;		// Length of the input line
+  ssize_t length;      // Length of the input line
   size_t bufsize;
 
-  rule *cur;			// Current rule to process
-  processed_rule *pcur;		// Current expanded rule
+  rule *cur;         // Current rule to process
+  processed_rule *pcur;      // Current expanded rule
 
-  chain *newChain;		// Current Chain to build
-  int current_chain;		// Index (in the chain_array) of the
-			        // chain. 
+  chain *newChain;      // Current Chain to build
+  int current_chain;      // Index (in the chain_array) of the
+                 // chain. 
 
   rule_parser* rp;
 
@@ -149,7 +149,7 @@ Firewall::BuildFWRules (char *fname)
     // break;
 
     if (length == 0)
-    {				// If the line is empty, ignore.
+    {            // If the line is empty, ignore.
 #ifdef DEBUG
         printf("%d: Ignoring empty line.\n", lineNo);
 #endif
@@ -158,9 +158,9 @@ Firewall::BuildFWRules (char *fname)
       length = getline (&line, &bufsize, ruleFile);
       lineNo++;
       oldLine = line;
-      if (length == -1)		// If at the end of the file, done.
-	break;
-      continue;			// Skip processing the line.
+      if (length == -1)      // If at the end of the file, done.
+   break;
+      continue;         // Skip processing the line.
     }
     // If the line defines a new chain
 
@@ -179,7 +179,7 @@ Firewall::BuildFWRules (char *fname)
 #ifdef DEBUG
       if (newChain == NULL){
           printf("%d: Bad chain definition\n", lineNo);
-	  exit(-1);
+     exit(-1);
       }
       printf("%d: Chain %s\n", lineNo, newChain->name);
 #endif 
@@ -207,20 +207,20 @@ Firewall::BuildFWRules (char *fname)
       lineNo++;
       oldLine = line;
 
-      if (length == -1)		// IF EOF, done.
-	break;
+      if (length == -1)      // IF EOF, done.
+   break;
     }
     else
     {
       // Read the next rule
       if (rp->ReadRule (cur, line, length) >= 0) //Normal input
       {
-	// Append to the linked list for the current chain
-	cur->next = chain_array[current_chain]->rules;
-	chain_array[current_chain]->rules = cur;
+   // Append to the linked list for the current chain
+   cur->next = chain_array[current_chain]->rules;
+   chain_array[current_chain]->rules = cur;
 
-	// Allocate next rule
-	cur = new rule;
+   // Allocate next rule
+   cur = new rule;
       }
       // Do priming read
       free (oldLine);
@@ -247,7 +247,7 @@ Firewall::BuildFWRules (char *fname)
 
   i = 0;
   while (i < num_chains)
-  {				// For each chain
+  {            // For each chain
     newChain = chain_array[i];
 #ifdef DEBUG
     printf ("Chain: %s\n", newChain->name);
@@ -287,7 +287,7 @@ Firewall::BuildFWRules (char *fname)
       //If empty target, ignore the rule.
       while (cur && cur->target[0] == '\0')
       {
-	cur = cur->next;
+   cur = cur->next;
       }
     }
 
@@ -297,7 +297,7 @@ Firewall::BuildFWRules (char *fname)
     // Now convert the processed rules into vector tuples suitable
     // for insertion into the MDDs
 
-    newChain->tup = NULL;	// <----- A very important step.
+    newChain->tup = NULL;   // <----- A very important step.
     BuildRules (phead, newChain->tup);
     i++;
     // Free the processed rules, since we don't need 'em anymore.
@@ -317,21 +317,21 @@ void
 Firewall::BuildVerboseFWRules (char *fname)
 {
   FILE *ruleFile;
-  char *line;			// Current line of input
-  char *oldLine;		// Placeholder so that we can free the
+  char *line;         // Current line of input
+  char *oldLine;      // Placeholder so that we can free the
   // line
 
   // After we've modified it.
 
-  ssize_t length;		// Length of the input line
+  ssize_t length;      // Length of the input line
   size_t bufsize;
 
-  rule *cur;			// Current rule to process
-  processed_rule *pcur;		// Current expanded rule
+  rule *cur;         // Current rule to process
+  processed_rule *pcur;      // Current expanded rule
 
-  chain *newChain;		// Current Chain to build
-  int current_chain;		// Index (in the chain_array) of the
-			        // chain. 
+  chain *newChain;      // Current Chain to build
+  int current_chain;      // Index (in the chain_array) of the
+                 // chain. 
 
   rule_parser* rp;
   
@@ -379,15 +379,15 @@ Firewall::BuildVerboseFWRules (char *fname)
     // break;
 
     if (length == 0)
-    {				// If the line is empty, ignore.
+    {            // If the line is empty, ignore.
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, ruleFile);
       lineNo++;
       oldLine = line;
-      if (length == -1)		// If at the end of the file, done.
-	break;
-      continue;			// Skip processing the line.
+      if (length == -1)      // If at the end of the file, done.
+   break;
+      continue;         // Skip processing the line.
     }
     // If the line defines a new chain
 
@@ -426,20 +426,20 @@ Firewall::BuildVerboseFWRules (char *fname)
       lineNo++;
       oldLine = line;
 
-      if (length == -1)		// IF EOF, done.
-	break;
+      if (length == -1)      // IF EOF, done.
+   break;
     }
     else
     {
       // Read the next rule
       if (rp->ReadVerboseRule (cur, line, length) >= 0) // Verbose Input
       {
-	// Append to the linked list for the current chain
-	cur->next = chain_array[current_chain]->rules;
-	chain_array[current_chain]->rules = cur;
+   // Append to the linked list for the current chain
+   cur->next = chain_array[current_chain]->rules;
+   chain_array[current_chain]->rules = cur;
 
-	// Allocate next rule
-	cur = new rule;
+   // Allocate next rule
+   cur = new rule;
       }
       // Do priming read
       free (oldLine);
@@ -466,7 +466,7 @@ Firewall::BuildVerboseFWRules (char *fname)
 
   i = 0;
   while (i < num_chains)
-  {				// For each chain
+  {            // For each chain
     newChain = chain_array[i];
 #ifdef DEBUG
     printf ("Chain: %s\n", newChain->name);
@@ -506,7 +506,7 @@ Firewall::BuildVerboseFWRules (char *fname)
       //If empty target, ignore the rule.
       while (cur && cur->target[0] == '\0')
       {
-	cur = cur->next;
+   cur = cur->next;
       }
     }
 
@@ -516,7 +516,7 @@ Firewall::BuildVerboseFWRules (char *fname)
     // Now convert the processed rules into vector tuples suitable
     // for insertion into the MDDs
 
-    newChain->tup = NULL;	// <----- A very important step.
+    newChain->tup = NULL;   // <----- A very important step.
     BuildRules (phead, newChain->tup);
     i++;
     // Free the processed rules, since we don't need 'em anymore.
@@ -538,23 +538,23 @@ void
 Firewall::BuildNATRules (char *fname)
 {
   FILE *natFile;
-  char *line;			// Current line of input
-  char *oldLine;		// Placeholder so that we can free the
+  char *line;         // Current line of input
+  char *oldLine;      // Placeholder so that we can free the
 
   // line
 
   // After we've modified it.
 
-  ssize_t length;		// Length of the input line
+  ssize_t length;      // Length of the input line
   size_t bufsize;
 
-  rule *cur;			// Current rule to process
-  processed_nat_rule *pcur;	// Current expanded rule
+  rule *cur;         // Current rule to process
+  processed_nat_rule *pcur;   // Current expanded rule
 
-  nat_chain *newNATChain;	// Current Chain to build
-  nat_chain *curNATChain;	// Chain of NAT rules to build
-  int current_nchain;		// Index (in nat_chains) of the
-			        // chain. 
+  nat_chain *newNATChain;   // Current Chain to build
+  nat_chain *curNATChain;   // Chain of NAT rules to build
+  int current_nchain;      // Index (in nat_chains) of the
+                 // chain. 
 
   rule_parser* rp; 
   
@@ -596,15 +596,15 @@ Firewall::BuildNATRules (char *fname)
     }
 
     if (length == 0)
-    {				// If the line is empty, ignore.
+    {            // If the line is empty, ignore.
       free (oldLine);
       line = NULL;
       length = getline (&line, &bufsize, natFile);
       lineNo++;
       oldLine = line;
-      if (length == -1)		// If at the end of the file, done.
-	break;
-      continue;			// Skip the line.
+      if (length == -1)      // If at the end of the file, done.
+   break;
+      continue;         // Skip the line.
     }
     // If the line defines a new chain
 
@@ -645,8 +645,8 @@ Firewall::BuildNATRules (char *fname)
       lineNo++;
       oldLine = line;
 
-      if (length == -1)		// IF EOF, done.
-	break;
+      if (length == -1)      // IF EOF, done.
+   break;
     }
     // Set number of chains
     // num_nat_chains = current_nchain + 1;
@@ -685,13 +685,13 @@ Firewall::BuildNATRules (char *fname)
   i = 0;
   curNATChain = NULL;
   while (i < num_nat_chains)
-  {				// For each chain
+  {            // For each chain
     curNATChain = nat_chains[i];
 #ifdef DEBUG
     printf ("NAT_Chain[%s]: %s\n", fname, curNATChain->name);
 #endif
     cur = curNATChain->rules;
-    natHead = NULL;		// Linked list of nat rules is initially
+    natHead = NULL;      // Linked list of nat rules is initially
     // NULL
 
     // Allocate a processed_rule
@@ -735,7 +735,7 @@ Firewall::BuildNATRules (char *fname)
 // and Logged, an MDD storing the set of logged packets.
 void
 Firewall::BuildChains (int input_chain, mdd_handle & outputMDD,
-		       mdd_handle & Logged)
+             mdd_handle & Logged)
 {
   AssembleChains (chain_array, chain_array[input_chain], outputMDD, Logged);
 }

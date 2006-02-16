@@ -25,6 +25,7 @@
 #include "chains.h"
 #include "fwmdd.h"
 #include "topology.h"
+#include <FDDL/structures.h>
 
 class Firewall
 {
@@ -45,56 +46,56 @@ class Firewall
   void BuildVerboseFWRules (char *fname);
   void BuildNATRules (char *fname);
   void BuildChains (int input_chain, mdd_handle & outputMDD,
-		    mdd_handle & logMDD);
+          mdd_handle & logMDD);
 
   void AssembleChains (chain ** chain_array, chain * ch,
-		       mdd_handle & outMDD, mdd_handle & logMDD);
+             mdd_handle & outMDD, mdd_handle & logMDD);
 
   void ProcessChain (chain ** chain_array, mdd_handle inMDD,
-		     rule_tuple * tup, mdd_handle & outMDD,
-		     mdd_handle & logMDD);
+           rule_tuple * tup, mdd_handle & outMDD,
+           mdd_handle & logMDD);
 
   void BuildRules (processed_rule * pr, rule_tuple * &tup);
 
   void ProcessSource (processed_rule * pr, rule_tuple * tup,
-		      rule_tuple * &stack);
+            rule_tuple * &stack);
   void ProcessDest (processed_rule * pr, rule_tuple * tup,
-		    rule_tuple * &stack);
+          rule_tuple * &stack);
   void ProcessProt (processed_rule * pr, rule_tuple * tup,
-		    rule_tuple * &stack);
+          rule_tuple * &stack);
   void ProcessSport (processed_rule * pr, rule_tuple * tup,
-		     rule_tuple * &stack);
+           rule_tuple * &stack);
   void ProcessDport (processed_rule * pr, rule_tuple * tup,
-		     rule_tuple * &stack);
+           rule_tuple * &stack);
   void ProcessIfaces (processed_rule * pr, rule_tuple * tup,
-		     rule_tuple * &stack);
+           rule_tuple * &stack);
   void ProcessState (processed_rule * pr, rule_tuple * tup,
-		     rule_tuple * &stack);
+           rule_tuple * &stack);
   void ProcessFlags (processed_rule * pr, rule_tuple * tup,
-		     rule_tuple * &stack);
+           rule_tuple * &stack);
   void ProcessTarget (processed_rule * pr, rule_tuple * tup,
-		      rule_tuple * &stack);
+            rule_tuple * &stack);
 
   void ConvertNATRules (processed_nat_rule * pnr, nat_tuple * &stack);
   void DoNAT (nat_tuple * tup, mdd_handle inMDD,
-	      mdd_handle & outMDD, mdd_handle & logMDD);
+         mdd_handle & outMDD, mdd_handle & logMDD);
 
   void ProcessNATSource (processed_nat_rule * pr,
-			 nat_tuple * tup, nat_tuple * &stack);
+          nat_tuple * tup, nat_tuple * &stack);
   void ProcessNATDest (processed_nat_rule * pr,
-		       nat_tuple * tup, nat_tuple * &stack);
+             nat_tuple * tup, nat_tuple * &stack);
   void ProcessNATProt (processed_nat_rule * pr,
-		       nat_tuple * tup, nat_tuple * &stack);
+             nat_tuple * tup, nat_tuple * &stack);
   void ProcessNATSport (processed_nat_rule * pr,
-			nat_tuple * tup, nat_tuple * &stack);
+         nat_tuple * tup, nat_tuple * &stack);
   void ProcessNATDport (processed_nat_rule * pr,
-			nat_tuple * tup, nat_tuple * &stack);
+         nat_tuple * tup, nat_tuple * &stack);
   void ProcessNATState (processed_nat_rule * pr,
-			nat_tuple * tup, nat_tuple * &stack);
+         nat_tuple * tup, nat_tuple * &stack);
   void ProcessNATFlags (processed_nat_rule * pr,
-			nat_tuple * tup, nat_tuple * &stack);
+         nat_tuple * tup, nat_tuple * &stack);
   void ProcessNATTarget (processed_nat_rule * pr,
-			 nat_tuple * tup, nat_tuple * &stack);
+          nat_tuple * tup, nat_tuple * &stack);
 
 public:
   fw_fddl_forest * FWForest;
@@ -109,7 +110,7 @@ public:
   int FindChain (char *name);
   int FindNATChain (char *name);
   void NATChains (int input_chain, mdd_handle inMDD,
-		  mdd_handle & outMDD, mdd_handle & logMDD);
+        mdd_handle & outMDD, mdd_handle & logMDD);
 
     Firewall (fw_fddl_forest * F);
 
@@ -120,11 +121,11 @@ public:
   {
     for (int i = 0; i < num_chains; i++)
       if (chain_array[i] != NULL)
-	delete chain_array[i];
+   delete chain_array[i];
 
     for (int i = 0; i < num_nat_chains; i++)
       if (nat_chains[i] != NULL)
-	delete nat_chains[i];
+   delete nat_chains[i];
 
       FWForest->DestroyMDD (Input);
       FWForest->DestroyMDD (InputLog);
@@ -134,7 +135,7 @@ public:
       FWForest->DestroyMDD (ForwardLog);
   }
    int PrintClasses();
-   group* getClasses();
+   group* GetClasses();
 };
 
 /* Create a META-Firewall from all the independent firewalls.*/

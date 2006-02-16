@@ -46,9 +46,9 @@ Williamsburg, VA 23185
 class fw_fddl_forest:public fddl_forest
 {
 private:
-  cache ** NMAPCache;		//Caches for embedded operations 
-  cache **DNATCache;		//Caches for embedded operations 
-  cache **SNATCache;		//Caches for embedded operations 
+  cache ** NMAPCache;      //Caches for embedded operations 
+  cache **DNATCache;      //Caches for embedded operations 
+  cache **SNATCache;      //Caches for embedded operations 
   cache **QIntersectCache;
   cache **BuildCache;
   cache **JoinCache;
@@ -56,7 +56,7 @@ private:
 public:
 
     fw_fddl_forest (int numlevels, int *maxvals):fddl_forest (numlevels,
-							      maxvals)
+                           maxvals)
   {
     NMAPCache = new cache *[K + 1];
     DNATCache = new cache *[K + 1];
@@ -74,7 +74,7 @@ public:
       JoinCache[k] = new cache;
       BuildCache[k] = new cache;
     }
-	 JoinCache[0] = new cache;
+    JoinCache[0] = new cache;
   }
 
   //Clean up data structures used by the forest
@@ -83,20 +83,20 @@ public:
     for (level k = K; k > 0; k--)
     {
       if (NMAPCache[k])
-	delete NMAPCache[k];
+   delete NMAPCache[k];
       if (DNATCache[k])
-	delete DNATCache[k];
+   delete DNATCache[k];
       if (SNATCache[k])
-	delete SNATCache[k];
+   delete SNATCache[k];
       if (QIntersectCache[k])
-	delete QIntersectCache[k];
+   delete QIntersectCache[k];
       if (JoinCache[k])
-	delete JoinCache[k];
+   delete JoinCache[k];
       if (BuildCache[k])
-	delete BuildCache[k];
+   delete BuildCache[k];
     }
-	 if (JoinCache[0])
-				delete JoinCache[0];
+    if (JoinCache[0])
+            delete JoinCache[0];
 
     delete[]NMAPCache;
     delete[]DNATCache;

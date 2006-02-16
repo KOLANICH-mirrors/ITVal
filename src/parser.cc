@@ -25,7 +25,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "structures.h"
+#include "parser.h"
 #include "fwlang.tab.hh"
 #include "firewall.h"
 
@@ -114,7 +114,7 @@ BuildGroupFromAddress (address * a)
   g = new group;
   g->list = a;
   sprintf (tmp, "Group %d.%d.%d.%d", a->val[0], a->val[1], a->val[2],
-	   a->val[3]);
+      a->val[3]);
   strncpy (g->name, tmp, 256);
   g->named = 0;
   return g;
@@ -160,9 +160,9 @@ ParseAddr (char *val1, char *val2, char *val3, char *val4)
   if (!newAddr)
   {
     printf ("Failed to allocate memory for address %s.%s.%s.%s\n",
-	    val1 != NULL ? val1 : "*",
-	    val2 != NULL ? val2 : "*",
-	    val3 != NULL ? val3 : "*", val4 != NULL ? val4 : "*");
+       val1 != NULL ? val1 : "*",
+       val2 != NULL ? val2 : "*",
+       val3 != NULL ? val3 : "*", val4 != NULL ? val4 : "*");
     return NULL;
   }
   if (val1 == NULL || val1[0] == '*')
@@ -205,7 +205,7 @@ GetLoggedCondition ()
   condition *sc;
 
   sc = new condition;
-  FW->FWForest->Attach (sc->h, FW->ForwardLog.index);	// Change to take
+  FW->FWForest->Attach (sc->h, FW->ForwardLog.index);   // Change to take
   // input chain
   // into account.
   return sc;
@@ -246,13 +246,13 @@ BuildConditionFromGroup (group * g, int op)
     {
       for (i = 22; i > 18; i--)
       {
-	low[i] = cur->val[22 - i];
-	high[i] = cur->val[22 - i];
-	if (cur->val[22 - i] < 0)
-	{
-	  low[i] = 0;
-	  high[i] = FW->FWForest->GetMaxVal (i);
-	}
+   low[i] = cur->val[22 - i];
+   high[i] = cur->val[22 - i];
+   if (cur->val[22 - i] < 0)
+   {
+     low[i] = 0;
+     high[i] = FW->FWForest->GetMaxVal (i);
+   }
       }
       // If it's a destination address group, copy them into
       // positions
@@ -262,13 +262,13 @@ BuildConditionFromGroup (group * g, int op)
     {
       for (i = 18; i > 14; i--)
       {
-	low[i] = cur->val[18 - i];
-	high[i] = cur->val[18 - i];
-	if (cur->val[18 - i] < 0)
-	{
-	  low[i] = 0;
-	  high[i] = FW->FWForest->GetMaxVal (i);
-	}
+   low[i] = cur->val[18 - i];
+   high[i] = cur->val[18 - i];
+   if (cur->val[18 - i] < 0)
+   {
+     low[i] = 0;
+     high[i] = FW->FWForest->GetMaxVal (i);
+   }
       }
     }
     // 1 means in the query, 0 means not in the query.
@@ -329,8 +329,8 @@ BuildConditionFromService (service * s, int op)
     {
       if (cur->val >= 0)
       {
-	high[13] = low[13] = cur->val / 256;
-	high[12] = low[12] = cur->val % 256;
+   high[13] = low[13] = cur->val / 256;
+   high[12] = low[12] = cur->val % 256;
       }
     }
     else
@@ -339,8 +339,8 @@ BuildConditionFromService (service * s, int op)
       // and store it in positions 8 and 9.
       if (cur->val >= 0)
       {
-	high[11] = low[11] = cur->val / 256;
-	high[10] = low[10] = cur->val % 256;
+   high[11] = low[11] = cur->val / 256;
+   high[10] = low[10] = cur->val % 256;
       }
     }
     // If it's a "BOTH" query, use UDP(1) and TCP(2)
@@ -455,12 +455,12 @@ BuildConditionFromIface(char* name, int in_out){
       case 0:
       low[9] = high[9] = topology->FindInterface(name);
       if (low[9] < 0)
-	      printf("Warning: Could not find input interface: %s\n", name);
+         printf("Warning: Could not find input interface: %s\n", name);
       break;
       case 1:
       low[8] = high[8] = topology->FindInterface(name);
       if (low[8] < 0)
-	      printf("Warning: Could not find output interface: %s\n", name);
+         printf("Warning: Could not find output interface: %s\n", name);
       break;
    }
    // 1 means in the query, 0 means not in the query.
@@ -502,22 +502,22 @@ BuildConditionFromFlag (int flag)
   // Set the appropriate value to 1.
   switch (flag)
   {
-  case 0:			// FIN
+  case 0:         // FIN
     low[6] = high[6] = 1;
     break;
-  case 1:			// SYN
+  case 1:         // SYN
     low[5] = high[5] = 1;
     break;
-  case 2:			// RST
+  case 2:         // RST
     low[4] = high[4] = 1;
     break;
-  case 3:			// PSH
+  case 3:         // PSH
     low[3] = high[3] = 1;
     break;
-  case 4:			// ACK
+  case 4:         // ACK
     low[2] = high[2] = 1;
     break;
-  case 5:			// URG
+  case 5:         // URG
     low[1] = high[1] = 1;
     break;
   default:
@@ -809,7 +809,7 @@ DoCleanup ()
 query* 
 PrintClasses(){
    FW->PrintClasses(); //Nodes at level 19.
-	return NULL;
+   return NULL;
 }
 
 void

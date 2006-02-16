@@ -36,7 +36,7 @@ Williamsburg, VA 23185
 
 int
 fw_fddl_forest::QueryIntersect (mdd_handle root, mdd_handle root2,
-				mdd_handle & result)
+            mdd_handle & result)
 {
   if (root.index < 0)
     return INVALID_MDD;
@@ -58,7 +58,7 @@ fw_fddl_forest::QueryIntersect (mdd_handle root, mdd_handle root2,
 }
 int
 fw_fddl_forest::JoinClasses(mdd_handle root, mdd_handle root2,
-				mdd_handle & result,int& OutNumClasses)
+            mdd_handle & result,int& OutNumClasses)
 {
   int numClasses;
   OutNumClasses = 0;
@@ -155,7 +155,7 @@ fw_fddl_forest::NETMAP (mdd_handle root, nat_tuple * pnr, mdd_handle & result)
 
 node_idx
   fw_fddl_forest::InternalSNAT (level k, node_idx p, node_idx q,
-				nat_tuple * pnr)
+            nat_tuple * pnr)
 {
   //Node p is the original address.
   //Node q is the NATTed address.
@@ -168,7 +168,7 @@ node_idx
   int qsize;
 
   if (k < 12)
-  {				//If we're beyond the source port
+  {            //If we're beyond the source port
     //return the node pointed to by the NATted address.
     result = CheckIn (k, q);
     return result;
@@ -184,35 +184,35 @@ node_idx
   nodeR = &FDDL_NODE (k, result);
 
   if (k >= 19 || k < 14)
-  {				//If it's a source address node
+  {            //If it's a source address node
     if (p != 0)
-    {				//And it's not zero.
+    {            //And it's not zero.
       nodeP = &FDDL_NODE (k, p);
       for (int i = 0; i < pnr->low[k]; i++)
-      {				//For arcs before the range, copy P.
-	node_idx pchild;
+      {            //For arcs before the range, copy P.
+   node_idx pchild;
 
-	if (i < nodeP->size)
-	  pchild = FDDL_ARC (k, nodeP, i);
-	else
-	  pchild = 0;
-	SetArc (k, result, i, pchild);
+   if (i < nodeP->size)
+     pchild = FDDL_ARC (k, nodeP, i);
+   else
+     pchild = 0;
+   SetArc (k, result, i, pchild);
       }
 
       for (int i = pnr->high[k] + 1; i <= maxVals[k]; i++)
-      {				//For arcs after the range, copy P.
-	node_idx pchild;
+      {            //For arcs after the range, copy P.
+   node_idx pchild;
 
-	if (i < nodeP->size)
-	  pchild = FDDL_ARC (k, nodeP, i);
-	else
-	  pchild = 0;
-	SetArc (k, result, i, pchild);
+   if (i < nodeP->size)
+     pchild = FDDL_ARC (k, nodeP, i);
+   else
+     pchild = 0;
+   SetArc (k, result, i, pchild);
       }
     }
 
     for (int i = pnr->low[k]; i <= pnr->high[k]; i++)
-    {				//Addresses in the range, NAT.
+    {            //Addresses in the range, NAT.
       nat_range *cur;
 
       cur = pnr->nat;
@@ -220,42 +220,42 @@ node_idx
       node_idx qchild;
 
       if (p == 0)
-	pchild = 0;
+   pchild = 0;
       else
       {
-	nodeP = &FDDL_NODE (k, p);
-	if (i < nodeP->size)
-	  pchild = FDDL_ARC (k, nodeP, i);
-	else
-	  pchild = 0;
+   nodeP = &FDDL_NODE (k, p);
+   if (i < nodeP->size)
+     pchild = FDDL_ARC (k, nodeP, i);
+   else
+     pchild = 0;
       }
 
       node_idx rchild;
 
       if (i < nodeR->size)
-	rchild = FDDL_ARC (k, nodeR, i);
+   rchild = FDDL_ARC (k, nodeR, i);
       else
-	rchild = 0;
+   rchild = 0;
 
       while (cur != NULL)
-      {				//Need a while loop, because NAT rules can load balance.
-	nodeQ = &FDDL_NODE (k, q);
-	for (int j = cur->low[k]; j <= cur->high[k]; j++)
-	{
-	  if (j < nodeQ->size)
-	    qchild = FDDL_ARC (k, nodeQ, j);
-	  else
-	    qchild = 0;
-	  u = InternalMax (k - 1, rchild,
-			   InternalSNAT (k - 1, pchild, qchild, pnr));
-	  SetArc (k, result, i, u);
-	}
-	cur = cur->next;
+      {            //Need a while loop, because NAT rules can load balance.
+   nodeQ = &FDDL_NODE (k, q);
+   for (int j = cur->low[k]; j <= cur->high[k]; j++)
+   {
+     if (j < nodeQ->size)
+       qchild = FDDL_ARC (k, nodeQ, j);
+     else
+       qchild = 0;
+     u = InternalMax (k - 1, rchild,
+            InternalSNAT (k - 1, pchild, qchild, pnr));
+     SetArc (k, result, i, u);
+   }
+   cur = cur->next;
       }
     }
   }
   else
-  {				//Otherwise, just recurse.
+  {            //Otherwise, just recurse.
     node_idx pchild;
     node_idx qchild;
 
@@ -264,13 +264,13 @@ node_idx
     for (arc_idx i = 0; i <= maxVals[k]; i++)
     {
       if (i < nodeP->size)
-	pchild = FDDL_ARC (k, nodeP, i);
+   pchild = FDDL_ARC (k, nodeP, i);
       else
-	pchild = 0;
+   pchild = 0;
       if (i < nodeQ->size)
-	qchild = FDDL_ARC (k, nodeQ, i);
+   qchild = FDDL_ARC (k, nodeQ, i);
       else
-	qchild = 0;
+   qchild = 0;
       u = InternalSNAT (k - 1, pchild, qchild, pnr);
       SetArc (k, result, i, u);
     }
@@ -282,7 +282,7 @@ node_idx
 
 node_idx
   fw_fddl_forest::InternalDNAT (level k, node_idx p, node_idx q,
-				nat_tuple * pnr)
+            nat_tuple * pnr)
 {
   //Node p is the original address.
   //Node q is the NATTed address.
@@ -295,7 +295,7 @@ node_idx
   int qsize;
 
   if (k < 10)
-  {				//If we're beyond the destination and port
+  {            //If we're beyond the destination and port
     //return the node pointed to by the NATted address.
     result = CheckIn (k, q);
     return result;
@@ -314,7 +314,7 @@ node_idx
   {
     assert (p == q);
 
-    if (q == 0)			//If no address to NAT to, return 0.
+    if (q == 0)         //If no address to NAT to, return 0.
       return 0;
 
     nodeQ = &FDDL_NODE (k, q);
@@ -326,9 +326,9 @@ node_idx
       node_idx rnode;
 
       if (i < nodeQ->size)
-	child = FDDL_ARC (k, nodeQ, i);
+   child = FDDL_ARC (k, nodeQ, i);
       else
-	child = 0;
+   child = 0;
       rnode = InternalDNAT (k - 1, child, child, pnr);
       SetArc (k, result, i, rnode);
     }
@@ -340,23 +340,23 @@ node_idx
       nodeP = &FDDL_NODE (k, p);
       for (int i = 0; i < pnr->low[k]; i++)
       {
-	node_idx pchild;
+   node_idx pchild;
 
-	if (i < nodeP->size)
-	  pchild = FDDL_ARC (k, nodeP, i);
-	else
-	  pchild = 0;
-	SetArc (k, result, i, pchild);
+   if (i < nodeP->size)
+     pchild = FDDL_ARC (k, nodeP, i);
+   else
+     pchild = 0;
+   SetArc (k, result, i, pchild);
       }
       for (int i = pnr->high[k] + 1; i <= maxVals[k]; i++)
       {
-	node_idx pchild;
+   node_idx pchild;
 
-	if (i < nodeP->size)
-	  pchild = FDDL_ARC (k, nodeP, i);
-	else
-	  pchild = 0;
-	SetArc (k, result, i, pchild);
+   if (i < nodeP->size)
+     pchild = FDDL_ARC (k, nodeP, i);
+   else
+     pchild = 0;
+   SetArc (k, result, i, pchild);
       }
     }
     for (int i = pnr->low[k]; i <= pnr->high[k]; i++)
@@ -368,37 +368,37 @@ node_idx
       node_idx qchild;
 
       if (p == 0)
-	pchild = 0;
+   pchild = 0;
       else
       {
-	nodeP = &FDDL_NODE (k, p);
-	if (i < nodeP->size)
-	  pchild = FDDL_ARC (k, nodeP, i);
-	else
-	  pchild = 0;
+   nodeP = &FDDL_NODE (k, p);
+   if (i < nodeP->size)
+     pchild = FDDL_ARC (k, nodeP, i);
+   else
+     pchild = 0;
       }
 
       node_idx rchild;
 
       if (i < nodeR->size)
-	rchild = FDDL_ARC (k, nodeR, i);
+   rchild = FDDL_ARC (k, nodeR, i);
       else
-	rchild = 0;
+   rchild = 0;
 
       while (cur != NULL)
       {
-	nodeQ = &FDDL_NODE (k, q);
-	for (int j = cur->low[k]; j <= cur->high[k]; j++)
-	{
-	  if (j < nodeQ->size)
-	    qchild = FDDL_ARC (k, nodeQ, j);
-	  else
-	    qchild = 0;
-	  u = InternalMax (k - 1, rchild,
-			   InternalDNAT (k - 1, pchild, qchild, pnr));
-	  SetArc (k, result, i, u);
-	}
-	cur = cur->next;
+   nodeQ = &FDDL_NODE (k, q);
+   for (int j = cur->low[k]; j <= cur->high[k]; j++)
+   {
+     if (j < nodeQ->size)
+       qchild = FDDL_ARC (k, nodeQ, j);
+     else
+       qchild = 0;
+     u = InternalMax (k - 1, rchild,
+            InternalDNAT (k - 1, pchild, qchild, pnr));
+     SetArc (k, result, i, u);
+   }
+   cur = cur->next;
       }
     }
   }
@@ -409,8 +409,8 @@ node_idx
 
 node_idx
   fw_fddl_forest::InternalNMAP (level k, node_idx p, node_idx q,
-				nat_tuple * pnr)
-{				//MODIFY!
+            nat_tuple * pnr)
+{            //MODIFY!
   //Node p is the original address.
   //Node q is the NATTed address.
 
@@ -423,7 +423,7 @@ node_idx
   int qsize;
 
   if (k < 10)
-  {				//If we're beyond the destination and port
+  {            //If we're beyond the destination and port
     //return the node pointed to by the NATted address.
     result = CheckIn (k, q);
     return result;
@@ -442,7 +442,7 @@ node_idx
   {
     assert (p == q);
 
-    if (q == 0)			//If no address to NAT to, return 0.
+    if (q == 0)         //If no address to NAT to, return 0.
       return 0;
 
     nodeQ = &FDDL_NODE (k, q);
@@ -454,9 +454,9 @@ node_idx
       node_idx rnode;
 
       if (i < nodeQ->size)
-	child = FDDL_ARC (k, nodeQ, i);
+   child = FDDL_ARC (k, nodeQ, i);
       else
-	child = 0;
+   child = 0;
       rnode = InternalNMAP (k - 1, child, child, pnr);
       SetArc (k, result, i, rnode);
     }
@@ -468,23 +468,23 @@ node_idx
       nodeP = &FDDL_NODE (k, p);
       for (int i = 0; i < pnr->low[k]; i++)
       {
-	node_idx pchild;
+   node_idx pchild;
 
-	if (i < nodeP->size)
-	  pchild = FDDL_ARC (k, nodeP, i);
-	else
-	  pchild = 0;
-	SetArc (k, result, i, pchild);
+   if (i < nodeP->size)
+     pchild = FDDL_ARC (k, nodeP, i);
+   else
+     pchild = 0;
+   SetArc (k, result, i, pchild);
       }
       for (int i = pnr->high[k] + 1; i <= maxVals[k]; i++)
       {
-	node_idx pchild;
+   node_idx pchild;
 
-	if (i < nodeP->size)
-	  pchild = FDDL_ARC (k, nodeP, i);
-	else
-	  pchild = 0;
-	SetArc (k, result, i, pchild);
+   if (i < nodeP->size)
+     pchild = FDDL_ARC (k, nodeP, i);
+   else
+     pchild = 0;
+   SetArc (k, result, i, pchild);
       }
     }
     for (int i = pnr->low[k]; i <= pnr->high[k]; i++)
@@ -496,37 +496,37 @@ node_idx
       node_idx qchild;
 
       if (p == 0)
-	pchild = 0;
+   pchild = 0;
       else
       {
-	nodeP = &FDDL_NODE (k, p);
-	if (i < nodeP->size)
-	  pchild = FDDL_ARC (k, nodeP, i);
-	else
-	  pchild = 0;
+   nodeP = &FDDL_NODE (k, p);
+   if (i < nodeP->size)
+     pchild = FDDL_ARC (k, nodeP, i);
+   else
+     pchild = 0;
       }
 
       node_idx rchild;
 
       if (i < nodeR->size)
-	rchild = FDDL_ARC (k, nodeR, i);
+   rchild = FDDL_ARC (k, nodeR, i);
       else
-	rchild = 0;
+   rchild = 0;
 
       while (cur != NULL)
       {
-	nodeQ = &FDDL_NODE (k, q);
-	for (int j = cur->low[k]; j <= cur->high[k]; j++)
-	{
-	  if (j < nodeQ->size)
-	    qchild = FDDL_ARC (k, nodeQ, j);
-	  else
-	    qchild = 0;
-	  u = InternalMax (k - 1, rchild,
-			   InternalNMAP (k - 1, pchild, qchild, pnr));
-	  SetArc (k, result, i, u);
-	}
-	cur = cur->next;
+   nodeQ = &FDDL_NODE (k, q);
+   for (int j = cur->low[k]; j <= cur->high[k]; j++)
+   {
+     if (j < nodeQ->size)
+       qchild = FDDL_ARC (k, nodeQ, j);
+     else
+       qchild = 0;
+     u = InternalMax (k - 1, rchild,
+            InternalNMAP (k - 1, pchild, qchild, pnr));
+     SetArc (k, result, i, u);
+   }
+   cur = cur->next;
       }
     }
   }
@@ -546,15 +546,15 @@ node_idx fw_fddl_forest::InternalQIntersect (level k, node_idx p, node_idx q)
   arc_idx * qtemp;
 
   if (p == 0)
-    return 0;			//If it's not accepted
+    return 0;         //If it's not accepted
   if (q == 0)
-    return 0;			//Or not relevant to the query
+    return 0;         //Or not relevant to the query
   if (k == 0)
   {
     if (q == 2)
-      return 1;			//If it's a log rule return 1.
+      return 1;         //If it's a log rule return 1.
     if (p == 3 && q == 1)
-    {				//If it's relevant and accepted.
+    {            //If it's relevant and accepted.
       return 1;
     }
     return 0;
@@ -568,7 +568,7 @@ node_idx fw_fddl_forest::InternalQIntersect (level k, node_idx p, node_idx q)
   nodeQ = &FDDL_NODE (k, q);
 
   if (IS_SPARSE (nodeP))
-  {				//If node <k.p> is stored sparsely, unpack it into a static array of appropriate size
+  {            //If node <k.p> is stored sparsely, unpack it into a static array of appropriate size
     psize = UnpackNode (k, p, ptemp);
   }
   else
@@ -580,7 +580,7 @@ node_idx fw_fddl_forest::InternalQIntersect (level k, node_idx p, node_idx q)
       ptemp[i] = FULL_ARC (k, nodeP, i);
   }
   if (IS_SPARSE (nodeQ))
-  {				//If node <k.q> is stored sparsely, unpack it into a static array of appropriate size
+  {            //If node <k.q> is stored sparsely, unpack it into a static array of appropriate size
     qsize = UnpackNode (k, q, qtemp);
   }
   else
@@ -594,7 +594,7 @@ node_idx fw_fddl_forest::InternalQIntersect (level k, node_idx p, node_idx q)
   for (i = 0; i <= maxVals[k]; i++)
   {
     u = InternalQIntersect (k - 1, i < psize ? ptemp[i] : 0,
-			    i < qsize ? qtemp[i] : 0);
+             i < qsize ? qtemp[i] : 0);
     SetArc (k, result, i, u);
   }
   delete[]qtemp;
@@ -634,13 +634,13 @@ int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest* forest,
 
 node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest* forest, level k, node_idx p, int& numClasses){
    node_idx r;
-	
+   
    r = BuildCache[k]->Hit(k,p);
    if (r>=0)
       return r;
-	
-	if (p==0){
-		numClasses++;
+   
+   if (p==0){
+      numClasses++;
       return numClasses-1;
    }
    
@@ -662,50 +662,50 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest* forest, level k, nod
 }
 
 node_idx fw_fddl_forest::InternalJoinClasses(level k, node_idx p, node_idx q, int& numClasses){
-	node_idx r;
-	node* nodeP;
-	node* nodeQ;
-	
-	if (p==0 && q == 0) return 0;
+   node_idx r;
+   node* nodeP;
+   node* nodeQ;
+   
+   if (p==0 && q == 0) return 0;
 
    r = JoinCache[k]->Hit(p,q);
-	if (r >=0 ) return r;
-	
+   if (r >=0 ) return r;
+   
    if (k==0){
       numClasses++;
       JoinCache[k]->Add(p,q,numClasses-1);
-		return numClasses-1;
-	}
+      return numClasses-1;
+   }
 
    r =  NewNode(k);
-	
+   
    if (p==0){
       nodeQ = &FDDL_NODE(k,q);
-		for (arc_idx i=0;i<nodeQ->size;i++){
+      for (arc_idx i=0;i<nodeQ->size;i++){
          SetArc(k,r,i, InternalJoinClasses(k-1,0,FDDL_ARC(k,nodeQ,i),numClasses));
-		}
-		r = CheckIn(k,r);
-		JoinCache[k]->Add(p,q,r);
-		return r;
-	}
+      }
+      r = CheckIn(k,r);
+      JoinCache[k]->Add(p,q,r);
+      return r;
+   }
 
-	if (q==0){
+   if (q==0){
       nodeP = &FDDL_NODE(k,p);
-		for (arc_idx i=0;i<nodeP->size;i++){
+      for (arc_idx i=0;i<nodeP->size;i++){
          SetArc(k,r,i, InternalJoinClasses(k-1,FDDL_ARC(k,nodeP,i),0, numClasses));
-		}
-		r = CheckIn(k,r);
-		JoinCache[k]->Add(p,q,r);
-		return r;
-	}
+      }
+      r = CheckIn(k,r);
+      JoinCache[k]->Add(p,q,r);
+      return r;
+   }
    nodeP = &FDDL_NODE(k,p);
    nodeQ = &FDDL_NODE(k,q);
-	for (arc_idx i=0;i<=maxVals[k];i++){
+   for (arc_idx i=0;i<=maxVals[k];i++){
       SetArc(k,r,i,InternalJoinClasses(k-1, i<nodeP->size ? FDDL_ARC(k,nodeP,i) : 0, i<nodeQ->size ? FDDL_ARC(k,nodeQ, i) : 0,numClasses)); 
-	}
-	r = CheckIn(k,r);
+   }
+   r = CheckIn(k,r);
    JoinCache[k]->Add(p,q,r);
-	return r;
+   return r;
 }
 
 int fw_fddl_forest::PrintClasses(mdd_handle p, int numClasses){
@@ -716,8 +716,24 @@ int fw_fddl_forest::PrintClasses(mdd_handle p, int numClasses){
   low = new int[5];
   high = new int[5];
   for (int i=0;i<numClasses;i++){
-	  printf("Class %d: \n", i);
+     printf("Class %d: \n", i);
      InternalPrintClasses(K, p.index,low,high, i);
+  }
+  delete [] low;
+  delete [] high;
+  return SUCCESS;
+}
+
+int fw_fddl_forest::GetClasses(mdd_handle p, group**& output, int numClasses){
+  int* low;
+  int* high;
+  if (p.index < 0)
+    return INVALID_MDD;
+  low = new int[5];
+  high = new int[5];
+  output = new group*[numClasses];
+  for (int i=0;i<numClasses;i++){
+     output[i] = InternalGetClasses(K, p.index,low,high, i, output, NULL);
   }
   delete [] low;
   delete [] high;
@@ -728,44 +744,91 @@ void fw_fddl_forest::InternalPrintClasses(level k, node_idx p, int* low, int* hi
    if (p==0){
       if (p==classNum){
          printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", 
-								 k<4 ? low[4] : 0, k<4 ? high[4] : 255,
-								 k<3 ? low[3] : 0, k<3 ? low[3] : 255,
-								 k<2 ? low[2] : 0, k<2 ? low[2] : 255,
-								 k<1 ? low[1] : 0, k<1 ? low[1] : 255);
-		}
-		return;
-	}
+                         k<4 ? low[4] : 0, k<4 ? high[4] : 255,
+                         k<3 ? low[3] : 0, k<3 ? low[3] : 255,
+                         k<2 ? low[2] : 0, k<2 ? low[2] : 255,
+                         k<1 ? low[1] : 0, k<1 ? low[1] : 255);
+      }
+      return;
+   }
    if (k==0){
       if (p == classNum){
          printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", low[4],high[4], low[3], high[3], low[2],high[2],low[1],high[1]);
-		}
-		return;
-	}
+      }
+      return;
+   }
 
-	int lastVal;
-	int needToPrint;
+   int lastVal;
+   int needToPrint;
 
-	node* nodeP;
-	nodeP = &FDDL_NODE(k,p);
+   node* nodeP;
+   nodeP = &FDDL_NODE(k,p);
    low[k] = 0;
    high[k] = 0;
 
-	needToPrint = 0;
+   needToPrint = 0;
    lastVal = FDDL_ARC(k,nodeP,0);
 
-	for (int i=0;i<nodeP->size;i++){
-		 if (lastVal == FDDL_ARC(k,nodeP,i)){
+   for (int i=0;i<nodeP->size;i++){
+       if (lastVal == FDDL_ARC(k,nodeP,i)){
           high[k] = i;
-			 needToPrint = 1;
-		 }
-		 else{
+          needToPrint = 1;
+       }
+       else{
           InternalPrintClasses(k-1, lastVal, low, high, classNum);
-			 low[k] = i;
-			 high[k] = i;
-			 lastVal = FDDL_ARC(k,nodeP,i);
-			 needToPrint = 0;
-		 }
-	}
-	if (needToPrint == 1)
-   	InternalPrintClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum);
+          low[k] = i;
+          high[k] = i;
+          lastVal = FDDL_ARC(k,nodeP,i);
+          needToPrint = 0;
+       }
+   }
+   if (needToPrint == 1)
+      InternalPrintClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum);
 }
+
+group* fw_fddl_forest::InternalGetClasses(level k, node_idx p, int* low, int* high, int classNum, group* head){
+   if (p==0){
+      if (p==classNum){
+         printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", 
+                         k<4 ? low[4] : 0, k<4 ? high[4] : 255,
+                         k<3 ? low[3] : 0, k<3 ? low[3] : 255,
+                         k<2 ? low[2] : 0, k<2 ? low[2] : 255,
+                         k<1 ? low[1] : 0, k<1 ? low[1] : 255);
+      }
+      return;
+   }
+   if (k==0){
+      if (p == classNum){
+         printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", low[4],high[4], low[3], high[3], low[2],high[2],low[1],high[1]);
+      }
+      return;
+   }
+
+   int lastVal;
+   int needToPrint;
+
+   node* nodeP;
+   nodeP = &FDDL_NODE(k,p);
+   low[k] = 0;
+   high[k] = 0;
+
+   needToPrint = 0;
+   lastVal = FDDL_ARC(k,nodeP,0);
+
+   for (int i=0;i<nodeP->size;i++){
+       if (lastVal == FDDL_ARC(k,nodeP,i)){
+          high[k] = i;
+          needToPrint = 1;
+       }
+       else{
+          InternalPrintClasses(k-1, lastVal, low, high, classNum);
+          low[k] = i;
+          high[k] = i;
+          lastVal = FDDL_ARC(k,nodeP,i);
+          needToPrint = 0;
+       }
+   }
+   if (needToPrint == 1)
+      InternalPrintClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum);
+}
+

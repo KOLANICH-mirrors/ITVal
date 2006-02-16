@@ -40,13 +40,13 @@ Williamsburg, VA 23185
 class chain
 {
 public:
-  char name[256];		//Name of the chain
-  char fname[256];		//For debugging, name of the file.
-  int Default;			//Default policy of the chain.
+  char name[256];      //Name of the chain
+  char fname[256];      //For debugging, name of the file.
+  int Default;         //Default policy of the chain.
 
-  rule *rules;			//List of original, unprocessed, rules
-  processed_rule *newRules;	//List of intermediate, expanded, rules
-  rule_tuple *tup;		//List of tuples
+  rule *rules;         //List of original, unprocessed, rules
+  processed_rule *newRules;   //List of intermediate, expanded, rules
+  rule_tuple *tup;      //List of tuples
 
     chain ()
   {

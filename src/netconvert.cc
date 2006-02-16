@@ -34,7 +34,7 @@
 
 void
 create_range (unsigned int *addy, unsigned int mask, address_range * ar,
-	      int invert)
+         int invert)
 {
   unsigned int low;
   unsigned int high;
@@ -101,7 +101,7 @@ create_range (unsigned int *addy, unsigned int mask, address_range * ar,
 void
 ConvertARange (char *range, address_range * ar)
 {
-  int invert;			// Should we negate the address?
+  int invert;         // Should we negate the address?
 
   // The elements of the IP address
   char bytes[4][256];
@@ -151,7 +151,7 @@ ConvertARange (char *range, address_range * ar)
       ch++;
     }
     (bytes[num])[ch - start] = '\0';
-    if (*ch == '.')		// Advance past a dot
+    if (*ch == '.')      // Advance past a dot
       ch++;
 
     // Convert the element string to an integer
@@ -164,7 +164,7 @@ ConvertARange (char *range, address_range * ar)
 
   if (*ch == '/')
   {
-    ch++;			// Advance past '/'
+    ch++;         // Advance past '/'
     start = ch;
     while (ch - range < length && *ch != ' ')
     {
