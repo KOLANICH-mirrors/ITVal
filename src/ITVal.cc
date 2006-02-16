@@ -44,9 +44,6 @@ typedef struct filename_node{
    filename_node* next;
 }filename_node;
 
-/* Create a META-Firewall from all the independent firewalls.*/
-Firewall *MergeFWs (fw_fddl_forest * FWForest, Firewall ** fws, int num_fws);
-
 /* Free group and service declarations, plus MDDs. */
 void DoCleanup ();
 
@@ -220,78 +217,4 @@ main (int argc, char **argv)
   delete FWForest;
 
   return 0;
-}
-
-/* Create a Meta-Firewall */
-/* Need to do something about Topologies, here. */
-Firewall *
-MergeFWs (fw_fddl_forest * FWForest, Firewall ** fws, int n)
-{
-  Firewall *f;
-  int prerouting, postrouting;
-
-  int i;
-
-  if (n == 0)
-    return NULL;
-
-  f = new Firewall (FWForest);
-
-  prerouting = fws[0]->FindNATChain ("Prerouting");
-  postrouting = fws[0]->FindNATChain ("Postrouting");
-
-  if (prerouting >= 0)
-  {
-    fws[0]->NATChains (postrouting, fws[0]->Forward, f->Forward,
-		       f->ForwardLog);
-    fws[0]->NATChains (postrouting, fws[0]->Input, f->Input, f->InputLog);
-    fws[0]->NATChains (postrouting, fws[n - 1]->Output, f->Output,
-		       f->OutputLog);
-  }
-  else
-  {
-    FWForest->Attach (f->Forward, fws[0]->Forward.index);
-    FWForest->Attach (f->ForwardLog, fws[0]->ForwardLog.index);
-
-    FWForest->Attach (f->Input, fws[0]->Input.index);
-    FWForest->Attach (f->InputLog, fws[0]->InputLog.index);
-
-    FWForest->Attach (f->Output, fws[n - 1]->Output.index);
-    FWForest->Attach (f->OutputLog, fws[n - 1]->OutputLog.index);
-  }
-
-  for (i = 1; i < n; i++)
-  {
-    FWForest->Min (f->Forward, fws[i]->Forward, f->Forward);
-    FWForest->Min (f->Input, fws[i]->Forward, f->Forward);
-    FWForest->Min (f->Output, fws[(n - 1) - i]->Forward, f->Forward);
-
-    prerouting = fws[i]->FindNATChain ("Prerouting");
-    postrouting = fws[i - 1]->FindNATChain ("Postrouting");
-
-    /* SNAT the chains (and postrouting NETMAP them) */
-    if (postrouting >= 0)
-    {
-      fws[i]->NATChains (postrouting, f->Forward, f->Forward, f->ForwardLog);
-      fws[i]->NATChains (postrouting, f->Input, f->Input, f->InputLog);
-    }
-    /* DNAT the chains and (Prerouting NETMAP them) */
-    if (prerouting >= 0)
-    {
-      fws[i]->NATChains (prerouting, f->Forward, f->Forward, f->ForwardLog);
-      fws[i]->NATChains (prerouting, f->Input, f->Input, f->InputLog);
-    }
-
-    prerouting = fws[(n - 1) - i]->FindNATChain ("Prerouting");
-    postrouting = fws[n - i]->FindNATChain ("Postrouting");
-    if (postrouting >= 0)
-    {
-      fws[n - i]->NATChains (postrouting, f->Output, f->Output, f->OutputLog);
-    }
-    if (prerouting >= 0)
-    {
-      fws[n - i]->NATChains (prerouting, f->Output, f->Output, f->OutputLog);
-    }
-  }
-  return f;
 }

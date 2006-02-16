@@ -135,3 +135,6 @@ public:
   }
 	int PrintClasses();
 };
+
+/* Create a META-Firewall from all the independent firewalls.*/
+Firewall *MergeFWs (fw_fddl_forest * FWForest, Firewall ** fws, int num_fws);
