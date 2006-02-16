@@ -160,6 +160,7 @@ query *PerformQuery (int s, condition * c, int input_chain);
 
 //Compute Host Equivalence Classes and print them.
 query* PrintClasses();
+group* GetClasses();
 
 //Add address "newAddy" to the linked list "list".
 address *AppendAddy (address * list, address * newAddy);

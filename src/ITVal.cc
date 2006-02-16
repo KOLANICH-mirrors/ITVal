@@ -215,6 +215,5 @@ main (int argc, char **argv)
      delete top;
   delete metaFirewall;
   delete FWForest;
-
   return 0;
 }

@@ -114,7 +114,7 @@ Firewall::BuildFWRules (char *fname)
   ruleFile = fopen (fname, "r");
   if (!ruleFile)
   {
-    perror ("ITVal");
+    perror ("ITVal: Opening Filter Rules");
     exit (errno);
   }
 
@@ -344,7 +344,7 @@ Firewall::BuildVerboseFWRules (char *fname)
   ruleFile = fopen (fname, "r");
   if (!ruleFile)
   {
-    perror ("ITVal");
+    perror ("ITVal: Opening Filter Rules");
     exit (errno);
   }
 
@@ -568,7 +568,7 @@ Firewall::BuildNATRules (char *fname)
   natFile = fopen (fname, "r");
   if (!natFile)
   {
-    perror ("ITVal");
+    perror ("ITVal: Opening NAT rules");
     exit (errno);
   }
 
@@ -801,6 +801,9 @@ Firewall::FindChain (char *name)
      return -2;
 
   if (strncmp(name, "MASQUERADE",4)==0)
+     return -2;
+
+  if (strncmp(name, "QUEUE",4)==0)
      return -2;
 
   if (strncmp(name, "REDIRECT",4)==0)

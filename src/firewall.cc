@@ -171,15 +171,15 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
 
 int Firewall::PrintClasses(){
    mdd_handle FWSourceClass;
-	mdd_handle INSourceClass;
-	mdd_handle OUTSourceClass;
-   mdd_handle FWDestClass;
-	mdd_handle INDestClass;
-	mdd_handle OUTDestClass;
+   mdd_handle INSourceClass;
+   mdd_handle OUTSourceClass;
    
-	mdd_handle newChain;
+   mdd_handle FWDestClass;
+   mdd_handle INDestClass;
+   mdd_handle OUTDestClass;
 
-	mdd_handle resultClass;
+   mdd_handle newChain;
+   mdd_handle resultClass;
 
    int numClasses = 0;
 
@@ -252,6 +252,52 @@ int Firewall::PrintClasses(){
 	printf("There are %d total host classes:\n",numClasses);
 	ClassForest->PrintClasses(resultClass, numClasses);
 	
+}
+
+group* Firewall::GetClasses(){
+   mdd_handle FWSourceClass;
+   mdd_handle INSourceClass;
+   mdd_handle OUTSourceClass;
+   
+   mdd_handle FWDestClass;
+   mdd_handle INDestClass;
+   mdd_handle OUTDestClass;
+
+   mdd_handle newChain;
+   mdd_handle resultClass;
+
+   int numClasses = 0;
+
+   FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses);
+   FWForest->BuildClassMDD(Input, ClassForest, INSourceClass, numClasses);
+   FWForest->BuildClassMDD(Output, ClassForest, OUTSourceClass, numClasses);
+   
+   //Shift Destination Addresses to Top.
+   FWForest->Shift(Forward,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+
+   FWForest->BuildClassMDD(newChain, ClassForest, FWDestClass, numClasses);
+   FWForest->Shift(Input,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->BuildClassMDD(newChain, ClassForest, INDestClass, numClasses);
+   FWForest->Shift(Output,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->Shift(newChain,15,newChain);
+   FWForest->BuildClassMDD(newChain, ClassForest, OUTDestClass, numClasses);
+   ClassForest->JoinClasses(FWSourceClass,INSourceClass, resultClass,numClasses);
+   ClassForest->JoinClasses(resultClass,OUTSourceClass, resultClass, numClasses);
+   ClassForest->JoinClasses(resultClass,FWDestClass, resultClass,numClasses);
+   ClassForest->JoinClasses(resultClass,INDestClass, resultClass,numClasses);
+   ClassForest->JoinClasses(resultClass,OUTDestClass, resultClass,numClasses);
+
+   //printf("There are %d total host classes:\n",numClasses);
+   //ClassForest->PrintClasses(resultClass, numClasses);
+   return ClassForest->GetClasses(resultClass, numClasses);
 }
 
 /* Create a Meta-Firewall */

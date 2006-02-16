@@ -133,7 +133,8 @@ public:
       FWForest->DestroyMDD (Forward);
       FWForest->DestroyMDD (ForwardLog);
   }
-	int PrintClasses();
+   int PrintClasses();
+   group* getClasses();
 };
 
 /* Create a META-Firewall from all the independent firewalls.*/
