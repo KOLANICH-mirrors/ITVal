@@ -67,12 +67,14 @@ class PyList{
 };
 
 class PythonPipe{
+      char* inName;
+      char* outName;
       FILE* inFile;
       FILE* outFile;
    public:
       int OpenPipe();
       int ClosePipe();
-      int ReadList(PyList* l);
+      int ReadList(PyList*& l);
       int WriteList(PyList* l);
       char* ReadString();
       int WriteString(char* str);

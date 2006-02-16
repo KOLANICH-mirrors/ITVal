@@ -179,7 +179,7 @@ target_alias =
 INCLUDES = -I $(top_builddir) -I $(top_srcdir)
 lib_LTLIBRARIES = libFDDL.la 
 libFDDL_la_SOURCES = mdd.cc api.cc caches.cc uniquetable.cc
-pkginclude_HEADERS = mdd.h mddtypes.h caches.h dynarray.h portset.h uniquetable.h
+pkginclude_HEADERS = mdd.h mddtypes.h caches.h dynarray.h portset.h uniquetable.h structures.h
 all: all-am
 
 .SUFFIXES:

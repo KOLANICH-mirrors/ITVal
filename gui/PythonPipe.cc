@@ -6,8 +6,6 @@
 
 int PythonPipe::OpenPipe(){
    pid_t myPid;
-   char* inName;
-   char* outName;
    char prefix[5];
 
    //Create two FIFO queues with unique names that start with "ITV"
@@ -59,24 +57,34 @@ int PythonPipe::OpenPipe(){
 int PythonPipe::ClosePipe(){
    fclose(inFile);
    fclose(outFile);
+   unlink(inName);
+   unlink(outName);
 }
 
-int PythonPipe::ReadList(PyList* l){
+int PythonPipe::ReadList(PyList*& l){
    PyList::node* cur;
    char* input;
+   int size;
+   
    l = new PyList();
+   size = 0;
+   
    input = ReadString();
    if (strncmp(input, "BeginList", 9))
       return -1;
+
    delete[] input;
    input = ReadString();
    while (strncmp(input, "EndList", 7)){
       cur = new PyList::node();
       cur->str = input;
       input = ReadString();
+      cur->next = l->head;
+      l->head = cur;
+      size++;
    }
    delete[] input;
-   return 1;
+   return size;
 }
 
 int PythonPipe::WriteList(PyList* l){
@@ -104,8 +112,13 @@ int PythonPipe::WriteList(PyList* l){
 
 char* PythonPipe::ReadString(){
    char* line;
+   int length;
    line = new char[256];
    fgets(line, 256, inFile);
+   length = strlen(line);
+   if (length == 0)
+      return NULL;
+   line[length-1]='\0';
    return line;
 }
 

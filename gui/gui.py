@@ -71,6 +71,10 @@ def getClasses():
    if str != "Send NAT Names":
       print 'Error: unexpected reply to Get Classes\n'
    WriteList(list.nats)
+   str = ReadString()
+   if str != "Send Topology Names":
+      print 'Error: unexpected reply to Get Classes\n'
+   WriteList(list.tops)
 
 def closeWindow():
    global top
