@@ -152,7 +152,6 @@ char* PythonPipe::ReadString(){
 }
 
 int PythonPipe::WriteString(char* str){
-   printf("Sending: %s\n", str);
    fprintf(outFile, "%s", str);
    fflush(outFile);
 }

@@ -102,26 +102,19 @@ def getClasses():
       return None
 
    name = ReadString() # Read Name
-   print name, '\n'
-   print '---------------------\n'
    while name != "End Classes":
       myClasses[name] = []
       str = ReadString()
       if str != "Begin Addresses":
          print 'Error: unexpected reply to Get Classes at Begin Addresses\n'
       addy = ReadString()
-      print addy,'\n'
 
       while addy != 'End Addresses':
          myClasses[name] += [addy]
          addy = ReadString()
-         print addy,'\n'
 
       name = ReadString() # Read Name
       
-      print name, '\n'
-      print '---------------------\n'
-
    return myClasses
 
 def showClasses():

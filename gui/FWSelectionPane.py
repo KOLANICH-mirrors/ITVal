@@ -28,7 +28,7 @@ class FWSelectionPane:
       self.frame3 = Tkinter.Frame(self.top)
       self.frame4 = Tkinter.Frame(self.top)
 
-      filterLabel = Tkinter.Label(self.frame1, text='Filter File:')
+      filterLabel = Tkinter.Label(self.frame1, text='  Filter File:')
       filterLabel.pack(side=Tkinter.LEFT)
       self.filterEntry = Tkinter.Entry(self.frame1)
       self.filterEntry.pack(side=Tkinter.LEFT)
@@ -36,7 +36,7 @@ class FWSelectionPane:
       filterBrowse.pack(side=Tkinter.LEFT)
       self.frame1.pack(side=Tkinter.TOP)
       
-      NATLabel = Tkinter.Label(self.frame2, text='NAT File:')
+      NATLabel = Tkinter.Label(self.frame2, text='     NAT File:')
       NATLabel.pack(side=Tkinter.LEFT)
       self.NATEntry = Tkinter.Entry(self.frame2)
       self.NATEntry.pack(side=Tkinter.LEFT)

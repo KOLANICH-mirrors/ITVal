@@ -783,7 +783,7 @@ int fw_fddl_forest::GetClasses(mdd_handle p, group**& output, int numClasses){
      low = new int[5];
      high = new int[5];
      InternalGetClasses(K, p.index,low,high, i, output[i]);
-     InternalPrintClasses(K, p.index,low,high, i);
+     //InternalPrintClasses(K, p.index,low,high, i);
      delete [] low;
      delete [] high;
   }
@@ -791,9 +791,7 @@ int fw_fddl_forest::GetClasses(mdd_handle p, group**& output, int numClasses){
 }
 
 void fw_fddl_forest::InternalGetClasses(level k, node_idx p, int* low, int* high, int classNum, group* head){
-   printf("%d: <%d, %d>\n", classNum, k, p);
    if (p==0 || k==0){
-      printf("Add: %d: <%d, %d>\n", classNum, k, p);
       if (p==classNum){
          address* newAddy;
          newAddy = new address();

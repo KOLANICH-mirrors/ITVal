@@ -38,8 +38,10 @@ class CloseUpWindow:
       self.listbox.config(yscrollcommand=self.scroll.set)
       self.scroll.config(command=self.listbox.yview)
       self.scroll.pack(side=Tkinter.LEFT, fill=Tkinter.Y)
-      for g in groups:
-         self.listbox.insert(Tkinter.END, processAddress(g))
+      newGroups = map(processAddress,groups)
+      newGroups.sort()
+      for g in newGroups:
+         self.listbox.insert(Tkinter.END, g)
 
 class EQClassDisplay:
    def __init__(self):
