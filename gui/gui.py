@@ -60,7 +60,8 @@ def WriteList(l):
 def addFilter():
    global list
    results = FWSelectionPane.GetResults()
-   list.add(results)
+   if results != None:
+      list.add(results)
 
 def getClasses():
    global list

@@ -1,6 +1,6 @@
 import Tkinter
 import tkFileDialog
-
+import tkFont
 
 class FWSelectionPane:
    def SetResults(self):
@@ -27,8 +27,10 @@ class FWSelectionPane:
       self.frame2 = Tkinter.Frame(self.top)
       self.frame3 = Tkinter.Frame(self.top)
       self.frame4 = Tkinter.Frame(self.top)
+      f = tkFont.Font()
+      f.config(family='fixed', weight=tkFont.BOLD)
 
-      filterLabel = Tkinter.Label(self.frame1, text='  Filter File:')
+      filterLabel = Tkinter.Label(self.frame1, text='  Filter File:', font=f)
       filterLabel.pack(side=Tkinter.LEFT)
       self.filterEntry = Tkinter.Entry(self.frame1)
       self.filterEntry.pack(side=Tkinter.LEFT)
@@ -36,7 +38,7 @@ class FWSelectionPane:
       filterBrowse.pack(side=Tkinter.LEFT)
       self.frame1.pack(side=Tkinter.TOP)
       
-      NATLabel = Tkinter.Label(self.frame2, text='     NAT File:')
+      NATLabel = Tkinter.Label(self.frame2, text='     NAT File:', font=f)
       NATLabel.pack(side=Tkinter.LEFT)
       self.NATEntry = Tkinter.Entry(self.frame2)
       self.NATEntry.pack(side=Tkinter.LEFT)
@@ -44,7 +46,7 @@ class FWSelectionPane:
       NATBrowse.pack(side=Tkinter.LEFT)
       self.frame2.pack(side=Tkinter.TOP)
       
-      TopLabel = Tkinter.Label(self.frame3, text='Topology File:')
+      TopLabel = Tkinter.Label(self.frame3, text='Topology File:', font=f)
       TopLabel.pack(side=Tkinter.LEFT)
       self.TopEntry = Tkinter.Entry(self.frame3)
       self.TopEntry.pack(side=Tkinter.LEFT)

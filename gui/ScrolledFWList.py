@@ -36,6 +36,8 @@ class ScrolledFWList:
          i = i + 1
 
    def add(self, tup):
+      if len(tup) < 3:
+         return
       (filter, NAT, Top) = tup
       self.filters += [filter]
       self.nats += [NAT]
