@@ -8,7 +8,7 @@ def processAddress(a):
    newStr = ""
    pieces = a.split('.')
    for piece in pieces:
-      if piece=="0-255":
+      if piece=="0-255" or piece=="0-65535":
          newStr += '*'
       else:
          ranges = piece.split('-')
@@ -27,9 +27,30 @@ def processAddress(a):
    
    return newStr
    
+def processPort(a):
+   newStr = ""
+   pieces = a.split('/')
+   
+   if pieces[0]=="0-65535":
+      newStr += '*'
+   else:
+      ranges = pieces[0].split('-')
+      if len(ranges) == 1 or ranges[0] == ranges[1]:
+         newStr += ranges[0] + pieces[1]
+      else:
+         newStr += ranges[0] + '-' + ranges[1] + pieces[1]
+
+   if newStr.find('-') == -1 and newStr.find('*') == -1:
+      try:
+         newStr = socket.getservbyport(newStr + '/' + pieces[1])[0]
+      except:
+         pass
+   
+   return newStr
+   
 
 class CloseUpWindow:
-   def __init__(self,name, groups):
+   def __init__(self,name, groups, serviceFlag):
       self.top = Tkinter.Toplevel()
       self.top.title(name)
       self.listbox = Tkinter.Listbox(self.top)
@@ -38,13 +59,19 @@ class CloseUpWindow:
       self.listbox.config(yscrollcommand=self.scroll.set)
       self.scroll.config(command=self.listbox.yview)
       self.scroll.pack(side=Tkinter.LEFT, fill=Tkinter.Y)
-      newGroups = map(processAddress,groups)
-      newGroups.sort()
+      newGroups = [] 
+      if serviceFlag == 1:
+         newGroups = map(processPort,groups)
+         newGroups.sort()
+      else:
+         newGroups = map(processAddress,groups)
+         newGroups.sort()
       for g in newGroups:
          self.listbox.insert(Tkinter.END, g)
 
 class EQClassDisplay:
    def __init__(self):
+      self.serviceFlag = 0
       self.groups = {}
       self.colors = [(0,127,0), (20,14,135), (255,255,255)]
       self.top = Tkinter.Toplevel()
@@ -62,7 +89,7 @@ class EQClassDisplay:
       tagList = self.canvas.gettags(ob)
       for g in tagList:
          if self.groups.has_key(g):
-            win = CloseUpWindow(g, self.groups[g])
+            win = CloseUpWindow(g, self.groups[g],self.serviceFlag)
 
    def ReverseColor(self, i):
       c = self.colors[i]
@@ -137,4 +164,15 @@ class EQClassDisplay:
          i = i + 1
    
    def AddGroup(self,name, addys):
-      self.groups[name] = addys
+      newAddys = []
+      for a in addys:
+         if a.find('/both') != -1:
+            pieces = a.split('/')
+            newAddys += [pieces[0] + '/tcp']
+            newAddys += [pieces[0] + '/udp']
+         else:
+            newAddys += [a]
+      self.groups[name] = newAddys
+
+   def SetServices(self):
+      self.serviceFlag = 1

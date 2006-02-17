@@ -16,9 +16,21 @@ char* Addy2Text(address* g){
 
 char* Port2Text(port* p){
    char* name;
-  
    name = new char[256];
-   sprintf(name, "%d-%d\n", p->low, p->high);
+
+   if (p->protocol == 0){
+      sprintf(name, "%d-%d/icmp\n", p->low, p->high);
+   }
+   else if (p->protocol == 1){
+      sprintf(name, "%d-%d/udp\n", p->low, p->high);
+   }
+   else if (p->protocol == 2){
+      sprintf(name, "%d-%d/tcp\n", p->low, p->high);
+   }
+   else{
+      sprintf(name, "%d-%d/both\n", p->low, p->high);
+   }
+  
    return name;
 }
 

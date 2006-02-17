@@ -38,7 +38,7 @@ Firewall::Firewall (fw_fddl_forest * F)
   }
   ClassForest = new fw_fddl_forest(5,ranges);
   ClassForest->ToggleSparsity(false);
-  ServiceClassForest = new fw_fddl_forest(3,ranges);
+  ServiceClassForest = new fw_fddl_forest(4,ranges);
   ServiceClassForest->ToggleSparsity(false);
   natHead = NULL;
 };
@@ -103,7 +103,7 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
   BuildChains (output_chain, Output, OutputLog);
   ClassForest = new fw_fddl_forest(5,ranges);
   ClassForest->ToggleSparsity(false);
-  ServiceClassForest = new fw_fddl_forest(3,ranges);
+  ServiceClassForest = new fw_fddl_forest(4,ranges);
   ServiceClassForest->ToggleSparsity(false);
   natHead = NULL;
 }
@@ -336,24 +336,38 @@ int Firewall::GetServiceClasses(service**& classes, int& numClasses){
 
    numClasses = 0;
 
+   FWForest->Shift(Forward,12,newChain);  //Grab source port byte 2
+   FWForest->Shift(newChain,12,newChain); //Grab source port byte 1
+   FWForest->Shift(newChain,12,newChain); //Grab protocol
    FWForest->BuildClassMDD(Forward, ServiceClassForest, FWSourceClass, numClasses,1);
+   
+   FWForest->Shift(Input,12,newChain);  //Grab source port byte 2
+   FWForest->Shift(newChain,12,newChain); //Grab source port byte 1
+   FWForest->Shift(newChain,12,newChain); //Grab protocol
    FWForest->BuildClassMDD(Input, ServiceClassForest, INSourceClass, numClasses,1);
+   
+   FWForest->Shift(Output,12,newChain);  //Grab destination port byte 2
+   FWForest->Shift(newChain,12,newChain); //Grab destination port byte 1
+   FWForest->Shift(newChain,12,newChain); //Grab protocol
    FWForest->BuildClassMDD(Output, ServiceClassForest, OUTSourceClass, numClasses,1);
    
-   //Shift Destination Addresses to Top.
-   FWForest->Shift(Forward,10,newChain);
-   FWForest->Shift(newChain,10,newChain);
+   //Shift Destination Port to Top.
+   FWForest->Shift(Forward,10,newChain);  //Grab destination port byte 2
+   FWForest->Shift(newChain,10,newChain); //Grab destination port byte 1
+   FWForest->Shift(newChain,12,newChain); //Grab protocol
    FWForest->BuildClassMDD(newChain, ServiceClassForest, FWDestClass, numClasses,1);
    
    FWForest->Shift(Input,10,newChain);
    FWForest->Shift(newChain,10,newChain);
+   FWForest->Shift(newChain,12,newChain);
    FWForest->BuildClassMDD(newChain, ServiceClassForest, INDestClass, numClasses,1);
    
    FWForest->Shift(Output,10,newChain);
    FWForest->Shift(newChain,10,newChain);
+   FWForest->Shift(newChain,12,newChain);
    FWForest->BuildClassMDD(newChain, ServiceClassForest, OUTDestClass, numClasses,1);
    
-//   for (level k=4;k>0;k--)
+//   for (level k=3;k>0;k--)
 //      ClassForest->Compact(k);
 //   printf("There are %d total service classes:\n",numClasses);
 //   ClassForest->PrintMDD();
@@ -374,7 +388,7 @@ int Firewall::GetServiceClasses(service**& classes, int& numClasses){
    ServiceClassForest->JoinClasses(resultClass,OUTDestClass, resultClass,numClasses);
    ServiceClassForest->DestroyMDD(OUTDestClass);
 
-//   for (level k=4;k>0;k--)
+//   for (level k=3;k>0;k--)
 //      ClassForest->Compact(k);
 //   printf("There are %d total service classes:\n",numClasses);
 //   ClassForest->PrintMDD();

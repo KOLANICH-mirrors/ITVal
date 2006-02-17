@@ -137,6 +137,7 @@ def showServiceClasses():
       tkMessageBox.askokcancel(message='File not found or no file specified.')
       return
    win = classes.EQClassDisplay()
+   win.SetServices()
    for t in eqClasses.keys():
       win.AddGroup(t, eqClasses[t])
    win.DrawGroups()

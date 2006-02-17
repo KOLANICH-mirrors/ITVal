@@ -641,7 +641,7 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest* forest, level k, nod
       newK = k-18;
 
    if (services==1)
-      newK = k-20;
+      newK = k-19;
    
    r = BuildCache[k]->Hit(k,p);
    if (r>=0)
@@ -852,8 +852,8 @@ int fw_fddl_forest::GetServiceClasses(mdd_handle p, service**& output, int numCl
   for (int i=0;i<numClasses;i++){
      output[i] = new service();
      sprintf(output[i]->name, "Class%d", i);
-     low = new int[3];
-     high = new int[3];
+     low = new int[4];
+     high = new int[4];
      InternalGetServiceClasses(K, p.index,low,high, i, output[i]);
      delete [] low;
      delete [] high;
@@ -882,6 +882,14 @@ void fw_fddl_forest::InternalGetServiceClasses(level k, node_idx p, int* low, in
          else{
             newPort->high += (256*255);
          }
+
+         if (k<=2){
+            if (low[3] != high[3])
+              newPort->protocol = -1;
+            else
+               newPort->protocol = high[3];
+         } 
+         
          newPort->next = head->list;
          head->list = newPort;
          return;
