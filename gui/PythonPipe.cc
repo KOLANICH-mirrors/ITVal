@@ -14,6 +14,14 @@ char* Addy2Text(address* g){
    return name;
 }
 
+char* Port2Text(port* p){
+   char* name;
+  
+   name = new char[256];
+   sprintf(name, "%d-%d\n", p->low, p->high);
+   return name;
+}
+
 int PythonPipe::OpenPipe(){
    pid_t myPid;
    char prefix[5];
@@ -109,6 +117,23 @@ int PythonPipe::WriteClasses(group** classes, int num_classes){
       cur = classes[i]->list;
       while (cur != NULL){
          WriteString(Addy2Text(cur));
+         cur = cur->next;
+      }
+      WriteString("End Addresses\n");
+   }
+   WriteString("End Classes\n");
+}
+
+int PythonPipe::WriteServiceClasses(service** classes, int num_classes){
+   port* cur;
+   WriteString("Begin Classes\n");
+   for (int i=0;i<num_classes;i++){
+      WriteString(classes[i]->name);
+      WriteString("\n");
+      WriteString("Begin Addresses\n");
+      cur = classes[i]->list;
+      while (cur != NULL){
+         WriteString(Port2Text(cur));
          cur = cur->next;
       }
       WriteString("End Addresses\n");

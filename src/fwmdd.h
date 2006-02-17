@@ -116,8 +116,8 @@ public:
   int NETMAP (mdd_handle p, nat_tuple * pnr, mdd_handle & result);
   node_idx InternalNMAP (level k, node_idx p, node_idx q, nat_tuple * pnr);
 
-  int BuildClassMDD(mdd_handle p, fddl_forest* forest, mdd_handle& r, int& numClasses);
-  int InternalBuildClassMDD(fddl_forest* forest, level k, node_idx p, int& numClasses);
+  int BuildClassMDD(mdd_handle p, fddl_forest* forest, mdd_handle& r, int& numClasses,int services);
+  int InternalBuildClassMDD(fddl_forest* forest, level k, node_idx p, int& numClasses, int services);
 
   int JoinClasses(mdd_handle p, mdd_handle q, mdd_handle& r, int& outNumClasses);  
   node_idx InternalJoinClasses(level k, node_idx p, node_idx q, int& numClasses);  
@@ -127,6 +127,9 @@ public:
   
   int GetClasses(mdd_handle p, group**& output, int numClasses);
   void InternalGetClasses(level k, node_idx p, int* low, int* high, int classNum, group* head);
+  
+  int GetServiceClasses(mdd_handle p, service**& output, int numClasses);
+  void InternalGetServiceClasses(level k, node_idx p, int* low, int* high, int classNum, service* head);
 };
 
 #endif

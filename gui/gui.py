@@ -63,7 +63,7 @@ def addFilter():
    if results != None:
       list.add(results)
 
-def getClasses():
+def getClasses(services):
    global list
    myClasses = {}
    if len(list.filters) == 0:
@@ -73,7 +73,10 @@ def getClasses():
    if len(list.tops) == 0:
       return None
 
-   WriteString("Get Classes\n")
+   if services==0:
+      WriteString("Get Classes\n")
+   else:
+      WriteString("Get Service Classes\n")
    str = ReadString()
    if str != "Send Filter Names":
       print 'Error: unexpected reply to Get Classes at Send Filter\n'
@@ -119,7 +122,7 @@ def getClasses():
    return myClasses
 
 def showClasses():
-   eqClasses = getClasses()
+   eqClasses = getClasses(0)
    if eqClasses == None:
       tkMessageBox.askokcancel(message='File not found or no file specified.')
       return
@@ -127,7 +130,16 @@ def showClasses():
    for t in eqClasses.keys():
       win.AddGroup(t, eqClasses[t])
    win.DrawGroups()
- 
+
+def showServiceClasses():
+   eqClasses = getClasses(1)
+   if eqClasses == None:
+      tkMessageBox.askokcancel(message='File not found or no file specified.')
+      return
+   win = classes.EQClassDisplay()
+   for t in eqClasses.keys():
+      win.AddGroup(t, eqClasses[t])
+   win.DrawGroups()
 
 def closeWindow():
    global top
@@ -154,6 +166,7 @@ def SetupScreen():
    topMenu.add_cascade(label = "File", underline = 0, menu=fileMenu)
    fileMenu.add_command(label='Add Firewall', underline = 0, command = addFilter)
    fileMenu.add_command(label='Generate Classes', underline = 0, command = showClasses)
+   fileMenu.add_command(label='Generate Service Classes', underline = 0, command = showServiceClasses)
    fileMenu.add_command(label='Quit', underline = 0, command = closeWindow)
    list = ScrolledFWList.ScrolledFWList(top)
    list.pack()

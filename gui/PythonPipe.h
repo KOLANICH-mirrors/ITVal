@@ -77,6 +77,7 @@ class PythonPipe{
       int ClosePipe();
       int ReadList(PyList*& l);
       int WriteList(PyList* l);
+      int WriteServiceClasses(service** classes, int numClasses);
       int WriteClasses(group** classes, int numClasses);
       char* ReadString();
       int WriteString(char* str);

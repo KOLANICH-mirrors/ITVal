@@ -56,6 +56,7 @@ fw_fddl_forest::QueryIntersect (mdd_handle root, mdd_handle root2,
   }
   return 0;
 }
+
 int
 fw_fddl_forest::JoinClasses(mdd_handle root, mdd_handle root2,
             mdd_handle & result,int& OutNumClasses)
@@ -605,7 +606,7 @@ node_idx fw_fddl_forest::InternalQIntersect (level k, node_idx p, node_idx q)
 }
 
 int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest* forest,
-     mdd_handle& r, int& numClasses){
+     mdd_handle& r, int& numClasses, int services){
 
    int *low;
    int *high;
@@ -623,7 +624,7 @@ int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest* forest,
    }
   
    numClasses = 0;
-   newresult = InternalBuildClassMDD(forest, K, p.index, numClasses);
+   newresult = InternalBuildClassMDD(forest, K, p.index, numClasses, services);
    if (r.index != newresult)
    {
       forest->ReallocHandle(r);
@@ -632,8 +633,15 @@ int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest* forest,
    return SUCCESS;
 }
 
-node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest* forest, level k, node_idx p, int& numClasses){
+node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest* forest, level k, node_idx p, int& numClasses, int services){
    node_idx r;
+   level newK;
+  
+   if (services==0)
+      newK = k-18;
+
+   if (services==1)
+      newK = k-20;
    
    r = BuildCache[k]->Hit(k,p);
    if (r>=0)
@@ -644,19 +652,19 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest* forest, level k, nod
       return numClasses-1;
    }
    
-   if (k-18 == 0){
+   if (newK == 0){
       BuildCache[k]->Add(k,p, numClasses);
       numClasses++;
       return numClasses-1;
    }
 
-   r = forest->NewNode(k-18);
+   r = forest->NewNode(newK);
    node* nodeP;
    nodeP = &FDDL_NODE(k,p);
    for (arc_idx i=0;i<nodeP->size;i++){
-      forest->SetArc(k-18,r, i, InternalBuildClassMDD(forest, k-1, FDDL_ARC(k,nodeP, i), numClasses));
+      forest->SetArc(newK,r, i, InternalBuildClassMDD(forest, k-1, FDDL_ARC(k,nodeP, i), numClasses, services));
    }
-   r = forest->CheckIn(k-18, r);
+   r = forest->CheckIn(newK, r);
    BuildCache[k]->Add(k,p,r);
    return r;
 }
@@ -783,7 +791,6 @@ int fw_fddl_forest::GetClasses(mdd_handle p, group**& output, int numClasses){
      low = new int[5];
      high = new int[5];
      InternalGetClasses(K, p.index,low,high, i, output[i]);
-     //InternalPrintClasses(K, p.index,low,high, i);
      delete [] low;
      delete [] high;
   }
@@ -834,5 +841,81 @@ void fw_fddl_forest::InternalGetClasses(level k, node_idx p, int* low, int* high
    }
 //   if (needToPrint == 1)
        InternalGetClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum, head);
+}
+
+int fw_fddl_forest::GetServiceClasses(mdd_handle p, service**& output, int numClasses){
+  int* low;
+  int* high;
+  if (p.index < 0)
+    return INVALID_MDD;
+  output = new service*[numClasses];
+  for (int i=0;i<numClasses;i++){
+     output[i] = new service();
+     sprintf(output[i]->name, "Class%d", i);
+     low = new int[3];
+     high = new int[3];
+     InternalGetServiceClasses(K, p.index,low,high, i, output[i]);
+     delete [] low;
+     delete [] high;
+  }
+  return SUCCESS;
+}
+
+void fw_fddl_forest::InternalGetServiceClasses(level k, node_idx p, int* low, int* high, int classNum, service* head){
+   if (p==0 || k==0){
+      if (p==classNum){
+         port* newPort;
+         newPort = new port();
+         if (k<=0){
+            newPort->low = low[1];
+            newPort->high = high[1];
+         }
+         else{
+            newPort->low = 0;
+            newPort->high = 255;
+         }
+
+         if (k<=1){
+            newPort->low += (256*low[2]);
+            newPort->high += (256*high[2]);
+         }
+         else{
+            newPort->high += (256*255);
+         }
+         newPort->next = head->list;
+         head->list = newPort;
+         return;
+      }
+      else
+         return;
+   }
+
+
+   int lastVal;
+//   int needToPrint;
+
+   node* nodeP;
+   nodeP = &FDDL_NODE(k,p);
+   low[k] = 0;
+   high[k] = 0;
+
+//   needToPrint = 0;
+   lastVal = FDDL_ARC(k,nodeP,0);
+
+   for (int i=0;i<nodeP->size;i++){
+       if (lastVal == FDDL_ARC(k,nodeP,i)){
+          high[k] = i;
+//          needToPrint = 1;
+       }
+       else{
+          InternalGetServiceClasses(k-1, lastVal, low, high, classNum, head);
+          low[k] = i;
+          high[k] = i;
+          lastVal = FDDL_ARC(k,nodeP,i);
+//          needToPrint = 0;
+       }
+   }
+//   if (needToPrint == 1)
+       InternalGetServiceClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum, head);
 }
 

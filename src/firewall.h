@@ -100,6 +100,7 @@ class Firewall
 public:
   fw_fddl_forest * FWForest;
   fw_fddl_forest * ClassForest;
+  fw_fddl_forest * ServiceClassForest;
   mdd_handle Input;
   mdd_handle InputLog;
   mdd_handle Output;
@@ -141,9 +142,11 @@ public:
       FWForest->DestroyMDD (ForwardLog);
 
       delete ClassForest;
+      delete ServiceClassForest;
   }
    int PrintClasses();
    int GetClasses(group**& Classes, int& numClasses);
+   int GetServiceClasses(service**& Classes, int& numClasses);
 };
 
 /* Create a META-Firewall from all the independent firewalls.*/

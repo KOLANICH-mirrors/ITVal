@@ -38,6 +38,8 @@ Firewall::Firewall (fw_fddl_forest * F)
   }
   ClassForest = new fw_fddl_forest(5,ranges);
   ClassForest->ToggleSparsity(false);
+  ServiceClassForest = new fw_fddl_forest(3,ranges);
+  ServiceClassForest->ToggleSparsity(false);
   natHead = NULL;
 };
 
@@ -101,6 +103,8 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
   BuildChains (output_chain, Output, OutputLog);
   ClassForest = new fw_fddl_forest(5,ranges);
   ClassForest->ToggleSparsity(false);
+  ServiceClassForest = new fw_fddl_forest(3,ranges);
+  ServiceClassForest->ToggleSparsity(false);
   natHead = NULL;
 }
 
@@ -169,6 +173,8 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
 #endif
   ClassForest = new fw_fddl_forest(5,ranges);
   ClassForest->ToggleSparsity(false);
+  ServiceClassForest = new fw_fddl_forest(3,ranges);
+  ServiceClassForest->ToggleSparsity(false);
   natHead = NULL;
 }
 
@@ -187,16 +193,16 @@ int Firewall::PrintClasses(){
    int numClasses = 0;
 
    //FWForest->PrintMDD();
-   FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses);
+   FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses,0);
 //   printf("There are %d Forward Source classes:\n", numClasses);
    //ClassForest->PrintMDD();
    
 //   ClassForest->PrintClasses(FWSourceClass, numClasses);
-   FWForest->BuildClassMDD(Input, ClassForest, INSourceClass, numClasses);
+   FWForest->BuildClassMDD(Input, ClassForest, INSourceClass, numClasses,0);
 //   printf("There are %d Input Source classes:\n", numClasses);
    //ClassForest->PrintMDD();
 //   ClassForest->PrintClasses(INSourceClass, numClasses);
-   FWForest->BuildClassMDD(Output, ClassForest, OUTSourceClass, numClasses);
+   FWForest->BuildClassMDD(Output, ClassForest, OUTSourceClass, numClasses,0);
 //   printf("There are %d Output Source classes:\n", numClasses);
    //ClassForest->PrintMDD();
 //   ClassForest->PrintClasses(OUTSourceClass, numClasses);
@@ -211,7 +217,7 @@ int Firewall::PrintClasses(){
 //   FWForest->Shift(newChain,17,newChain);
 //   FWForest->Shift(newChain,18,newChain);
 
-   FWForest->BuildClassMDD(newChain, ClassForest, FWDestClass, numClasses);
+   FWForest->BuildClassMDD(newChain, ClassForest, FWDestClass, numClasses,0);
 //   printf("There are %d Forward Destination classes:\n", numClasses);
 //   ClassForest->PrintClasses(FWDestClass, numClasses);
 
@@ -224,7 +230,7 @@ int Firewall::PrintClasses(){
    FWForest->Shift(newChain,15,newChain);
    FWForest->Shift(newChain,15,newChain);
    FWForest->Shift(newChain,15,newChain);
-   FWForest->BuildClassMDD(newChain, ClassForest, INDestClass, numClasses);
+   FWForest->BuildClassMDD(newChain, ClassForest, INDestClass, numClasses,0);
 //   printf("There are %d Input Destination classes:\n", numClasses);
 //   ClassForest->PrintMDD();
 //   ClassForest->PrintClasses(INDestClass, numClasses);
@@ -236,7 +242,7 @@ int Firewall::PrintClasses(){
 //   FWForest->Shift(newChain,16,newChain);
 //   FWForest->Shift(newChain,17,newChain);
 //   FWForest->Shift(newChain,18,newChain);
-   FWForest->BuildClassMDD(newChain, ClassForest, OUTDestClass, numClasses);
+   FWForest->BuildClassMDD(newChain, ClassForest, OUTDestClass, numClasses,0);
 //   printf("There are %d Output Destination classes:\n", numClasses);
    //ClassForest->PrintMDD();
 //   ClassForest->PrintClasses(OUTDestClass, numClasses);
@@ -270,9 +276,9 @@ int Firewall::GetClasses(group**& classes, int& numClasses){
 
    numClasses = 0;
 
-   FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses);
-   FWForest->BuildClassMDD(Input, ClassForest, INSourceClass, numClasses);
-   FWForest->BuildClassMDD(Output, ClassForest, OUTSourceClass, numClasses);
+   FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses,0);
+   FWForest->BuildClassMDD(Input, ClassForest, INSourceClass, numClasses,0);
+   FWForest->BuildClassMDD(Output, ClassForest, OUTSourceClass, numClasses,0);
    
    //Shift Destination Addresses to Top.
    FWForest->Shift(Forward,15,newChain);
@@ -280,17 +286,17 @@ int Firewall::GetClasses(group**& classes, int& numClasses){
    FWForest->Shift(newChain,15,newChain);
    FWForest->Shift(newChain,15,newChain);
 
-   FWForest->BuildClassMDD(newChain, ClassForest, FWDestClass, numClasses);
+   FWForest->BuildClassMDD(newChain, ClassForest, FWDestClass, numClasses,0);
    FWForest->Shift(Input,15,newChain);
    FWForest->Shift(newChain,15,newChain);
    FWForest->Shift(newChain,15,newChain);
    FWForest->Shift(newChain,15,newChain);
-   FWForest->BuildClassMDD(newChain, ClassForest, INDestClass, numClasses);
+   FWForest->BuildClassMDD(newChain, ClassForest, INDestClass, numClasses,0);
    FWForest->Shift(Output,15,newChain);
    FWForest->Shift(newChain,15,newChain);
    FWForest->Shift(newChain,15,newChain);
    FWForest->Shift(newChain,15,newChain);
-   FWForest->BuildClassMDD(newChain, ClassForest, OUTDestClass, numClasses);
+   FWForest->BuildClassMDD(newChain, ClassForest, OUTDestClass, numClasses,0);
 
    ClassForest->JoinClasses(FWSourceClass,INSourceClass, resultClass,numClasses);
    ClassForest->DestroyMDD(FWSourceClass);
@@ -306,11 +312,75 @@ int Firewall::GetClasses(group**& classes, int& numClasses){
 
    for (level k=4;k>0;k--)
       ClassForest->Compact(k);
-   printf("There are %d total host classes:\n",numClasses);
-   ClassForest->PrintMDD();
-   //ClassForest->PrintClasses(resultClass, numClasses);
+//   printf("There are %d total host classes:\n",numClasses);
+//   ClassForest->PrintMDD();
+//   ClassForest->PrintClasses(resultClass, numClasses);
+   
    classes = NULL;
    if (ClassForest->GetClasses(resultClass, classes, numClasses)  == SUCCESS)
+      return 1;
+   return 0;
+}
+
+int Firewall::GetServiceClasses(service**& classes, int& numClasses){
+   mdd_handle FWSourceClass;
+   mdd_handle INSourceClass;
+   mdd_handle OUTSourceClass;
+   
+   mdd_handle FWDestClass;
+   mdd_handle INDestClass;
+   mdd_handle OUTDestClass;
+
+   mdd_handle newChain;
+   mdd_handle resultClass;
+
+   numClasses = 0;
+
+   FWForest->BuildClassMDD(Forward, ServiceClassForest, FWSourceClass, numClasses,1);
+   FWForest->BuildClassMDD(Input, ServiceClassForest, INSourceClass, numClasses,1);
+   FWForest->BuildClassMDD(Output, ServiceClassForest, OUTSourceClass, numClasses,1);
+   
+   //Shift Destination Addresses to Top.
+   FWForest->Shift(Forward,10,newChain);
+   FWForest->Shift(newChain,10,newChain);
+   FWForest->BuildClassMDD(newChain, ServiceClassForest, FWDestClass, numClasses,1);
+   
+   FWForest->Shift(Input,10,newChain);
+   FWForest->Shift(newChain,10,newChain);
+   FWForest->BuildClassMDD(newChain, ServiceClassForest, INDestClass, numClasses,1);
+   
+   FWForest->Shift(Output,10,newChain);
+   FWForest->Shift(newChain,10,newChain);
+   FWForest->BuildClassMDD(newChain, ServiceClassForest, OUTDestClass, numClasses,1);
+   
+//   for (level k=4;k>0;k--)
+//      ClassForest->Compact(k);
+//   printf("There are %d total service classes:\n",numClasses);
+//   ClassForest->PrintMDD();
+
+   ServiceClassForest->JoinClasses(FWSourceClass,INSourceClass, resultClass,numClasses);
+   ServiceClassForest->DestroyMDD(FWSourceClass);
+   ServiceClassForest->DestroyMDD(INSourceClass);
+   
+   ServiceClassForest->JoinClasses(resultClass,OUTSourceClass, resultClass, numClasses);
+   ServiceClassForest->DestroyMDD(OUTSourceClass);
+
+   ServiceClassForest->JoinClasses(resultClass,FWDestClass, resultClass,numClasses);
+   ServiceClassForest->DestroyMDD(FWDestClass);
+   
+   ServiceClassForest->JoinClasses(resultClass,INDestClass, resultClass,numClasses);
+   ServiceClassForest->DestroyMDD(INDestClass);
+   
+   ServiceClassForest->JoinClasses(resultClass,OUTDestClass, resultClass,numClasses);
+   ServiceClassForest->DestroyMDD(OUTDestClass);
+
+//   for (level k=4;k>0;k--)
+//      ClassForest->Compact(k);
+//   printf("There are %d total service classes:\n",numClasses);
+//   ClassForest->PrintMDD();
+
+   classes = NULL;
+   if (ServiceClassForest->GetServiceClasses(resultClass, classes, numClasses)  == SUCCESS)
       return 1;
    return 0;
 }

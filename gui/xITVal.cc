@@ -93,6 +93,7 @@ int main ( void ){
    PythonPipe* pp = NULL;
    Firewall* fw; 
    group** Classes;
+   service** ServiceClasses;
    int numClasses;
    
    pp = new PythonPipe();
@@ -105,10 +106,21 @@ int main ( void ){
       if (cmd != NULL)
          delete[] cmd;
       cmd = pp->ReadString();
+      
       if (!strncmp(cmd, "Get Classes", 11)){
          if (BuildMetaFirewall(pp, fw) == 0){
             fw->GetClasses(Classes, numClasses);
             pp->WriteClasses(Classes, numClasses);
+         }
+         else{
+            pp->WriteString("Not Found\n");
+         }
+         delete fw;
+      }
+      else if (!strncmp(cmd, "Get Service Classes", 19)){
+         if (BuildMetaFirewall(pp, fw) == 0){
+            fw->GetServiceClasses(ServiceClasses, numClasses);
+            pp->WriteServiceClasses(ServiceClasses, numClasses);
          }
          else{
             pp->WriteString("Not Found\n");
