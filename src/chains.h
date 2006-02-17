@@ -103,7 +103,17 @@ public:
   nat_chain (char *fileName):chain (fileName)
   {
     natRules = NULL;
-}};
+  }
+  ~nat_chain(){
+     processed_nat_rule *cur_nrule;
+     cur_nrule = natRules;
+     while (natRules != NULL){
+        cur_nrule = natRules;
+        natRules = (processed_nat_rule *)natRules->next;
+        delete cur_nrule;
+     }
+  }
+};
 
 //Given the name of a chain, find its index in the chain array
 int FindNATChain (char *name);

@@ -203,105 +203,93 @@ int
 rule_parser::ReadRule (rule * newRule, char *line, size_t length)
 {
   char *ch;
+  char* end;
+
+  ch = line;
+  end = line + length*sizeof(char);
+
   if (line[0] == ' ' || line[0] == '\t')
   {
     newRule->target[0] = '\0';
   }
   else
   {
-    ch = line;
-    line = ch;
-    while ((unsigned) (ch - line) < length && (*ch != ' ' && *ch != '\t'))
+    while (ch < end && (*ch != ' ' && *ch != '\t'))
     {
       newRule->target[ch - line] = *ch;
       ch++;
     }
     newRule->target[ch - line] = '\0';
-    length -= (ch - line);
   }
   // Consume Whitespace
-  line = ch;
-  while ((unsigned) (ch - line) < length && (*ch == ' ' || *ch == '\t'))
+  while (ch < end && (*ch == ' ' || *ch == '\t'))
   {
     ch++;
   }
-  length -= (ch - line);
 
   // Read protocol field
   line = ch;
-  while ((unsigned) (ch - line) < length && (*ch != ' ' && *ch != '\t'))
+  while (ch < end && (*ch != ' ' && *ch != '\t'))
   {
     newRule->protocol[ch - line] = *ch;
     ch++;
   }
   newRule->protocol[ch - line] = '\0';
-  length -= (ch - line);
 
   // Consume Whitespace
-  line = ch;
-  while ((unsigned) (ch - line) < length && (*ch == ' ' || *ch == '\t'))
+  while (ch < end && (*ch == ' ' || *ch == '\t'))
   {
     ch++;
   }
-  length -= (ch - line);
 
   // Read opt field
   line = ch;
-  while ((unsigned) (ch - line) < length && (*ch != ' ' && *ch != '\t'))
+  while (ch < end && (*ch != ' ' && *ch != '\t'))
   {
     newRule->opt[ch - line] = *ch;
     ch++;
   }
   newRule->opt[ch - line] = '\0';
-  length -= (ch - line);
 
   // Consume Whitespace
-  line = ch;
-  while ((unsigned) (ch - line) < length && (*ch == ' ' || *ch == '\t'))
+  while (ch < end && (*ch == ' ' || *ch == '\t'))
   {
     ch++;
   }
-  length -= (ch - line);
 
   // Read source address/mask
   line = ch;
-  while ((unsigned) (ch - line) < length && (*ch != ' ' && *ch != '\t'))
+  while (ch < end && (*ch != ' ' && *ch != '\t'))
   {
     newRule->source[ch - line] = *ch;
     ch++;
   }
   newRule->source[ch - line] = '\0';
-  length -= (ch - line);
 
   // Consume Whitespace
-  line = ch;
-  while ((unsigned) (ch - line) < length && (*ch == ' ' || *ch == '\t'))
+  while (ch < end && (*ch == ' ' || *ch == '\t'))
   {
     ch++;
   }
-  length -= (ch - line);
 
   // Read dest address/mask
   line = ch;
-  while ((unsigned) (ch - line) < length && (*ch != ' ' && *ch != '\t'))
+  while (ch < end && (*ch != ' ' && *ch != '\t'))
   {
     newRule->dest[ch - line] = *ch;
     ch++;
   }
   newRule->dest[ch - line] = '\0';
-  length -= (ch - line);
 
   // Consume Whitespace
-  line = ch;
-  while ((unsigned) (ch - line) < length && (*ch == ' ' || *ch == '\t'))
+  while (ch < end && (*ch == ' ' || *ch == '\t'))
   {
     ch++;
   }
-  length -= (ch - line);
 
   // Read extra stuff at the end (ports, state, flags, etc.)
   line = ch;
-  while ((unsigned) (ch - line) < length + 1)
+  while (ch < end)
   {
     newRule->info[ch - line] = *ch;
     ch++;

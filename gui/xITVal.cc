@@ -70,6 +70,7 @@ int BuildMetaFirewall(PythonPipe* pp, Firewall*& mf){
       curFilter = curFilter->next;
       curNAT = curNAT->next;
       curTop = curTop->next;
+      delete top;
    }
    delete filters;
    delete nats;
@@ -84,12 +85,15 @@ int BuildMetaFirewall(PythonPipe* pp, Firewall*& mf){
       printf("No firewalls to merge!\n");
       return -2;
    }
+   return 0;
 }
 
 int main ( void ){
    char* cmd = NULL;
    PythonPipe* pp = NULL;
    Firewall* fw; 
+   group** Classes;
+   int numClasses;
    
    pp = new PythonPipe();
    
@@ -98,16 +102,24 @@ int main ( void ){
    }
 
    while (cmd == NULL || (strncmp(cmd, "QUIT", 4) != 0)){
+      if (cmd != NULL)
+         delete[] cmd;
       cmd = pp->ReadString();
-      printf("GotCommand: %s\n", cmd);
       if (!strncmp(cmd, "Get Classes", 11)){
-         BuildMetaFirewall(pp, fw);
-         fw->PrintClasses();
+         if (BuildMetaFirewall(pp, fw) == 0){
+            fw->GetClasses(Classes, numClasses);
+            pp->WriteClasses(Classes, numClasses);
+         }
+         else{
+            pp->WriteString("Not Found\n");
+         }
+         delete fw;
       }
    }
+   if (cmd != NULL)
+      delete[] cmd;
    
    pp->ClosePipe();
 
    delete pp;
-   delete[] cmd;
 }

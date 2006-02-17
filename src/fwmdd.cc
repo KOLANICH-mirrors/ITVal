@@ -76,7 +76,7 @@ fw_fddl_forest::JoinClasses(mdd_handle root, mdd_handle root2,
     JoinCache[k]->Clear ();
   }
   
-  numClasses = 1; // Class 0 is automatic.
+  numClasses = 1; // Class0 is automatic.
   newresult = InternalJoinClasses(K, root.index, root2.index, numClasses);
   if (result.index != newresult)
   {
@@ -716,7 +716,7 @@ int fw_fddl_forest::PrintClasses(mdd_handle p, int numClasses){
   low = new int[5];
   high = new int[5];
   for (int i=0;i<numClasses;i++){
-     printf("Class %d: \n", i);
+     printf("Class%d: \n", i);
      InternalPrintClasses(K, p.index,low,high, i);
   }
   delete [] low;
@@ -724,30 +724,15 @@ int fw_fddl_forest::PrintClasses(mdd_handle p, int numClasses){
   return SUCCESS;
 }
 
-int fw_fddl_forest::GetClasses(mdd_handle p, group**& output, int numClasses){
-  int* low;
-  int* high;
-  if (p.index < 0)
-    return INVALID_MDD;
-  low = new int[5];
-  high = new int[5];
-  output = new group*[numClasses];
-  for (int i=0;i<numClasses;i++){
-     output[i] = InternalGetClasses(K, p.index,low,high, i, output, NULL);
-  }
-  delete [] low;
-  delete [] high;
-  return SUCCESS;
-}
 
 void fw_fddl_forest::InternalPrintClasses(level k, node_idx p, int* low, int* high, int classNum){
    if (p==0){
       if (p==classNum){
          printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", 
                          k<4 ? low[4] : 0, k<4 ? high[4] : 255,
-                         k<3 ? low[3] : 0, k<3 ? low[3] : 255,
-                         k<2 ? low[2] : 0, k<2 ? low[2] : 255,
-                         k<1 ? low[1] : 0, k<1 ? low[1] : 255);
+                         k<3 ? low[3] : 0, k<3 ? high[3] : 255,
+                         k<2 ? low[2] : 0, k<2 ? high[2] : 255,
+                         k<1 ? low[1] : 0, k<1 ? high[1] : 255);
       }
       return;
    }
@@ -786,49 +771,70 @@ void fw_fddl_forest::InternalPrintClasses(level k, node_idx p, int* low, int* hi
       InternalPrintClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum);
 }
 
-group* fw_fddl_forest::InternalGetClasses(level k, node_idx p, int* low, int* high, int classNum, group* head){
-   if (p==0){
+int fw_fddl_forest::GetClasses(mdd_handle p, group**& output, int numClasses){
+  int* low;
+  int* high;
+  if (p.index < 0)
+    return INVALID_MDD;
+  output = new group*[numClasses];
+  for (int i=0;i<numClasses;i++){
+     output[i] = new group();
+     sprintf(output[i]->name, "Class%d", i);
+     low = new int[5];
+     high = new int[5];
+     InternalGetClasses(K, p.index,low,high, i, output[i]);
+     InternalPrintClasses(K, p.index,low,high, i);
+     delete [] low;
+     delete [] high;
+  }
+  return SUCCESS;
+}
+
+void fw_fddl_forest::InternalGetClasses(level k, node_idx p, int* low, int* high, int classNum, group* head){
+   printf("%d: <%d, %d>\n", classNum, k, p);
+   if (p==0 || k==0){
+      printf("Add: %d: <%d, %d>\n", classNum, k, p);
       if (p==classNum){
-         printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", 
-                         k<4 ? low[4] : 0, k<4 ? high[4] : 255,
-                         k<3 ? low[3] : 0, k<3 ? low[3] : 255,
-                         k<2 ? low[2] : 0, k<2 ? low[2] : 255,
-                         k<1 ? low[1] : 0, k<1 ? low[1] : 255);
+         address* newAddy;
+         newAddy = new address();
+         for (int i=0;i<4;i++){
+            newAddy->low[3-i] = k <= i ? low[i+1] : 0;
+            newAddy->high[3-i] = k <= i ? high[i+1] : 255;
+         }
+         newAddy->next = head->list;
+         head->list = newAddy;
+         return;
       }
-      return;
-   }
-   if (k==0){
-      if (p == classNum){
-         printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", low[4],high[4], low[3], high[3], low[2],high[2],low[1],high[1]);
-      }
-      return;
+      else
+         return;
    }
 
+
    int lastVal;
-   int needToPrint;
+//   int needToPrint;
 
    node* nodeP;
    nodeP = &FDDL_NODE(k,p);
    low[k] = 0;
    high[k] = 0;
 
-   needToPrint = 0;
+//   needToPrint = 0;
    lastVal = FDDL_ARC(k,nodeP,0);
 
    for (int i=0;i<nodeP->size;i++){
        if (lastVal == FDDL_ARC(k,nodeP,i)){
           high[k] = i;
-          needToPrint = 1;
+//          needToPrint = 1;
        }
        else{
-          InternalPrintClasses(k-1, lastVal, low, high, classNum);
+          InternalGetClasses(k-1, lastVal, low, high, classNum, head);
           low[k] = i;
           high[k] = i;
           lastVal = FDDL_ARC(k,nodeP,i);
-          needToPrint = 0;
+//          needToPrint = 0;
        }
    }
-   if (needToPrint == 1)
-      InternalPrintClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum);
+//   if (needToPrint == 1)
+       InternalGetClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum, head);
 }
 

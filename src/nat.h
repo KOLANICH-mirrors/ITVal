@@ -91,7 +91,16 @@ public:
   processed_nat_rule ():processed_rule ()
   {
     nat = NULL;
-}};
+  }
+  ~processed_nat_rule(){
+     while (nat != NULL){
+        nat_range* cur;
+        cur = nat;
+        nat = nat->next;
+        delete cur;
+     }
+  }
+};
 
 //A helper function for converting unprocessed rules
 //into processed_rules.

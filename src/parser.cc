@@ -98,7 +98,7 @@ BuildServiceFromPort (port * p)
 
   s = new service;
   s->list = p;
-  sprintf (tmp, "Service %d", p->val);
+  sprintf (tmp, "Service %d-%d", p->low, p->high);
   strncpy (s->name, tmp, 256);
   s->named = 0;
   return s;
@@ -110,11 +110,25 @@ BuildGroupFromAddress (address * a)
 {
   group *g;
   char tmp[256];
+  int flag;
 
   g = new group;
   g->list = a;
-  sprintf (tmp, "Group %d.%d.%d.%d", a->val[0], a->val[1], a->val[2],
-      a->val[3]);
+  flag = 0;
+  for (int i=0;i<4;i++){
+     if (a->high[i] != a->low[i]){
+        flag = 1;
+        break;
+     }
+  }
+  if (flag == 1){
+     sprintf (tmp, "Group %d-%d.%d-%d.%d-%d.%d-%d", a->low[0],
+        a->high[0], a->low[1], a->high[1], a->low[2], a->high[2], a->low[3],
+        a->high[3]);
+  }
+  else{
+     sprintf (tmp, "Group %d.%d.%d.%d", a->high[0], a->high[1], a->high[2], a->high[3]);
+  }
   strncpy (g->name, tmp, 256);
   g->named = 0;
   return g;
@@ -136,15 +150,17 @@ ParsePort (char *str)
   newPort->next = NULL;
   if (str[0] == '*')
   {
-    newPort->val = -1;
+    newPort->low = -1;
+    newPort->high = -1;
   }
-  else if (sscanf (str, "%d", &newPort->val) == 0)
+  else if (sscanf (str, "%d", &newPort->low) == 0)
   {
     printf ("\nInvalid port: %s\n", str);
     delete newPort;
 
     return NULL;
   }
+  newPort->high = newPort->low;
   delete[]str;
   return newPort;
 }
@@ -165,32 +181,45 @@ ParseAddr (char *val1, char *val2, char *val3, char *val4)
        val3 != NULL ? val3 : "*", val4 != NULL ? val4 : "*");
     return NULL;
   }
-  if (val1 == NULL || val1[0] == '*')
-    newAddr->val[0] = -1;
+  if (val1 == NULL || val1[0] == '*'){
+    newAddr->low[0] = -1;
+    newAddr->high[0] = -1;
+  }
   else
   {
-    sscanf (val1, "%d", &newAddr->val[0]);
+    sscanf (val1, "%d", &newAddr->low[0]);
+    newAddr->high[0] = newAddr->low[0];
   }
   delete[]val1;
-  if (val2 == NULL || val2[0] == '*')
-    newAddr->val[1] = -1;
+  
+  if (val2 == NULL || val2[0] == '*'){
+    newAddr->low[1] = -1;
+    newAddr->high[1] = -1;
+  }
   else
   {
-    sscanf (val2, "%d", &newAddr->val[1]);
+    sscanf (val2, "%d", &newAddr->low[1]);
+    newAddr->high[1] = newAddr->low[1];
   }
   delete[]val2;
-  if (val3 == NULL || val3[0] == '*')
-    newAddr->val[2] = -1;
+  if (val3 == NULL || val3[0] == '*'){
+    newAddr->low[2] = -1;
+    newAddr->high[2] = -1;
+  }
   else
   {
-    sscanf (val3, "%d", &newAddr->val[2]);
+    sscanf (val3, "%d", &newAddr->low[2]);
+    newAddr->high[2] = newAddr->low[2];
   }
   delete[]val3;
-  if (val4 == NULL || val4[0] == '*')
-    newAddr->val[3] = -1;
+  if (val4 == NULL || val4[0] == '*'){
+    newAddr->low[3] = -1;
+    newAddr->high[3] = -1;
+  }
   else
   {
-    sscanf (val4, "%d", &newAddr->val[3]);
+    sscanf (val4, "%d", &newAddr->low[3]);
+    newAddr->high[3] = newAddr->low[3];
   }
   delete[]val4;
   newAddr->next = NULL;
@@ -246,9 +275,9 @@ BuildConditionFromGroup (group * g, int op)
     {
       for (i = 22; i > 18; i--)
       {
-   low[i] = cur->val[22 - i];
-   high[i] = cur->val[22 - i];
-   if (cur->val[22 - i] < 0)
+   low[i] = cur->low[22 - i];
+   high[i] = cur->high[22 - i];
+   if (cur->high[22 - i] < 0)
    {
      low[i] = 0;
      high[i] = FW->FWForest->GetMaxVal (i);
@@ -262,9 +291,9 @@ BuildConditionFromGroup (group * g, int op)
     {
       for (i = 18; i > 14; i--)
       {
-   low[i] = cur->val[18 - i];
-   high[i] = cur->val[18 - i];
-   if (cur->val[18 - i] < 0)
+   low[i] = cur->low[18 - i];
+   high[i] = cur->high[18 - i];
+   if (cur->high[18 - i] < 0)
    {
      low[i] = 0;
      high[i] = FW->FWForest->GetMaxVal (i);
@@ -327,20 +356,24 @@ BuildConditionFromService (service * s, int op)
     // and store it in positions 10 and 11.
     if (op == 0)
     {
-      if (cur->val >= 0)
+      if (cur->low >= 0)
       {
-   high[13] = low[13] = cur->val / 256;
-   high[12] = low[12] = cur->val % 256;
+        high[13] = cur->high /256;
+        low[13] = cur->low / 256;
+        high[12] =  cur->high % 256;
+        low[12] = cur->low % 256;
       }
     }
     else
     {
       // If it's a destination port, break it into two bytes
       // and store it in positions 8 and 9.
-      if (cur->val >= 0)
+      if (cur->low >= 0)
       {
-   high[11] = low[11] = cur->val / 256;
-   high[10] = low[10] = cur->val % 256;
+         high[11] = cur->high/256;
+         low[11] = cur->low / 256;
+         high[10] = cur->high % 256;
+         low[10] = cur->low % 256;
       }
     }
     // If it's a "BOTH" query, use UDP(1) and TCP(2)
@@ -820,7 +853,7 @@ PrintAddyList (address* list)
   cur = list;
   while (cur != NULL)
   {
-    printf ("%d.%d.%d.%d ", cur->val[0], cur->val[1], cur->val[2], cur->val[3]);
+    printf ("%d-%d.%d-%d.%d-%d.%d-%d ", cur->low[0], cur->high[0], cur->low[1], cur->high[1], cur->low[2], cur->high[2], cur->low[3], cur->high[3]);
     cur = cur->next;
   }
   printf("\n");

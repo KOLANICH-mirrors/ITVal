@@ -34,6 +34,7 @@ Williamsburg, VA 23185
 
 #   include <FDDL/mdd.h>
 #   include "nat.h"
+#   include <FDDL/structures.h>
 
 /*
  * The class fw_fddl_forest enhances the fddl_forest by providing
@@ -123,6 +124,9 @@ public:
 
   int PrintClasses(mdd_handle p, int numClasses);
   void InternalPrintClasses(level k, node_idx p, int* low, int* high, int classNum);
+  
+  int GetClasses(mdd_handle p, group**& output, int numClasses);
+  void InternalGetClasses(level k, node_idx p, int* low, int* high, int classNum, group* head);
 };
 
 #endif

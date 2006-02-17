@@ -4,6 +4,16 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+char* Addy2Text(address* g){
+   char* name;
+  
+   name = new char[256];
+   sprintf(name, "%d-%d.%d-%d.%d-%d.%d-%d\n", 
+         g->low[0], g->high[0], g->low[1], g->high[1], g->low[2], 
+         g->high[2], g->low[3], g->high[3]);
+   return name;
+}
+
 int PythonPipe::OpenPipe(){
    pid_t myPid;
    char prefix[5];
@@ -59,6 +69,8 @@ int PythonPipe::ClosePipe(){
    fclose(outFile);
    unlink(inName);
    unlink(outName);
+   free(inName);
+   free(outName);
 }
 
 int PythonPipe::ReadList(PyList*& l){
@@ -70,12 +82,12 @@ int PythonPipe::ReadList(PyList*& l){
    size = 0;
    
    input = ReadString();
-   if (strncmp(input, "BeginList", 9))
+   if (strncmp(input, "Begin List", 9))
       return -1;
 
    delete[] input;
    input = ReadString();
-   while (strncmp(input, "EndList", 7)){
+   while (strncmp(input, "End List", 7)){
       cur = new PyList::node();
       cur->str = input;
       input = ReadString();
@@ -87,12 +99,29 @@ int PythonPipe::ReadList(PyList*& l){
    return size;
 }
 
+int PythonPipe::WriteClasses(group** classes, int num_classes){
+   address* cur;
+   WriteString("Begin Classes\n");
+   for (int i=0;i<num_classes;i++){
+      WriteString(classes[i]->name);
+      WriteString("\n");
+      WriteString("Begin Addresses\n");
+      cur = classes[i]->list;
+      while (cur != NULL){
+         WriteString(Addy2Text(cur));
+         cur = cur->next;
+      }
+      WriteString("End Addresses\n");
+   }
+   WriteString("End Classes\n");
+}
+
 int PythonPipe::WriteList(PyList* l){
     PyList::node* cur;
     char* output;
     int length;
    
-    WriteString("BeginList\n");
+    WriteString("Begin List\n");
     cur = l->head;
     while (cur != NULL){
        if (cur->str == NULL)
@@ -106,7 +135,7 @@ int PythonPipe::WriteList(PyList* l){
        output = NULL;
        cur = cur->next;
     }
-    WriteString("EndList\n");
+    WriteString("End List\n");
     return 1;
 }
 
@@ -123,8 +152,7 @@ char* PythonPipe::ReadString(){
 }
 
 int PythonPipe::WriteString(char* str){
-   printf("Writing: %s\n", str);
+   printf("Sending: %s\n", str);
    fprintf(outFile, "%s", str);
    fflush(outFile);
-   printf("Wrote: %s\n", str);
 }

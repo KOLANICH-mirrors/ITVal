@@ -38,6 +38,7 @@ Firewall::Firewall (fw_fddl_forest * F)
   }
   ClassForest = new fw_fddl_forest(5,ranges);
   ClassForest->ToggleSparsity(false);
+  natHead = NULL;
 };
 
 Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topology* top)
@@ -100,6 +101,7 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
   BuildChains (output_chain, Output, OutputLog);
   ClassForest = new fw_fddl_forest(5,ranges);
   ClassForest->ToggleSparsity(false);
+  natHead = NULL;
 }
 
 Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topology* top, int verbose)
@@ -167,6 +169,7 @@ Firewall::Firewall (char *filterName, char *natName, fw_fddl_forest * F, Topolog
 #endif
   ClassForest = new fw_fddl_forest(5,ranges);
   ClassForest->ToggleSparsity(false);
+  natHead = NULL;
 }
 
 int Firewall::PrintClasses(){
@@ -251,10 +254,9 @@ int Firewall::PrintClasses(){
 
    printf("There are %d total host classes:\n",numClasses);
    ClassForest->PrintClasses(resultClass, numClasses);
-   
 }
 
-group* Firewall::GetClasses(){
+int Firewall::GetClasses(group**& classes, int& numClasses){
    mdd_handle FWSourceClass;
    mdd_handle INSourceClass;
    mdd_handle OUTSourceClass;
@@ -266,7 +268,7 @@ group* Firewall::GetClasses(){
    mdd_handle newChain;
    mdd_handle resultClass;
 
-   int numClasses = 0;
+   numClasses = 0;
 
    FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses);
    FWForest->BuildClassMDD(Input, ClassForest, INSourceClass, numClasses);
@@ -289,15 +291,28 @@ group* Firewall::GetClasses(){
    FWForest->Shift(newChain,15,newChain);
    FWForest->Shift(newChain,15,newChain);
    FWForest->BuildClassMDD(newChain, ClassForest, OUTDestClass, numClasses);
-   ClassForest->JoinClasses(FWSourceClass,INSourceClass, resultClass,numClasses);
-   ClassForest->JoinClasses(resultClass,OUTSourceClass, resultClass, numClasses);
-   ClassForest->JoinClasses(resultClass,FWDestClass, resultClass,numClasses);
-   ClassForest->JoinClasses(resultClass,INDestClass, resultClass,numClasses);
-   ClassForest->JoinClasses(resultClass,OUTDestClass, resultClass,numClasses);
 
-   //printf("There are %d total host classes:\n",numClasses);
+   ClassForest->JoinClasses(FWSourceClass,INSourceClass, resultClass,numClasses);
+   ClassForest->DestroyMDD(FWSourceClass);
+   ClassForest->DestroyMDD(INSourceClass);
+   ClassForest->JoinClasses(resultClass,OUTSourceClass, resultClass, numClasses);
+   ClassForest->DestroyMDD(OUTSourceClass);
+   ClassForest->JoinClasses(resultClass,FWDestClass, resultClass,numClasses);
+   ClassForest->DestroyMDD(FWDestClass);
+   ClassForest->JoinClasses(resultClass,INDestClass, resultClass,numClasses);
+   ClassForest->DestroyMDD(INDestClass);
+   ClassForest->JoinClasses(resultClass,OUTDestClass, resultClass,numClasses);
+   ClassForest->DestroyMDD(OUTDestClass);
+
+   for (level k=4;k>0;k--)
+      ClassForest->Compact(k);
+   printf("There are %d total host classes:\n",numClasses);
+   ClassForest->PrintMDD();
    //ClassForest->PrintClasses(resultClass, numClasses);
-   return ClassForest->GetClasses(resultClass, numClasses);
+   classes = NULL;
+   if (ClassForest->GetClasses(resultClass, classes, numClasses)  == SUCCESS)
+      return 1;
+   return 0;
 }
 
 /* Create a Meta-Firewall */

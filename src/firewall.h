@@ -119,13 +119,19 @@ public:
 
    ~Firewall ()
   {
+    while (natHead != NULL){
+       processed_nat_rule* cur;
+       cur = natHead;
+       natHead = (processed_nat_rule*)natHead->next;
+       delete cur;
+    }
     for (int i = 0; i < num_chains; i++)
       if (chain_array[i] != NULL)
    delete chain_array[i];
 
     for (int i = 0; i < num_nat_chains; i++)
       if (nat_chains[i] != NULL)
-   delete nat_chains[i];
+         delete nat_chains[i];
 
       FWForest->DestroyMDD (Input);
       FWForest->DestroyMDD (InputLog);
@@ -133,9 +139,11 @@ public:
       FWForest->DestroyMDD (OutputLog);
       FWForest->DestroyMDD (Forward);
       FWForest->DestroyMDD (ForwardLog);
+
+      delete ClassForest;
   }
    int PrintClasses();
-   group* GetClasses();
+   int GetClasses(group**& Classes, int& numClasses);
 };
 
 /* Create a META-Firewall from all the independent firewalls.*/

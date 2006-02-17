@@ -304,6 +304,7 @@ ProcessNATInfo (char *info, processed_nat_rule * p, Firewall * FW, rule_parser* 
       else if (!strncmp (p->target, "NETMAP", 6))
       {
    BreakNMAP (word1, NATRange, FW);
+   p->nat = NATRange;
       }
     }
     length = strlen (info);

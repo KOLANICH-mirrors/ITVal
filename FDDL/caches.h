@@ -62,7 +62,7 @@ typedef class cache {
 		}
 */
 		Clear();
-		delete[]list;
+		delete[] list;
 	}
 	node_idx Hit(node_idx p);
 	node_idx Hit(node_idx p, node_idx q);

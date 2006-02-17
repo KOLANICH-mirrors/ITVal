@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <FDDL/structures.h>
 
 class PyList{
    
@@ -76,6 +77,7 @@ class PythonPipe{
       int ClosePipe();
       int ReadList(PyList*& l);
       int WriteList(PyList* l);
+      int WriteClasses(group** classes, int numClasses);
       char* ReadString();
       int WriteString(char* str);
 };
