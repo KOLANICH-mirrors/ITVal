@@ -36,9 +36,9 @@ def processPort(a):
    else:
       ranges = pieces[0].split('-')
       if len(ranges) == 1 or ranges[0] == ranges[1]:
-         newStr += ranges[0] + pieces[1]
+         newStr += ranges[0] + '/' + pieces[1] 
       else:
-         newStr += ranges[0] + '-' + ranges[1] + pieces[1]
+         newStr += ranges[0] + '-' + ranges[1] + '/' + pieces[1]
 
    if newStr.find('-') == -1 and newStr.find('*') == -1:
       try:
