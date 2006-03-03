@@ -42,7 +42,8 @@ int yyerror(char* str);
 
 %token <input_chain> INPUT FORWARD OUTPUT "selected chain"
 %token <sub> PACKET SPORT DPORT SADDY DADDY STATE "query subject"
-%token <query_rec> CLASSES "equivalence classes"
+%token <query_rec> CLASSES "equivalence host classes"
+%token <query_rec> SCLASSES "equivalence service classes"
 %token <prot> UDP TCP ICMP BOTH	    "protocol"
 %token <val> NUM		 "number"
 %token <char> DOT		 "."
@@ -93,7 +94,8 @@ addy_list: addy_list addr {$$ = AppendAddy($1,$2);}
 port_list: port_list complete_port {$$ = AppendPort($1, $2);}
             | complete_port {$$ = AppendPort(NULL, $1);};
 
-query_expression: QUERY CLASSES {$$ = PrintClasses();}
+query_expression: QUERY CLASSES {$$ = PrintClasses();} 
+          | QUERY SCLASSES {$$ = PrintServiceClasses();}
           | QUERY subject condition {$$ = PerformQuery($2, $3, 1);}
           | QUERY subject input_chain condition {$$ = PerformQuery($2, $4, $3);} 
 			 ;

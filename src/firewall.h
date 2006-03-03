@@ -145,6 +145,7 @@ public:
       delete ServiceClassForest;
   }
    int PrintClasses();
+   int PrintServiceClasses();
    int GetClasses(group**& Classes, int& numClasses);
    int GetServiceClasses(service**& Classes, int& numClasses);
 };

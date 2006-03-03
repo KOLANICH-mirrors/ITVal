@@ -125,6 +125,9 @@ public:
   int PrintClasses(mdd_handle p, int numClasses);
   void InternalPrintClasses(level k, node_idx p, int* low, int* high, int classNum);
   
+  int PrintServiceClasses(mdd_handle p, int numClasses);
+  void InternalPrintServiceClasses(level k, node_idx p, int* low, int* high, int classNum);
+  
   int GetClasses(mdd_handle p, group**& output, int numClasses);
   void InternalGetClasses(level k, node_idx p, int* low, int* high, int classNum, group* head);
   

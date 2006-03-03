@@ -662,7 +662,7 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest* forest, level k, nod
    node* nodeP;
    nodeP = &FDDL_NODE(k,p);
    for (arc_idx i=0;i<nodeP->size;i++){
-      forest->SetArc(newK,r, i, InternalBuildClassMDD(forest, k-1, FDDL_ARC(k,nodeP, i), numClasses, services));
+      forest->SetArc(newK, r, i, InternalBuildClassMDD(forest, k-1, FDDL_ARC(k,nodeP, i), numClasses, services));
    }
    r = forest->CheckIn(newK, r);
    BuildCache[k]->Add(k,p,r);
@@ -732,9 +732,25 @@ int fw_fddl_forest::PrintClasses(mdd_handle p, int numClasses){
   return SUCCESS;
 }
 
+int fw_fddl_forest::PrintServiceClasses(mdd_handle p, int numClasses){
+  int* low;
+  int* high;
+  if (p.index < 0)
+    return INVALID_MDD;
+  low = new int[4];
+  high = new int[4];
+  for (int i=0;i<numClasses;i++){
+     printf("Class%d: \n", i);
+     InternalPrintServiceClasses(K, p.index,low,high, i);
+  }
+  delete [] low;
+  delete [] high;
+  return SUCCESS;
+}
+
 
 void fw_fddl_forest::InternalPrintClasses(level k, node_idx p, int* low, int* high, int classNum){
-   if (p==0){
+   if (p==0 || k==0){
       if (p==classNum){
          printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", 
                          k<4 ? low[4] : 0, k<4 ? high[4] : 255,
@@ -744,39 +760,103 @@ void fw_fddl_forest::InternalPrintClasses(level k, node_idx p, int* low, int* hi
       }
       return;
    }
-   if (k==0){
-      if (p == classNum){
-         printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", low[4],high[4], low[3], high[3], low[2],high[2],low[1],high[1]);
-      }
-      return;
-   }
 
    int lastVal;
-   int needToPrint;
 
    node* nodeP;
    nodeP = &FDDL_NODE(k,p);
    low[k] = 0;
    high[k] = 0;
-
-   needToPrint = 0;
    lastVal = FDDL_ARC(k,nodeP,0);
-
+   
    for (int i=0;i<nodeP->size;i++){
        if (lastVal == FDDL_ARC(k,nodeP,i)){
           high[k] = i;
-          needToPrint = 1;
        }
        else{
           InternalPrintClasses(k-1, lastVal, low, high, classNum);
           low[k] = i;
           high[k] = i;
           lastVal = FDDL_ARC(k,nodeP,i);
-          needToPrint = 0;
        }
    }
-   if (needToPrint == 1)
-      InternalPrintClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum);
+   InternalPrintClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum);
+}
+
+void fw_fddl_forest::InternalPrintServiceClasses(level k, node_idx p, int* low, int* high, int classNum){
+   int pLow, pHigh;
+   if (p==0 || k==0){
+      if (p==classNum){
+         printf("\t");
+         if (k<=3){
+            if (low[3] == high[3]){
+               switch (low[3]){
+                  case -1:
+                     printf("BOTH: ");
+                     break;
+                  case 0:
+                     printf("ICMP: ");
+                     break;
+                  case 1:
+                     printf("UDP: ");
+                     break;
+                  case 2:
+                     printf("TCP: ");
+                     break;
+                  default:
+                     printf("Unknown Protocol[%d]: ", low[3]);
+               }
+            }
+            else{
+               if (low[3]==0 && high[3] == 2)
+                  printf("ALL: ");
+               else if (low[3]==1 && high[3]==2)
+                  printf("BOTH: ");
+               else if (low[3]==0 && high[3]==1)
+                  printf("ICMP + UDP: ");
+               else
+                  printf("Unknown[%d-%d]: ", low[3], high[3]);
+            }
+         }
+         else{
+            printf("ALL: ");
+         }
+         pLow = 0;
+         pHigh = 255;
+         if (k<2){
+            pLow=low[2]*255;
+            pHigh = high[2]*255;
+         }
+         if (k<1){
+            pLow += low[1];
+            pHigh += high[1];
+         }
+         printf("%d-%d\n", pLow, pHigh);
+      }
+      return;
+   }
+
+   int lastVal;
+
+   node* nodeP;
+   nodeP = &FDDL_NODE(k,p);
+   low[k] = 0;
+   high[k] = 0;
+
+   lastVal = FDDL_ARC(k,nodeP,0);
+
+   for (int i=0;i<nodeP->size;i++){
+       if (lastVal == FDDL_ARC(k,nodeP,i)){
+          high[k] = i;
+       }
+       else{
+          InternalPrintServiceClasses(k-1, lastVal, low, high, classNum);
+          low[k] = i;
+          high[k] = i;
+          lastVal = FDDL_ARC(k,nodeP,i);
+       }
+   }
+   InternalPrintServiceClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum);
 }
 
 int fw_fddl_forest::GetClasses(mdd_handle p, group**& output, int numClasses){
@@ -816,31 +896,26 @@ void fw_fddl_forest::InternalGetClasses(level k, node_idx p, int* low, int* high
 
 
    int lastVal;
-//   int needToPrint;
 
    node* nodeP;
    nodeP = &FDDL_NODE(k,p);
    low[k] = 0;
    high[k] = 0;
 
-//   needToPrint = 0;
    lastVal = FDDL_ARC(k,nodeP,0);
 
    for (int i=0;i<nodeP->size;i++){
        if (lastVal == FDDL_ARC(k,nodeP,i)){
           high[k] = i;
-//          needToPrint = 1;
        }
        else{
           InternalGetClasses(k-1, lastVal, low, high, classNum, head);
           low[k] = i;
           high[k] = i;
           lastVal = FDDL_ARC(k,nodeP,i);
-//          needToPrint = 0;
        }
    }
-//   if (needToPrint == 1)
-       InternalGetClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum, head);
+   InternalGetClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum, head);
 }
 
 int fw_fddl_forest::GetServiceClasses(mdd_handle p, service**& output, int numClasses){
@@ -900,30 +975,25 @@ void fw_fddl_forest::InternalGetServiceClasses(level k, node_idx p, int* low, in
 
 
    int lastVal;
-//   int needToPrint;
 
    node* nodeP;
    nodeP = &FDDL_NODE(k,p);
    low[k] = 0;
    high[k] = 0;
 
-//   needToPrint = 0;
    lastVal = FDDL_ARC(k,nodeP,0);
 
    for (int i=0;i<nodeP->size;i++){
        if (lastVal == FDDL_ARC(k,nodeP,i)){
           high[k] = i;
-//          needToPrint = 1;
        }
        else{
           InternalGetServiceClasses(k-1, lastVal, low, high, classNum, head);
           low[k] = i;
           high[k] = i;
           lastVal = FDDL_ARC(k,nodeP,i);
-//          needToPrint = 0;
        }
    }
-//   if (needToPrint == 1)
        InternalGetServiceClasses(k-1, FDDL_ARC(k,nodeP, nodeP->size-1), low, high, classNum, head);
 }
 

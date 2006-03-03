@@ -845,6 +845,12 @@ PrintClasses(){
    return NULL;
 }
 
+query*
+PrintServiceClasses(){
+   FW->PrintServiceClasses();
+   return NULL;
+}
+
 void
 PrintAddyList (address* list)
 {
