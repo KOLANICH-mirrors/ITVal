@@ -31,9 +31,9 @@ Williamsburg, VA 23185
 #include "chains.h"
 
 //Some useful debugging functions
-void PrintRange (address_range ar);
-void PrintRule (rule Rule);
-void PrintChain (chain * c);
-void PrintRuleTuple (rule_tuple * r);
-void PrintProcessedRule (processed_rule * r);
-void PrintProcessedNATRule (processed_nat_rule * r);
+void PrintRange(address_range ar);
+void PrintRule(rule Rule);
+void PrintChain(chain * c);
+void PrintRuleTuple(rule_tuple * r);
+void PrintProcessedRule(processed_rule * r);
+void PrintProcessedNATRule(processed_nat_rule * r);

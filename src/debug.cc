@@ -29,141 +29,125 @@
 // Some useful Print functions for debugging
 
 // Print a range of addresses
-void
-PrintRange (address_range * ar)
+void PrintRange(address_range * ar)
 {
-  address_range *cur;
+   address_range *cur;
 
-  cur = ar;
-  while (cur != NULL)
-  {
-    printf ("%u to %u\n", cur->low, cur->high);
-    cur = cur->next;
-  }
+   cur = ar;
+   while (cur != NULL) {
+      printf("%u to %u\n", cur->low, cur->high);
+      cur = cur->next;
+   }
 }
 
 // Unprocessed Rules
-void
-PrintRule (rule newRule)
+void PrintRule(rule newRule)
 {
-  printf ("Target: %s\n", newRule.target);
-  printf ("Protocol: %s\n", newRule.protocol);
-  printf ("Opt: %s\n", newRule.opt);
-  printf ("Source: %s\n", newRule.source);
-  printf ("Destination: %s\n", newRule.dest);
-  printf ("Info: %s\n", newRule.info);
+   printf("Target: %s\n", newRule.target);
+   printf("Protocol: %s\n", newRule.protocol);
+   printf("Opt: %s\n", newRule.opt);
+   printf("Source: %s\n", newRule.source);
+   printf("Destination: %s\n", newRule.dest);
+   printf("Info: %s\n", newRule.info);
 }
 
 // Chains
-void
-PrintChain (chain * c)
+void PrintChain(chain * c)
 {
-  rule *r;
+   rule *r;
 
-  if (c == NULL)
-  {
-    printf ("Null chain.\n");
-    return;
-  }
-  printf ("%s chain.\n", c->name);
-  r = c->rules;
-  while (r)
-  {
-    PrintRule (*r);
-    r = r->next;
-  }
+   if (c == NULL) {
+      printf("Null chain.\n");
+      return;
+   }
+   printf("%s chain.\n", c->name);
+   r = c->rules;
+   while (r) {
+      PrintRule(*r);
+      r = r->next;
+   }
 }
 
 // Processed Rules
-void
-PrintProcessedRule (processed_rule * r)
+void PrintProcessedRule(processed_rule * r)
 {
-  port_range *cur;
+   port_range *cur;
 
-  if (r == NULL)
-    return;
-  printf ("From: ");
-  PrintRange (r->from);
-  printf ("To: ");
-  PrintRange (r->to);
-  printf ("Protocol: %c\nState: %d\n", r->protocol, r->state);
-  printf ("Target: %s\n", r->target);
-  printf ("Source Ports: ");
-  cur = r->sports;
-  while (cur)
-  {
-    printf ("%d ", cur->port1 * 256 + cur->port2);
-    cur = cur->next;
-  }
-  printf ("\n");
-  printf ("Dest Ports: ");
-  cur = r->dports;
-  while (cur)
-  {
-    printf ("%d ", cur->port1 * 256 + cur->port2);
-    cur = cur->next;
-  }
-  printf ("\n");
-  printf ("----------------\n");
+   if (r == NULL)
+      return;
+   printf("From: ");
+   PrintRange(r->from);
+   printf("To: ");
+   PrintRange(r->to);
+   printf("Protocol: %c\nState: %d\n", r->protocol, r->state);
+   printf("Target: %s\n", r->target);
+   printf("Source Ports: ");
+   cur = r->sports;
+   while (cur) {
+      printf("%d ", cur->port1 * 256 + cur->port2);
+      cur = cur->next;
+   }
+   printf("\n");
+   printf("Dest Ports: ");
+   cur = r->dports;
+   while (cur) {
+      printf("%d ", cur->port1 * 256 + cur->port2);
+      cur = cur->next;
+   }
+   printf("\n");
+   printf("----------------\n");
 }
 
 // Processed NAT Rules
-void
-PrintProcessedNATRule (processed_nat_rule * r)
+void PrintProcessedNATRule(processed_nat_rule * r)
 {
-  port_range *cur;
+   port_range *cur;
 
-  if (r == NULL)
-    return;
-  printf ("From: ");
-  PrintRange (r->from);
-  printf ("To: ");
-  PrintRange (r->to);
-  printf ("Protocol: %c\nState: %d\n", r->protocol, r->state);
-  printf ("Target: %s\n", r->target);
-  printf ("Source Ports: ");
-  cur = r->sports;
-  while (cur)
-  {
-    printf ("%d ", cur->port1 * 256 + cur->port2);
-    cur = cur->next;
-  }
-  printf ("\n");
-  printf ("Dest Ports: ");
-  cur = r->dports;
-  while (cur)
-  {
-    printf ("%d ", cur->port1 * 256 + cur->port2);
-    cur = cur->next;
-  }
-  printf ("\n");
-  if (r->nat)
-  {
-    printf ("NAT Addy: ");
-    PrintRange (&r->nat->addys);
-    printf ("NAT Ports: ");
-    printf ("%d ", r->nat->ports.port1);
-    printf ("%d ", r->nat->ports.port2);
-    cur = r->nat->ports.next;
-    while (cur)
-    {
-      printf ("%d %d", cur->port1, cur->port2);
+   if (r == NULL)
+      return;
+   printf("From: ");
+   PrintRange(r->from);
+   printf("To: ");
+   PrintRange(r->to);
+   printf("Protocol: %c\nState: %d\n", r->protocol, r->state);
+   printf("Target: %s\n", r->target);
+   printf("Source Ports: ");
+   cur = r->sports;
+   while (cur) {
+      printf("%d ", cur->port1 * 256 + cur->port2);
       cur = cur->next;
-    }
-  }
-  printf ("----------------\n");
+   }
+   printf("\n");
+   printf("Dest Ports: ");
+   cur = r->dports;
+   while (cur) {
+      printf("%d ", cur->port1 * 256 + cur->port2);
+      cur = cur->next;
+   }
+   printf("\n");
+   if (r->nat) {
+      printf("NAT Addy: ");
+      PrintRange(&r->nat->addys);
+      printf("NAT Ports: ");
+      printf("%d ", r->nat->ports.port1);
+      printf("%d ", r->nat->ports.port2);
+      cur = r->nat->ports.next;
+      while (cur) {
+         printf("%d %d", cur->port1, cur->port2);
+         cur = cur->next;
+      }
+   }
+   printf("----------------\n");
 }
 
 // Rule Tuples
-void
-PrintRuleTuple (rule_tuple * r)
+void PrintRuleTuple(rule_tuple * r)
 {
-  int i;
+   int i;
 
-  printf ("-->");
-  for (i = 22; i >= 0; i--)
-  {
-    printf ("%d-%d ", r->low[i], r->high[i]);
-  }
-  printf ("\n");
+   printf("-->");
+   for (i = 22; i >= 0; i--) {
+      printf("%d-%d ", r->low[i], r->high[i]);
+   }
+   printf("\n");
 }

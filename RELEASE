@@ -1,8 +1,13 @@
-Thank you for downloading Version 0.5 of ITVal, an iptables
-configuration verification tool.  Version 0.5 introduces a new type of
-query called "CLASSES" that partitions the set of all IP addresses into 
-groups according to how the firewall treats each host with that address.
-It also introduces a few minor bugfixes.  
+Thank you for downloading Version 0.6 of ITVal, an iptables
+configuration verification tool.  Version 0.6 contains some bug fixes
+related to handling of unnamed interfaces.
+
+Version 0.6 also includes features from version 0.5 (which was not released)
+including some preliminary GUI support.
+
+Version 0.5 introduced a new type of query called "CLASSES" that partitions the
+set of all IP addresses into groups according to how the firewall treats each
+host with that address.  It also introduces a few minor bugfixes.  
 
 What's new in 0.5?
 ------------------
@@ -40,4 +45,4 @@ so would require a significant overhaul of the internal design.
 
 3.  A fancy graphical front-end.
 
-I hope to have something in place soon, however.  Using the equivalence classes makes a graphical view simpler, so this might be a reality.
+A preliminary front end is available in the source code and by running xITVal.

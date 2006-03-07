@@ -44,95 +44,97 @@ Williamsburg, VA 23185
  * printing Firewall query results.
  */
 
-class fw_fddl_forest:public fddl_forest
-{
-private:
-  cache ** NMAPCache;      //Caches for embedded operations 
-  cache **DNATCache;      //Caches for embedded operations 
-  cache **SNATCache;      //Caches for embedded operations 
-  cache **QIntersectCache;
-  cache **BuildCache;
-  cache **JoinCache;
+class fw_fddl_forest:public fddl_forest {
+ private:
+   cache ** NMAPCache;                    //Caches for embedded operations 
+   cache **DNATCache;                     //Caches for embedded operations 
+   cache **SNATCache;                     //Caches for embedded operations 
+   cache **QIntersectCache;
+   cache **BuildCache;
+   cache **JoinCache;
 
-public:
+ public:
 
-    fw_fddl_forest (int numlevels, int *maxvals):fddl_forest (numlevels,
-                           maxvals)
-  {
-    NMAPCache = new cache *[K + 1];
-    DNATCache = new cache *[K + 1];
-    SNATCache = new cache *[K + 1];
-    QIntersectCache = new cache *[K + 1];
-    BuildCache = new cache *[K + 1];
-    JoinCache = new cache *[K + 1];
+     fw_fddl_forest(int numlevels, int *maxvals):fddl_forest(numlevels,
+                                                             maxvals) {
+      NMAPCache = new cache *[K + 1];
+      DNATCache = new cache *[K + 1];
+      SNATCache = new cache *[K + 1];
+      QIntersectCache = new cache *[K + 1];
+      BuildCache = new cache *[K + 1];
+      JoinCache = new cache *[K + 1];
 
-    for (int k = 1; k <= K; k++)
-    {
-      NMAPCache[k] = new cache;
-      DNATCache[k] = new cache;
-      SNATCache[k] = new cache;
-      QIntersectCache[k] = new cache;
-      JoinCache[k] = new cache;
-      BuildCache[k] = new cache;
-    }
-    JoinCache[0] = new cache;
-  }
+      for (int k = 1; k <= K; k++) {
+         NMAPCache[k] = new cache;
+         DNATCache[k] = new cache;
+         SNATCache[k] = new cache;
+         QIntersectCache[k] = new cache;
+         JoinCache[k] = new cache;
+         BuildCache[k] = new cache;
+      } JoinCache[0] = new cache;
+   }
 
-  //Clean up data structures used by the forest
-   ~fw_fddl_forest ()
-  {
-    for (level k = K; k > 0; k--)
-    {
-      if (NMAPCache[k])
-   delete NMAPCache[k];
-      if (DNATCache[k])
-   delete DNATCache[k];
-      if (SNATCache[k])
-   delete SNATCache[k];
-      if (QIntersectCache[k])
-   delete QIntersectCache[k];
-      if (JoinCache[k])
-   delete JoinCache[k];
-      if (BuildCache[k])
-   delete BuildCache[k];
-    }
-    if (JoinCache[0])
-            delete JoinCache[0];
+   //Clean up data structures used by the forest
+   ~fw_fddl_forest() {
+      for (level k = K; k > 0; k--) {
+         if (NMAPCache[k])
+            delete NMAPCache[k];
+         if (DNATCache[k])
+            delete DNATCache[k];
+         if (SNATCache[k])
+            delete SNATCache[k];
+         if (QIntersectCache[k])
+            delete QIntersectCache[k];
+         if (JoinCache[k])
+            delete JoinCache[k];
+         if (BuildCache[k])
+            delete BuildCache[k];
+      }
+      if (JoinCache[0])
+         delete JoinCache[0];
 
-    delete[]NMAPCache;
-    delete[]DNATCache;
-    delete[]SNATCache;
-    delete[]BuildCache;
-    delete[]JoinCache;
-    delete[]QIntersectCache;
-  }
+      delete[]NMAPCache;
+      delete[]DNATCache;
+      delete[]SNATCache;
+      delete[]BuildCache;
+      delete[]JoinCache;
+      delete[]QIntersectCache;
+   }
 
-  int QueryIntersect (mdd_handle p, mdd_handle q, mdd_handle & result);
-  node_idx InternalQIntersect (level k, node_idx p, node_idx q);
-  int DNAT (mdd_handle p, nat_tuple * pnr, mdd_handle & result);
-  node_idx InternalDNAT (level k, node_idx p, node_idx q, nat_tuple * pnr);
-  int SNAT (mdd_handle p, nat_tuple * pnr, mdd_handle & result);
-  node_idx InternalSNAT (level k, node_idx p, node_idx q, nat_tuple * pnr);
-  int NETMAP (mdd_handle p, nat_tuple * pnr, mdd_handle & result);
-  node_idx InternalNMAP (level k, node_idx p, node_idx q, nat_tuple * pnr);
+   int QueryIntersect(mdd_handle p, mdd_handle q, mdd_handle & result);
+   node_idx InternalQIntersect(level k, node_idx p, node_idx q);
+   int DNAT(mdd_handle p, nat_tuple * pnr, mdd_handle & result);
+   node_idx InternalDNAT(level k, node_idx p, node_idx q, nat_tuple * pnr);
+   int SNAT(mdd_handle p, nat_tuple * pnr, mdd_handle & result);
+   node_idx InternalSNAT(level k, node_idx p, node_idx q, nat_tuple * pnr);
+   int NETMAP(mdd_handle p, nat_tuple * pnr, mdd_handle & result);
+   node_idx InternalNMAP(level k, node_idx p, node_idx q, nat_tuple * pnr);
 
-  int BuildClassMDD(mdd_handle p, fddl_forest* forest, mdd_handle& r, int& numClasses,int services);
-  int InternalBuildClassMDD(fddl_forest* forest, level k, node_idx p, int& numClasses, int services);
+   int BuildClassMDD(mdd_handle p, fddl_forest * forest, mdd_handle & r,
+                     int &numClasses, int services);
+   int InternalBuildClassMDD(fddl_forest * forest, level k, node_idx p,
+                             int &numClasses, int services);
 
-  int JoinClasses(mdd_handle p, mdd_handle q, mdd_handle& r, int& outNumClasses);  
-  node_idx InternalJoinClasses(level k, node_idx p, node_idx q, int& numClasses);  
+   int JoinClasses(mdd_handle p, mdd_handle q, mdd_handle & r,
+                   int &outNumClasses);
+   node_idx InternalJoinClasses(level k, node_idx p, node_idx q,
+                                int &numClasses);
 
-  int PrintClasses(mdd_handle p, int numClasses);
-  void InternalPrintClasses(level k, node_idx p, int* low, int* high, int classNum);
-  
-  int PrintServiceClasses(mdd_handle p, int numClasses);
-  void InternalPrintServiceClasses(level k, node_idx p, int* low, int* high, int classNum);
-  
-  int GetClasses(mdd_handle p, group**& output, int numClasses);
-  void InternalGetClasses(level k, node_idx p, int* low, int* high, int classNum, group* head);
-  
-  int GetServiceClasses(mdd_handle p, service**& output, int numClasses);
-  void InternalGetServiceClasses(level k, node_idx p, int* low, int* high, int classNum, service* head);
+   int PrintClasses(mdd_handle p, int numClasses);
+   void InternalPrintClasses(level k, node_idx p, int *low, int *high,
+                             int classNum);
+
+   int PrintServiceClasses(mdd_handle p, int numClasses);
+   void InternalPrintServiceClasses(level k, node_idx p, int *low, int *high,
+                                    int classNum);
+
+   int GetClasses(mdd_handle p, group ** &output, int numClasses);
+   void InternalGetClasses(level k, node_idx p, int *low, int *high,
+                           int classNum, group * head);
+
+   int GetServiceClasses(mdd_handle p, service ** &output, int numClasses);
+   void InternalGetServiceClasses(level k, node_idx p, int *low, int *high,
+                                  int classNum, service * head);
 };
 
 #endif

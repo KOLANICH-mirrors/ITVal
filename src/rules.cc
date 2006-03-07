@@ -27,133 +27,145 @@
 #include "rules.h"
 #include <stdlib.h>
 
-void
-ProcessInfo (char *info, processed_rule * p, rule_parser* rp)
+void ProcessInfo(char *info, processed_rule * p, rule_parser * rp)
 {
-  char port[1024];      // String representation of the port
-  char which[1024];      // Which protocol the port is for
+   char port[1024];                       // String representation of the port
+   char which[1024];                      // Which protocol the port is for
 
-  // (tcp, udp, or icmp)
-  int port_val;         // Integer representation of the port 
+   // (tcp, udp, or icmp)
+   int port_val;                          // Integer representation of the port 
 
-  port_range *newPort;      // Temporary range to be added to the rule 
+   port_range *newPort;                   // Temporary range to be added to the rule 
 
-  port_range *sports;      // List of ranges for the source ports
-  port_range *dports;      // List of ranges for the destination
-  // ports
+   port_range *sports;                    // List of ranges for the source ports
+   port_range *dports;                    // List of ranges for the destination ports
+   int pktcond;
 
-  int state;         // States to match
+   int state;                             // States to match
 
-  char word1[1024];      // Key name
-  char word2[1024];      // Value 
+   char word1[1024];                      // Key name
+   char word2[1024];                      // Value 
 
-  int flags[6];         // Which TCP flags to match
+   int flags[6];                          // Which TCP flags to match
 
-  int length;         // Length of the info string
+   int length;                            // Length of the info string
 
-  int i;
+   int i;
 
-  // Initially, the port lists are empty, all states match, and the
-  // no flags are considered.
-  sports = NULL;
-  dports = NULL;
-  state = 0;
-  for (i = 0; i < 6; i++)
-    flags[i] = (-1);
+   // Initially, the port lists are empty, all states match, and the
+   // no flags are considered.
+   sports = NULL;
+   dports = NULL;
+   pktcond = 0;
+   state = 0;
+   for (i = 0; i < 6; i++)
+      flags[i] = (-1);
 
-  length = strlen (info);
-  while (length - 1 > 0)
-  {
-    // Consume whitespace
-    while (strlen (info) - 1 > 0 && (*info == ' ' || *info == '\t'))
-    {
-      info++;
-    }
-    // Read the first word (the key)
-    if (sscanf (info, "%1024s", word1) != EOF)
-    {
-      info += strlen (word1);
-      // If it's tcp or udp, scan in a port.
-      if (!strncmp (word1, "tcp", 1024) || !strncmp (word1, "udp", 1024))
-      {
-   // Read the port number into word2
-   if (sscanf (info, "%1024s", word2) != EOF)
-   {
-     info += strlen (word2);
-     // Convert the string into an integer
-     rp->BreakPort (word2, which, port);
-     // If it's a destination port, put it in the dports
-     // list.  If it's a source port, put it in the sports
-     // list.
-     if (!strncmp (which, "dpt", 1024))
-     {
-       newPort = new port_range;
-       newPort->next = dports;
-       port_val = atoi (port);
-       newPort->port1 = port_val / 256;
-       newPort->port2 = port_val % 256;
-       dports = newPort;
-     }
-     else if (!strncmp (which, "spt", 1024))
-     {
-       newPort = new port_range;
-       newPort->next = sports;
-       port_val = atoi (port);
-       newPort->port1 = port_val / 256;
-       newPort->port2 = port_val % 256;
-       sports = newPort;
-     }
+   length = strlen(info);
+   while (length - 1 > 0) {
+      // Consume whitespace
+      while (strlen(info) - 1 > 0 && (*info == ' ' || *info == '\t')) {
+         info++;
+      }
+      // Read the first word (the key)
+      if (sscanf(info, "%1024s", word1) != EOF) {
+         info += strlen(word1);
+         // If it's tcp or udp, scan in a port.
+         if (!strncmp(word1, "tcp", 1024) || !strncmp(word1, "udp", 1024)) {
+            // Read the port number into word2
+            if (sscanf(info, "%1024s", word2) != EOF) {
+               info += strlen(word2);
+               // Convert the string into an integer
+               rp->BreakPort(word2, which, port);
+               // If it's a destination port, put it in the dports
+               // list.  If it's a source port, put it in the sports
+               // list.
+               if (!strncmp(which, "dpt", 1024)) {
+                  newPort = new port_range;
+                  newPort->next = dports;
+                  port_val = atoi(port);
+                  newPort->port1 = port_val / 256;
+                  newPort->port2 = port_val % 256;
+                  dports = newPort;
+               }
+               else if (!strncmp(which, "spt", 1024)) {
+                  newPort = new port_range;
+                  newPort->next = sports;
+                  port_val = atoi(port);
+                  newPort->port1 = port_val / 256;
+                  newPort->port2 = port_val % 256;
+                  sports = newPort;
+               }
+            }
+            // If the keyword is "state", then parse the state
+            // information.
+         }
+         else if (!strncmp(word1, "state", 1024)) {
+            if (sscanf(info, "%1024s", word2) != EOF) {
+               info += strlen(word2);
+               rp->BreakState(word2, &state);
+            }
+            // If it's "flags", parse the flag information.
+         }
+         else if (!strncmp(word1, "flags:", 6)) {
+            rp->BreakFlags(word1, flags);
+         }
+         else if (!strncmp(word1, "PKTTYPE", 7)) {
+            if (sscanf(info, " %*c %1024s", word2) != EOF) {
+               info += strlen(word2);
+               rp->BreakPktType(word2, pktcond);
+            }
+         }
+      }
+      length = strlen(info);
    }
-   // If the keyword is "state", then parse the state
-   // information.
-      }
-      else if (!strncmp (word1, "state", 1024))
-      {
-   if (sscanf (info, "%1024s", word2) != EOF)
-   {
-     info += strlen (word2);
-     rp->BreakState (word2, &state);
+   // Store the results in the processed_rule
+   p->sports = sports;
+   p->dports = dports;
+   p->state = state;
+   p->pktcond = pktcond;
+   for (i = 0; i < 6; i++) {
+      p->flags[i] = flags[i];
    }
-   // If it's "flags", parse the flag information.
-      }
-      else if (!strncmp (word1, "flags:", 6))
-      {
-   rp->BreakFlags (word1, flags);
-      }
-    }
-    length = strlen (info);
-  }
-  // Store the results in the processed_rule
-  p->sports = sports;
-  p->dports = dports;
-  p->state = state;
-  for (i = 0; i < 6; i++)
-  {
-    p->flags[i] = flags[i];
-  }
 }
 
 // Convert an unprocessed rule r into a processed_rule p.
-void
-ProcessRule (rule * r, processed_rule * p, rule_parser* rp, Topology* top)
+void ProcessRule(rule * r, processed_rule * p, rule_parser * rp,
+                 Topology * top)
 {
-  // Munge the source and destination addresses
-  ConvertARange (r->source, p->from);
-  ConvertARange (r->dest, p->to);
+   // Munge the source and destination addresses
+   ConvertARange(r->source, p->from);
+   ConvertARange(r->dest, p->to);
 
-  // The protocol
-  p->protocol = r->protocol[0];
+   // The protocol
+   p->protocol = r->protocol[0];
 
-  // The target
-  strncpy (p->target, r->target, 256);
+   // The target
+   strncpy(p->target, r->target, 256);
 
-  // Interfaces:
-  if (top != NULL){
-     if (r->in[0] != '\0')
-        p->in = top->FindInterface(r->in);
-     if (r->out[0] != '\0')
-        p->out = top->FindInterface(r->out);
-  }
-  // And everything else
-  ProcessInfo (r->info, p, rp);
+   // Interfaces:
+   if (top != NULL) {
+      if (r->in[0] != '\0') {
+         if (r->in[0] == '*')
+            p->in = -1;
+         else {
+            p->in = top->FindInterface(r->in);
+            if (p->in == -1) {
+               p->in = top->AddAnonymousInterface(r->in);
+            }
+         }
+      }
+      if (r->out[0] != '\0') {
+         if (r->out[0] == '*')
+            p->out = -1;
+         else {
+            p->out = top->FindInterface(r->out);
+            if (p->out == -1) {
+               p->out = top->AddAnonymousInterface(r->out);
+            }
+         }
+      }
+   }
+   // And everything else
+   ProcessInfo(r->info, p, rp);
 }

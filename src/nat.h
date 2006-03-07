@@ -37,73 +37,62 @@ Williamsburg, VA 23185
 
 class Firewall;
 
-class nat_range
-{
-public:
-  address_range addys;
-  port_range ports;
-  nat_range *next;
+class nat_range {
+ public:
+   address_range addys;
+   port_range ports;
+   nat_range *next;
 
-  int low[23];
-  int high[23];
+   int low[23];
+   int high[23];
 
-    nat_range ()
-  {
-    next = NULL;
-  }
-};
+     nat_range() {
+      next = NULL;
+}};
 
-class nmap_range
-{
-public:
-  address_range addys;
-  port_range ports;
-  nmap_range *next;
+class nmap_range {
+ public:
+   address_range addys;
+   port_range ports;
+   nmap_range *next;
 
-  int mask;
+   int mask;
 
-  int low[23];
-  int high[23];
+   int low[23];
+   int high[23];
 
-    nmap_range ()
-  {
-    next = NULL;
-  }
-};
+     nmap_range() {
+      next = NULL;
+}};
 
-class nat_tuple:public rule_tuple
-{
-public:
-  nat_range * nat;
+class nat_tuple:public rule_tuple {
+ public:
+   nat_range * nat;
 
-  nat_tuple ():rule_tuple ()
-  {
-    nat = NULL;
-  }
-};
+   nat_tuple():rule_tuple() {
+      nat = NULL;
+}};
 
 //A processed rule from the NAT file,
 //in which the addresses and ports have been broken into lists of ranges.
-class processed_nat_rule:public processed_rule
-{
-public:
-  nat_range * nat;
-  processed_nat_rule ():processed_rule ()
-  {
-    nat = NULL;
-  }
-  ~processed_nat_rule(){
-     while (nat != NULL){
-        nat_range* cur;
-        cur = nat;
-        nat = nat->next;
-        delete cur;
-     }
-  }
+class processed_nat_rule:public processed_rule {
+ public:
+   nat_range * nat;
+   processed_nat_rule():processed_rule() {
+      nat = NULL;
+   } ~processed_nat_rule() {
+      while (nat != NULL) {
+         nat_range *cur;
+         cur = nat;
+         nat = nat->next;
+         delete cur;
+      }
+   }
 };
 
 //A helper function for converting unprocessed rules
 //into processed_rules.
-void ProcessNATRule (rule * r, processed_nat_rule * p, Firewall * FW, rule_parser* rp);
-void ConvertNATRules (processed_nat_rule * pnr, nat_tuple * &stack);
+void ProcessNATRule(rule * r, processed_nat_rule * p, Firewall * FW,
+                    rule_parser * rp);
+void ConvertNATRules(processed_nat_rule * pnr, nat_tuple * &stack);
 #endif

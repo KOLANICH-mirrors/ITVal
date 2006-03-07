@@ -33,34 +33,33 @@ Williamsburg, VA 23185
 #   include "topology.h"
 
 //An unprocessed rule grabbed straight from the text file.
-class rule
-{
-public:
-  char target[1024];
-  char protocol[1024];
-  char opt[1024];
-  char source[1024];
-  char dest[1024];
-  char in[1024];
-  char out[1024];
-  char info[1024];
-  rule *next;
+class rule {
+ public:
+   char target[1024];
+   char protocol[1024];
+   char opt[1024];
+   char source[1024];
+   char dest[1024];
+   char in[1024];
+   char out[1024];
+   char info[1024];
+   int pktCond;
+   rule *next;
 
-  rule(){
-     next = NULL;
-  }
-};
+     rule() {
+      next = NULL;
+}};
 
-class rule_parser{
-   Topology* top;
-   public: 
-   void BreakPort (char *word, char *which, char *port);
-   void BreakState (char *word, int *state);
-   void BreakFlags (char *word, int *flags);
-   rule_parser(Topology* t){
+class rule_parser {
+   Topology *top;
+ public:
+   void BreakPort(char *word, char *which, char *port);
+   void BreakState(char *word, int *state);
+   void BreakFlags(char *word, int *flags);
+   void BreakPktType(char *word, int& type);
+     rule_parser(Topology * t) {
       top = t;
-   }
-   int ReadRule (rule * newRule, char *line, size_t length);
-   int ReadVerboseRule (rule * newRule, char *line, size_t length);
+   } int ReadRule(rule * newRule, char *line, size_t length);
+   int ReadVerboseRule(rule * newRule, char *line, size_t length);
 };
 #endif

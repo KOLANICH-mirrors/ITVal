@@ -1,10 +1,31 @@
+ITVal-0.6-r1: March 7, 2006 Robert Marmorstein
+	ITVal now ignores "PKTTYPE = <blah>" style conditions in the options
+	section of the rule table.  Also fixed a bug that caused segmentation
+	faults when no topology file was given.  ITVal now "creates"
+	interfaces on the fly as it detects them in the rule file and the
+	query file.  It is always better to specify them in the topology file,
+	though, so that ITVal knows what IP address to use for MASQUERADING
+	and REDIRECT.
+
+ITVal-0.6: March 6, 2006 Robert Marmorstein
+	Birthday "release".  Fixed a bug in handling of interfaces not
+	explicitly mentioned in the topology file.  Before, if ITVal came
+	across an unmentioned interface, it silently renamed that interface to
+	'*'.  Now, it adds the interface to the topology list and gives it a
+	bogus address, which I think is better default behavior.  Also added
+	rudimentary support for handling topology files with multiple
+	firewalls.  However, the new system just takes the topology file of
+	the 'last' filter rather than trying to merge and rename them.
+
+	Also, added a preliminary man page for ITVal.
+   
 ITVal-0.5: January 11, 2006 Robert Marmorstein
 	Implemented a new "CLASSES" query which decomposes the set of all IP
 	addresses into groups based on how the firewall treats all packets
-	originating from or destined for them.  Two hosts in an equivalence class
-	are always treated identically by the firewall with respect to filtering.
-	This is useful for visualizing the firewall configuration and potentially
-	for future development of the tool.
+	originating from or destined for them.  Two hosts in an equivalence
+	class are always treated identically by the firewall with respect to
+	filtering.  This is useful for visualizing the firewall configuration
+	and potentially for future development of the tool.
 	
 ITVal-0.4-r3: December 13, 2005 Robert Marmorstein
 	 Fixed some memory access bugs that caused ITVal to crash when

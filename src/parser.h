@@ -30,98 +30,95 @@ Williamsburg, VA 23185
 #define __PARSER_H
 
 #include <FDDL/structures.h>
-#include "topology.h"
 #include "fwmdd.h"
 
 //A query condition.
-class condition
-{
-public:
-  mdd_handle h;
+class condition {
+ public:
+   mdd_handle h;
 };
 
 //A query, consisting of a subject (what info to display) and a
 //condition (which packets to consider).
-class query
-{
-public:
-  int subject;         //0 PACKET, 1 SADDY, 2 DADDY, 3 SPORT, 4 DPORT, 5 STATE
-  condition *cond;
+class query {
+ public:
+   int subject;                           //0 PACKET, 1 SADDY, 2 DADDY, 3 SPORT, 4 DPORT, 5 STATE
+   condition *cond;
 };
 
 //Convert a port string into a port struct
-port *ParsePort (char *str);
+port *ParsePort(char *str);
 
 //Convert a port string into a port struct
-address *ParseAddr (char *val1, char *val2, char *val3, char *val4);
+address *ParseAddr(char *val1, char *val2, char *val3, char *val4);
 
 //Returns the service associated with "name" or NULL if not found
-service *ServiceLookup (char *name);
+service *ServiceLookup(char *name);
 
 //Returns the group associated with "name" or NULL if not found
-group *GroupLookup (char *name);
+group *GroupLookup(char *name);
 
 //Construct a new Service, consisting of the single port p
-service *BuildServiceFromPort (port * p);
+service *BuildServiceFromPort(port * p);
 
 //Construct a new Group, consisting of the single address a
-group *BuildGroupFromAddress (address * a);
+group *BuildGroupFromAddress(address * a);
 
 //Construct a query condition representing the set of all logged
 //packets.
-condition *GetLoggedCondition ();
+condition *GetLoggedCondition();
 
 //Construct a query condition from a group of addresses
-condition *BuildConditionFromGroup (group * g, int op);
+condition *BuildConditionFromGroup(group * g, int op);
 
 //Construct a query condition from a group of ports 
-condition *BuildConditionFromService (service * g, int op);
+condition *BuildConditionFromService(service * g, int op);
 
 //Construct a query condition from a specified state
-condition *BuildConditionFromState (int state);
+condition *BuildConditionFromState(int state);
 
 //Construct a query condition from a given network interface 
-condition *BuildConditionFromIface (char *name, int in_out);
+condition *BuildConditionFromIface(char *name, int in_out);
 
 //Construct a query condition from a specified flag
-condition *BuildConditionFromFlag (int flag);
+condition *BuildConditionFromFlag(int flag);
 
 //Create a query condition which is the negation of condition "c"
-condition *NegateCondition (condition * c);
+condition *NegateCondition(condition * c);
 
 //Create a query condition which is the union of conditions "c1" and
 //"c2".
-condition *UnionConditions (condition * c1, condition * c2);
+condition *UnionConditions(condition * c1, condition * c2);
 
 //Create a query condition which is the intersection of conditions "c1"
 //and "c2".
-condition *IntersectConditions (condition * c1, condition * c2);
+condition *IntersectConditions(condition * c1, condition * c2);
 
 //Intersect the set of accepted packets with the query filter and
 //display the result.
-query *PerformQuery (int s, condition * c, int input_chain);
+query *PerformQuery(int s, condition * c, int input_chain);
 
 //Compute Host Equivalence Classes and print them.
-query* PrintClasses();
-query* PrintServiceClasses();
-group* GetClasses();
-service* GetServiceClasses();
+query *PrintClasses();
+query *PrintServiceClasses();
+group *GetClasses();
+service *GetServiceClasses();
 
 //Add address "newAddy" to the linked list "list".
-address *AppendAddy (address * list, address * newAddy);
+address *AppendAddy(address * list, address * newAddy);
 
 //Add port "newPort" to the linked list "list".
-port *AppendPort (port * list, port * newPort);
+port *AppendPort(port * list, port * newPort);
 
 //Create an address group from a name and a list of addresses
-group *DefineGroup (char *name, address * list);
+group *DefineGroup(char *name, address * list);
 
 //Create a service object from a name and a list of ports
-service *DefineService (char *name, port * list);
+service *DefineService(char *name, port * list);
 
 //Create and initialize the MDD forest
-void InitializeStructures (Firewall * F, Topology* top);
+void InitializeStructures(Firewall * F);
 
 //Set the protocol of port "port" to "protocol"
-port *BuildPort (int protocol, port * port);
+port *BuildPort(int protocol, port * port);
 #endif

@@ -36,69 +36,64 @@ Williamsburg, VA 23185
 
 //A processed rule, in which the addresses and ports
 //have been broken into lists of ranges.
-class processed_rule
-{
-public:
+class processed_rule {
+ public:
 
-  address_range * from;
-  address_range *to;
+   address_range * from;
+   address_range *to;
 
-  char protocol;
-  port_range *sports;
-  port_range *dports;
-  int in;
-  int out;
-  int state;
-  int flags[6];
+   char protocol;
+   port_range *sports;
+   port_range *dports;
+   int in;
+   int out;
+   int state;
+   int flags[6];
+   int pktcond;
 
-  char target[256];
-  processed_rule *next;
+   char target[256];
+   processed_rule *next;
 
-    processed_rule ()
-  {
-    from = new address_range;
-    to = new address_range;
-    sports = NULL;
-    dports = NULL;
-    next = NULL;
-    in = -1;
-    out = -1;
-  } ~processed_rule ()
-  {
-    port_range *cur;
-    delete from;
-    delete to;
+     processed_rule() {
+      from = new address_range;
+      to = new address_range;
+      sports = NULL;
+      dports = NULL;
+      next = NULL;
+      in = -1;
+      out = -1;
+   } ~processed_rule() {
+      port_range *cur;
+      delete from;
+      delete to;
 
-    while (sports != NULL)
-    {
-      cur = sports;
-      sports = sports->next;
-      delete cur;
-    }
-    while (dports != NULL)
-    {
-      cur = dports;
-      dports = dports->next;
-      delete cur;
-    }
-  }
+      while (sports != NULL) {
+         cur = sports;
+         sports = sports->next;
+         delete cur;
+      }
+      while (dports != NULL) {
+         cur = dports;
+         dports = dports->next;
+         delete cur;
+      }
+   }
 };
 
 //A tuple of elements suitable for insertion
 //into an MDD.
-class rule_tuple
-{
-public:
-  int low[23];
-  int high[23];
-  rule_tuple *next;
+class rule_tuple {
+ public:
+   int low[23];
+   int high[23];
+   rule_tuple *next;
 
-    rule_tuple ()
-  {
-    next = NULL;
+     rule_tuple() {
+      next = NULL;
 }};
 
 //A helper function for converting unprocessed rules
 //into processed_rules.
-void ProcessRule (rule * r, processed_rule * p, rule_parser* rp, Topology* h);
+void ProcessRule(rule * r, processed_rule * p, rule_parser * rp,
+                 Topology * h);
 #endif

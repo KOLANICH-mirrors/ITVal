@@ -32,153 +32,137 @@
 // Turn a address/mask pair into a (low, high) pair of integers.  
 // Store them in the address_range struct "ar".
 
-void
-create_range (unsigned int *addy, unsigned int mask, address_range * ar,
-         int invert)
+void create_range(unsigned int *addy, unsigned int mask, address_range * ar,
+                  int invert)
 {
-  unsigned int low;
-  unsigned int high;
-  unsigned int mval;
+   unsigned int low;
+   unsigned int high;
+   unsigned int mval;
 
-  if (mask == 0)
-  {
-    if (invert)
-    {
-      ar->low = 1;
-      ar->high = 0;
-      return;
-    }
-    ar->low = 0;
-    ar->high = UINT_MAX;
-    return;
-  }
-  mval = 0xFFFFFFFF << (32 - mask);
-
-  low = addy[0] * 256 * 256 * 256;
-  low += addy[1] * 256 * 256;
-  low += addy[2] * 256;
-  low += addy[3];
-
-  low = low & mval;
-  high = low | ~mval;
-
-  if (!invert)
-  {
-    ar->low = low;
-    ar->high = high;
-  }
-  else
-  {
-    ar->next = new address_range;
-
-    if (low == 0)
-    {
-      ar->low = 1;
-      ar->high = 0;
-    }
-    else
-    {
+   if (mask == 0) {
+      if (invert) {
+         ar->low = 1;
+         ar->high = 0;
+         return;
+      }
       ar->low = 0;
-      ar->high = low - 1;
-    }
+      ar->high = UINT_MAX;
+      return;
+   }
+   mval = 0xFFFFFFFF << (32 - mask);
 
-    if (high == UINT_MAX)
-    {
-      ar->next->low = 1;
-      ar->next->high = 0;
-    }
-    else
-    {
-      ar->next->low = high + 1;
-      ar->next->high = UINT_MAX;
-    }
-    //printf("low: %u high:%u %u-%u %u-%u ", low, high, ar->low, ar->high, ar->next->low, ar->next->high);
-  }
+   low = addy[0] * 256 * 256 * 256;
+   low += addy[1] * 256 * 256;
+   low += addy[2] * 256;
+   low += addy[3];
+
+   low = low & mval;
+   high = low | ~mval;
+
+   if (!invert) {
+      ar->low = low;
+      ar->high = high;
+   }
+   else {
+      ar->next = new address_range;
+
+      if (low == 0) {
+         ar->low = 1;
+         ar->high = 0;
+      }
+      else {
+         ar->low = 0;
+         ar->high = low - 1;
+      }
+
+      if (high == UINT_MAX) {
+         ar->next->low = 1;
+         ar->next->high = 0;
+      }
+      else {
+         ar->next->low = high + 1;
+         ar->next->high = UINT_MAX;
+      }
+      //printf("low: %u high:%u %u-%u %u-%u ", low, high, ar->low, ar->high, ar->next->low, ar->next->high);
+   }
 }
 
 // Convert a net/mask string into a (low, high) pair describing
 // a range of IP addresses
-void
-ConvertARange (char *range, address_range * ar)
+void ConvertARange(char *range, address_range * ar)
 {
-  int invert;         // Should we negate the address?
+   int invert;                            // Should we negate the address?
 
-  // The elements of the IP address
-  char bytes[4][256];
+   // The elements of the IP address
+   char bytes[4][256];
 
-  // The mask
-  char mask[256];
+   // The mask
+   char mask[256];
 
-  // The value of each IP element
-  unsigned int vals[4];
+   // The value of each IP element
+   unsigned int vals[4];
 
-  // The integer value of the mask.
-  unsigned int mval;
+   // The integer value of the mask.
+   unsigned int mval;
 
-  // The current character to be processed
-  char *ch;
+   // The current character to be processed
+   char *ch;
 
-  // The beginning of the string
-  char *start;
+   // The beginning of the string
+   char *start;
 
-  // Number of IP elements processed
-  int num;
+   // Number of IP elements processed
+   int num;
 
-  // Length of the string
-  int length;
+   // Length of the string
+   int length;
 
-  length = strlen (range);
+   length = strlen(range);
 
-  // Start at the beginning
-  invert = 0;
+   // Start at the beginning
+   invert = 0;
 
-  ch = range;
-  num = 0;
-  start = range;
+   ch = range;
+   num = 0;
+   start = range;
 
-  if (*ch == '!')
-  {
-    invert = 1;
-    ch++;
-    start++;
-  }
-  // Grab the four elements
-  while (num < 4)
-  {
-    while (ch - range < length && *ch != '.' && *ch != ' ' && *ch != '/')
-    {
-      (bytes[num])[ch - start] = *ch;
+   if (*ch == '!') {
+      invert = 1;
       ch++;
-    }
-    (bytes[num])[ch - start] = '\0';
-    if (*ch == '.')      // Advance past a dot
-      ch++;
+      start++;
+   }
+   // Grab the four elements
+   while (num < 4) {
+      while (ch - range < length && *ch != '.' && *ch != ' ' && *ch != '/') {
+         (bytes[num])[ch - start] = *ch;
+         ch++;
+      }
+      (bytes[num])[ch - start] = '\0';
+      if (*ch == '.')           // Advance past a dot
+         ch++;
 
-    // Convert the element string to an integer
-    vals[num] = atoi (bytes[num]);
-    num++;
-    start = ch;
-  }
-  // If a mask has been specified, grab it.  Otherwise, it defaults to
-  // 32 (all bits significant).
+      // Convert the element string to an integer
+      vals[num] = atoi(bytes[num]);
+      num++;
+      start = ch;
+   }
+   // If a mask has been specified, grab it.  Otherwise, it defaults to
+   // 32 (all bits significant).
 
-  if (*ch == '/')
-  {
-    ch++;         // Advance past '/'
-    start = ch;
-    while (ch - range < length && *ch != ' ')
-    {
-      mask[ch - start] = *ch;
-      ch++;
-    }
-    mask[ch - start] = '\0';
-    // Convert the mask string to an integer
-    mval = atoi (mask);
-  }
-  else
-  {
-    mval = 32;
-  }
-  // Now turn the mask/val pair into a (low, high) pair.
-  create_range (vals, mval, ar, invert);
+   if (*ch == '/') {
+      ch++;                     // Advance past '/'
+      start = ch;
+      while (ch - range < length && *ch != ' ') {
+         mask[ch - start] = *ch;
+         ch++;
+      }
+      mask[ch - start] = '\0';
+      // Convert the mask string to an integer
+      mval = atoi(mask);
+   }
+   else {
+      mval = 32;
+   }
+   // Now turn the mask/val pair into a (low, high) pair.
+   create_range(vals, mval, ar, invert);
 }

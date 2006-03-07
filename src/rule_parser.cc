@@ -31,319 +31,314 @@
 // Store the protocol name (tcp or udp) in "which"
 // Store the port list in "port"
 void
-rule_parser::BreakPort (char *word, char *which, char *port)
+  rule_parser::BreakPort(char *word, char *which, char *port)
 {
-  // Current character
-  char *ch;
+   // Current character
+   char *ch;
 
-  // Length of the string
-  int length;
+   // Length of the string
+   int length;
 
-  length = strlen (word);
+   length = strlen(word);
 
-  // Start at the beginning of the string
-  ch = word;
+   // Start at the beginning of the string
+   ch = word;
 
-  // The protocol precedes the colon.
-  while (ch - word < length && *ch != ':')
-  {
-    which[ch - word] = *ch;
-    ch++;
-  }
-  which[ch - word] = '\0';
-  ch++;            // Advance past ':'
+   // The protocol precedes the colon.
+   while (ch - word < length && *ch != ':') {
+      which[ch - word] = *ch;
+      ch++;
+   }
+   which[ch - word] = '\0';
+   ch++;                        // Advance past ':'
 
-  // Now grab the list of ports.
-  word = ch;
-  while (ch - word < length)
-  {
-    port[ch - word] = *ch;
-    ch++;
-  }
-  port[ch - word] = '\0';
+   // Now grab the list of ports.
+   word = ch;
+   while (ch - word < length) {
+      port[ch - word] = *ch;
+      ch++;
+   }
+   port[ch - word] = '\0';
 }
 
 // Convert the textual state information into an integer.
-void
-rule_parser::BreakState (char *word, int *state)
+void rule_parser::BreakState(char *word, int *state)
 {
-  // The current word to examine
-  char curword[1024];
+   // The current word to examine
+   char curword[1024];
 
-  // The current character to copy
-  char *ch;
+   // The current character to copy
+   char *ch;
 
-  // The length of the string
-  int length;
+   // The length of the string
+   int length;
 
-  length = strlen (word);
+   length = strlen(word);
 
-  // Start at the beginning.
-  ch = word;
-  // Initially assume no state is mentioned.
-  *state = 0;
-  while (ch - word < length)
-  {
-    // Grab each element of the comma seperated list.
-    while (ch - word < length && *ch != ',')
-    {
-      curword[ch - word] = *ch;
-      ch++;
-    }
-    curword[ch - word] = '\0';
+   // Start at the beginning.
+   ch = word;
+   // Initially assume no state is mentioned.
+   *state = 0;
+   while (ch - word < length) {
+      // Grab each element of the comma seperated list.
+      while (ch - word < length && *ch != ',') {
+         curword[ch - word] = *ch;
+         ch++;
+      }
+      curword[ch - word] = '\0';
 
-    // Now, "or in" the value for the state it matches.
-    if (!strncmp (curword, "INVALID", 1024))
-      *state |= INVALID;
-    else if (!strncmp (curword, "ESTABLISHED", 1024))
-      *state |= ESTABLISHED;
-    else if (!strncmp (curword, "NEW", 1024))
-      *state |= NEW;
-    else if (!strncmp (curword, "RELATED", 1024))
-      *state |= RELATED;
-    ch++;         // Advance past comma
-    word = ch;
-    length -= (strlen (curword) + 1);
-  }
+      // Now, "or in" the value for the state it matches.
+      if (!strncmp(curword, "INVALID", 1024))
+         *state |= INVALID;
+      else if (!strncmp(curword, "ESTABLISHED", 1024))
+         *state |= ESTABLISHED;
+      else if (!strncmp(curword, "NEW", 1024))
+         *state |= NEW;
+      else if (!strncmp(curword, "RELATED", 1024))
+         *state |= RELATED;
+      ch++;                     // Advance past comma
+      word = ch;
+      length -= (strlen(curword) + 1);
+   }
+}
+
+// Convert a "PKTTYPE = <Blah>" declaration into an integer flag
+void rule_parser::BreakPktType(char *word, int& pktcond){
+   if (!strncmp(word, "anycast", 7)){
+      pktcond = 0;
+   }
+   if (!strncmp(word, "unicast", 7)){
+      pktcond = 1;
+   }
+   else if (!strncmp(word, "broadcast",9)){
+      pktcond = 2;
+   }
+   else if (!strncmp(word, "multicast",9)){
+      pktcond = 3;
+   }
+   else{
+      printf("Error: Couldn't process PKTTYPE flag: %s.\n", word);
+      exit(-1);
+   }
 }
 
 // Convert the textual representation of TCP flags into an array of
 // six integers.
 
-void
-rule_parser::BreakFlags (char *word, int *flags)
+void rule_parser::BreakFlags(char *word, int *flags)
 {
-  char word1[1024];      // Flags to examine (Hex string)
-  char word2[1024];      // Flags that must be set to match 
+   char word1[1024];                      // Flags to examine (Hex string)
+   char word2[1024];                      // Flags that must be set to match 
 
-  // (Hex string)
+   // (Hex string)
 
-  int mask_num;         // Flags to examine (integer)
-  int val_num;         // Flags that must be set to match
+   int mask_num;                          // Flags to examine (integer)
+   int val_num;                           // Flags that must be set to match
 
-  // (integer)
+   // (integer)
 
-  int mask[6];         // Boolean array of flags to examine 
-  int value[6];         // Boolean array of flags that must be set
+   int mask[6];                           // Boolean array of flags to examine 
+   int value[6];                          // Boolean array of flags that must be set
 
-  char *ch;         // Current character to consider.
-  int length;         // Length of the string.
+   char *ch;                              // Current character to consider.
+   int length;                            // Length of the string.
 
-  int i;
+   int i;
 
-  length = strlen (word);
+   length = strlen(word);
 
-  // Start at the beginning of the string
-  ch = word;
+   // Start at the beginning of the string
+   ch = word;
 
-  while (ch - word < length)
-  {
+   while (ch - word < length) {
 
-    ch += 6;
-    word = ch;         // Consume the word "flags"
-    length -= 6;
+      ch += 6;
+      word = ch;                // Consume the word "flags"
+      length -= 6;
 
-    // Grab the mask part
-    while (ch - word < length && *ch != '/')
-    {
-      word1[ch - word] = *ch;
+      // Grab the mask part
+      while (ch - word < length && *ch != '/') {
+         word1[ch - word] = *ch;
+         ch++;
+      }
+      word1[ch - word] = '\0';
       ch++;
-    }
-    word1[ch - word] = '\0';
-    ch++;
-    word = ch;
-    length -= strlen (word1);
+      word = ch;
+      length -= strlen(word1);
 
-    // Grab the value part.
-    while (ch - word < length && *ch != ',')
-    {
-      word2[ch - word] = *ch;
+      // Grab the value part.
+      while (ch - word < length && *ch != ',') {
+         word2[ch - word] = *ch;
+         ch++;
+      }
+      word2[ch - word] = '\0';
       ch++;
-    }
-    word2[ch - word] = '\0';
-    ch++;
-  }
-  // Parse the two parts into integers
-  sscanf (word1, "%x", &mask_num);
-  sscanf (word2, "%x", &val_num);
+   }
+   // Parse the two parts into integers
+   sscanf(word1, "%x", &mask_num);
+   sscanf(word2, "%x", &val_num);
 
-  // Convert the integers into boolean arrays.
-  mask[0] = mask_num & 1;
-  mask[1] = mask_num & 2;
-  mask[2] = mask_num & 4;
-  mask[3] = mask_num & 8;
-  mask[4] = mask_num & 16;
-  mask[5] = mask_num & 32;
+   // Convert the integers into boolean arrays.
+   mask[0] = mask_num & 1;
+   mask[1] = mask_num & 2;
+   mask[2] = mask_num & 4;
+   mask[3] = mask_num & 8;
+   mask[4] = mask_num & 16;
+   mask[5] = mask_num & 32;
 
-  value[0] = val_num & 1;
-  value[1] = (val_num & 2) / 2;
-  value[2] = (val_num & 4) / 4;
-  value[3] = (val_num & 8) / 8;
-  value[4] = (val_num & 16) / 16;
-  value[5] = (val_num & 32) / 32;
+   value[0] = val_num & 1;
+   value[1] = (val_num & 2) / 2;
+   value[2] = (val_num & 4) / 4;
+   value[3] = (val_num & 8) / 8;
+   value[4] = (val_num & 16) / 16;
+   value[5] = (val_num & 32) / 32;
 
-  // For each flag, assign the appropriate value to flags[i].
-  // If it's not in the mask, it can have any value.
-  // If it IS in the mask, it must have the value specified.
-  for (i = 0; i < 6; i++)
-  {
-    if (mask[i] == 0)
-    {
-      flags[i] = -1;
-    }
-    else
-    {
-      flags[i] = value[i];
-    }
-  }
+   // For each flag, assign the appropriate value to flags[i].
+   // If it's not in the mask, it can have any value.
+   // If it IS in the mask, it must have the value specified.
+   for (i = 0; i < 6; i++) {
+      if (mask[i] == 0) {
+         flags[i] = -1;
+      }
+      else {
+         flags[i] = value[i];
+      }
+   }
 }
 
 // Read a rule from the rule file.  Store it in a rule struct.
-int
-rule_parser::ReadRule (rule * newRule, char *line, size_t length)
+int rule_parser::ReadRule(rule * newRule, char *line, size_t length)
 {
-  char *ch;
-  char* end;
+   char *ch;
+   char *end;
 
-  ch = line;
-  end = line + length*sizeof(char);
+   ch = line;
+   end = line + length * sizeof(char);
 
-  if (line[0] == ' ' || line[0] == '\t')
-  {
-    newRule->target[0] = '\0';
-  }
-  else
-  {
-    while (ch < end && (*ch != ' ' && *ch != '\t'))
-    {
-      newRule->target[ch - line] = *ch;
+   if (line[0] == ' ' || line[0] == '\t') {
+      newRule->target[0] = '\0';
+   }
+   else {
+      while (ch < end && (*ch != ' ' && *ch != '\t')) {
+         newRule->target[ch - line] = *ch;
+         ch++;
+      }
+      newRule->target[ch - line] = '\0';
+   }
+   // Consume Whitespace
+   while (ch < end && (*ch == ' ' || *ch == '\t')) {
       ch++;
-    }
-    newRule->target[ch - line] = '\0';
-  }
-  // Consume Whitespace
-  while (ch < end && (*ch == ' ' || *ch == '\t'))
-  {
-    ch++;
-  }
+   }
 
-  // Read protocol field
-  line = ch;
-  while (ch < end && (*ch != ' ' && *ch != '\t'))
-  {
-    newRule->protocol[ch - line] = *ch;
-    ch++;
-  }
-  newRule->protocol[ch - line] = '\0';
+   // Read protocol field
+   line = ch;
+   while (ch < end && (*ch != ' ' && *ch != '\t')) {
+      newRule->protocol[ch - line] = *ch;
+      ch++;
+   }
+   newRule->protocol[ch - line] = '\0';
 
-  // Consume Whitespace
-  while (ch < end && (*ch == ' ' || *ch == '\t'))
-  {
-    ch++;
-  }
+   // Consume Whitespace
+   while (ch < end && (*ch == ' ' || *ch == '\t')) {
+      ch++;
+   }
 
-  // Read opt field
-  line = ch;
-  while (ch < end && (*ch != ' ' && *ch != '\t'))
-  {
-    newRule->opt[ch - line] = *ch;
-    ch++;
-  }
-  newRule->opt[ch - line] = '\0';
+   // Read opt field
+   line = ch;
+   while (ch < end && (*ch != ' ' && *ch != '\t')) {
+      newRule->opt[ch - line] = *ch;
+      ch++;
+   }
+   newRule->opt[ch - line] = '\0';
 
-  // Consume Whitespace
-  while (ch < end && (*ch == ' ' || *ch == '\t'))
-  {
-    ch++;
-  }
+   // Consume Whitespace
+   while (ch < end && (*ch == ' ' || *ch == '\t')) {
+      ch++;
+   }
 
-  // Read source address/mask
-  line = ch;
-  while (ch < end && (*ch != ' ' && *ch != '\t'))
-  {
-    newRule->source[ch - line] = *ch;
-    ch++;
-  }
-  newRule->source[ch - line] = '\0';
+   // Read source address/mask
+   line = ch;
+   while (ch < end && (*ch != ' ' && *ch != '\t')) {
+      newRule->source[ch - line] = *ch;
+      ch++;
+   }
+   newRule->source[ch - line] = '\0';
 
-  // Consume Whitespace
-  while (ch < end && (*ch == ' ' || *ch == '\t'))
-  {
-    ch++;
-  }
+   // Consume Whitespace
+   while (ch < end && (*ch == ' ' || *ch == '\t')) {
+      ch++;
+   }
 
-  // Read dest address/mask
-  line = ch;
-  while (ch < end && (*ch != ' ' && *ch != '\t'))
-  {
-    newRule->dest[ch - line] = *ch;
-    ch++;
-  }
-  newRule->dest[ch - line] = '\0';
+   // Read dest address/mask
+   line = ch;
+   while (ch < end && (*ch != ' ' && *ch != '\t')) {
+      newRule->dest[ch - line] = *ch;
+      ch++;
+   }
+   newRule->dest[ch - line] = '\0';
 
-  // Consume Whitespace
-  while (ch < end && (*ch == ' ' || *ch == '\t'))
-  {
-    ch++;
-  }
+   // Consume Whitespace
+   while (ch < end && (*ch == ' ' || *ch == '\t')) {
+      ch++;
+   }
 
-  // Read extra stuff at the end (ports, state, flags, etc.)
-  line = ch;
-  while (ch < end)
-  {
-    newRule->info[ch - line] = *ch;
-    ch++;
-  }
-  newRule->info[ch - line] = '\0';
-  newRule->in[0] = '\0';
-  newRule->out[0] = '\0';
-  return 0;
+   // Read extra stuff at the end (ports, state, flags, etc.)
+   line = ch;
+   while (ch < end) {
+      newRule->info[ch - line] = *ch;
+      ch++;
+   }
+   newRule->info[ch - line] = '\0';
+   newRule->in[0] = '\0';
+   newRule->out[0] = '\0';
+   return 0;
 }
 
 // Read a rule from the rule file.  Store it in a rule struct.
-int
-rule_parser::ReadVerboseRule (rule * newRule, char *line, size_t length)
+int rule_parser::ReadVerboseRule(rule * newRule, char *line, size_t length)
 {
-  char target[1024];
-  char protocol[1024];
-  char opt[1024];
-  char in[1024];
-  char out[1024];
-  char source[1024];
-  char destination[1024];
-  char info[1024];
-  int numcons;
+   char target[1024];
+   char protocol[1024];
+   char opt[1024];
+   char in[1024];
+   char out[1024];
+   char source[1024];
+   char destination[1024];
+   char info[1024];
+   int numcons;
 
-  for (int i=0;i<1024;i++)
-     info[i] = (char)0x0;
-  
-  numcons= 0;
-  
-  numcons = sscanf(line, "%*s %*s %1024s %1024s %1024s %1024s %1024s %1024s %1024s %1024c", target, protocol, opt, in, out, source, destination, info);
-  if (numcons != 8){
-     info[0] = '\0';
-  }
+   for (int i = 0; i < 1024; i++)
+      info[i] = (char) 0x0;
 
-  if (strncmp(protocol,"--",2) == 0){
-     /* Handle "blank target" case */
-     strncpy(newRule->info, destination, 1024);
-     strncpy(newRule->dest, source, 1024);
-     strncpy(newRule->source, out, 1024);
-     strncpy(newRule->out, in, 1024);
-     strncpy(newRule->in, opt, 1024);
-     strncpy(newRule->protocol, target, 1024);
-     newRule->target[0]='\0';
-  }
-  else{
-     /*Normal Case*/
-     strncpy(newRule->info, info, 1024);
-     strncpy(newRule->dest, destination, 1024);
-     strncpy(newRule->source, source, 1024);
-     strncpy(newRule->out, out, 1024);
-     strncpy(newRule->in, in, 1024);
-     strncpy(newRule->protocol, protocol, 1024);
-     strncpy(newRule->target, target, 1024);
-  }
-  return 0;
+   numcons = 0;
+
+   numcons =
+      sscanf(line,
+             "%*s %*s %1024s %1024s %1024s %1024s %1024s %1024s %1024s %1024c",
+             target, protocol, opt, in, out, source, destination, info);
+   if (numcons != 8) {
+      info[0] = '\0';
+   }
+
+   if (strncmp(protocol, "--", 2) == 0) {
+      /* Handle "blank target" case */
+      strncpy(newRule->info, destination, 1024);
+      strncpy(newRule->dest, source, 1024);
+      strncpy(newRule->source, out, 1024);
+      strncpy(newRule->out, in, 1024);
+      strncpy(newRule->in, opt, 1024);
+      strncpy(newRule->protocol, target, 1024);
+      newRule->target[0] = '\0';
+   }
+   else {
+      /*Normal Case */
+      strncpy(newRule->info, info, 1024);
+      strncpy(newRule->dest, destination, 1024);
+      strncpy(newRule->source, source, 1024);
+      strncpy(newRule->out, out, 1024);
+      strncpy(newRule->in, in, 1024);
+      strncpy(newRule->protocol, protocol, 1024);
+      strncpy(newRule->target, target, 1024);
+   }
+   return 0;
 }
-

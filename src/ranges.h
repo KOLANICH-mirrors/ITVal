@@ -31,43 +31,37 @@ Williamsburg, VA 23185
 #ifndef __RANGES_H__
 #   define __RANGES_H__
 
-enum states
-{ INVALID = 1, ESTABLISHED = 2, NEW = 4, RELATED = 8 };
+enum states { INVALID = 1, ESTABLISHED = 2, NEW = 4, RELATED = 8 };
 
 //A (low, high) pair describing an IP address range.
-class address_range
-{
-public:
-  unsigned int low;
-  unsigned int high;
-  address_range *next;
+class address_range {
+ public:
+   unsigned int low;
+   unsigned int high;
+   address_range *next;
 
-    address_range ()
-  {
-    next = NULL;
-    low = 0;
-    high = 0;
-  }
-};
+     address_range() {
+      next = NULL;
+      low = 0;
+      high = 0;
+}};
 
 //A linked list of (low, high) pairs, describing a set of port ranges.
-class port_range
-{
-public:
-  int port1;
-  int port2;
-  port_range *next;
+class port_range {
+ public:
+   int port1;
+   int port2;
+   port_range *next;
 
-    port_range ()
-  {
-    next = NULL;
-    port1 = -1;
-    port2 = -1;
+     port_range() {
+      next = NULL;
+      port1 = -1;
+      port2 = -1;
 }};
 
 //Helper function to convert an address/mask pair into a (low, high)
 //pair.
-void create_range (unsigned int *addy, unsigned int mask, address_range * ar);
+void create_range(unsigned int *addy, unsigned int mask, address_range * ar);
 
-void ConvertARange (char *range, address_range * ar);
+void ConvertARange(char *range, address_range * ar);
 #endif

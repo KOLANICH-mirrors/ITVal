@@ -29,18 +29,16 @@ Williamsburg, VA 23185
 #include "rules.h"
 #include "chains.h"
 
-enum targets
-{ SNAT = -3, DNAT = -2, LOG = -1, UNDEFINED = 0, RETURN = 0,
-  DROP = 1, REJECT = 2, ACCEPT = 3, NETMAP = 4
+enum targets { SNAT = -3, DNAT = -2, LOG = -1, UNDEFINED = 0, RETURN = 0,
+   DROP = 1, REJECT = 2, ACCEPT = 3, NETMAP = 4
 };
 
-enum protocols
-{ ICMP = 0, UDP = 1, TCP = 2 };
+enum protocols { ICMP = 0, UDP = 1, TCP = 2 };
 
-void PrintRuleTuple (rule_tuple * r);
-void BuildRules (processed_rule * head, rule_tuple * &result);
-void ApplyNATRules (processed_nat_rule * head, rule_tuple * &result);
-void AssembleChains (chain ** chain_array, chain * chain,
-           mdd_handle & outputMDD, mdd_handle & logMDD);
-void NATChains (chain ** nat_chains, int prerouting,
-      mdd_handle & outputMDD, mdd_handle & logMDD);
+void PrintRuleTuple(rule_tuple * r);
+void BuildRules(processed_rule * head, rule_tuple * &result);
+void ApplyNATRules(processed_nat_rule * head, rule_tuple * &result);
+void AssembleChains(chain ** chain_array, chain * chain,
+                    mdd_handle & outputMDD, mdd_handle & logMDD);
+void NATChains(chain ** nat_chains, int prerouting, mdd_handle & outputMDD,
+               mdd_handle & logMDD);

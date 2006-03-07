@@ -37,84 +37,72 @@ Williamsburg, VA 23185
 #   include "rules.h"
 #   include "nat.h"
 
-class chain
-{
-public:
-  char name[256];      //Name of the chain
-  char fname[256];      //For debugging, name of the file.
-  int Default;         //Default policy of the chain.
+class chain {
+ public:
+   char name[256];                        //Name of the chain
+   char fname[256];                       //For debugging, name of the file.
+   int Default;                           //Default policy of the chain.
 
-  rule *rules;         //List of original, unprocessed, rules
-  processed_rule *newRules;   //List of intermediate, expanded, rules
-  rule_tuple *tup;      //List of tuples
+   rule *rules;                           //List of original, unprocessed, rules
+   processed_rule *newRules;              //List of intermediate, expanded, rules
+   rule_tuple *tup;                       //List of tuples
 
-    chain ()
-  {
-    rules = NULL;
-    newRules = NULL;
-    tup = NULL;
-    Default = -1;
-  } 
-    
-    chain (char *fileName)
-  {
-    rules = NULL;
-    newRules = NULL;
-    tup = NULL;
-    Default = -1;
-    strncpy (fname, fileName, 256);
-  }
+     chain() {
+      rules = NULL;
+      newRules = NULL;
+      tup = NULL;
+      Default = -1;
+   } chain(char *fileName) {
+      rules = NULL;
+      newRules = NULL;
+      tup = NULL;
+      Default = -1;
+      strncpy(fname, fileName, 256);
+   }
 
-  ~chain ()
-  {
-    rule *cur_rule;
-    processed_rule *cur_prule;
-    rule_tuple *cur_tup;
+   ~chain() {
+      rule *cur_rule;
+      processed_rule *cur_prule;
+      rule_tuple *cur_tup;
 
-    while (rules != NULL)
-    {
-      cur_rule = rules;
-      rules = rules->next;
-      delete cur_rule;
+      while (rules != NULL) {
+         cur_rule = rules;
+         rules = rules->next;
+         delete cur_rule;
 
-      cur_rule = NULL;
-    }
+         cur_rule = NULL;
+      }
 
-    while (newRules != NULL)
-    {
-      cur_prule = newRules;
-      newRules = newRules->next;
-      delete cur_prule;
-    }
+      while (newRules != NULL) {
+         cur_prule = newRules;
+         newRules = newRules->next;
+         delete cur_prule;
+      }
 
-    while (tup != NULL)
-    {
-      cur_tup = tup;
-      tup = tup->next;
-      delete cur_tup;
-    }
-  }
+      while (tup != NULL) {
+         cur_tup = tup;
+         tup = tup->next;
+         delete cur_tup;
+      }
+   }
 };
 
-class nat_chain:public chain
-{
-public:
-  processed_nat_rule * natRules;
-  nat_chain (char *fileName):chain (fileName)
-  {
-    natRules = NULL;
-  }
-  ~nat_chain(){
-     processed_nat_rule *cur_nrule;
-     cur_nrule = natRules;
-     while (natRules != NULL){
-        cur_nrule = natRules;
-        natRules = (processed_nat_rule *)natRules->next;
-        delete cur_nrule;
-     }
-  }
+class nat_chain:public chain {
+ public:
+   processed_nat_rule * natRules;
+   nat_chain(char *fileName):chain(fileName) {
+      natRules = NULL;
+   } ~nat_chain() {
+      processed_nat_rule *cur_nrule;
+      cur_nrule = natRules;
+      while (natRules != NULL) {
+         cur_nrule = natRules;
+         natRules = (processed_nat_rule *) natRules->next;
+         delete cur_nrule;
+      }
+   }
 };
 
 //Given the name of a chain, find its index in the chain array
-int FindNATChain (char *name);
+int FindNATChain(char *name);
 #endif
