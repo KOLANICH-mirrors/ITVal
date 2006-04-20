@@ -331,6 +331,70 @@ int Firewall::GetClasses(group ** &classes, int &numClasses)
    return 0;
 }
 
+int Firewall::GetServiceGraph(int* src, int* dst, service*& arcs, int& numArcs){
+   mdd_handle FWSourceClass;
+   mdd_handle INSourceClass;
+   mdd_handle OUTSourceClass;
+
+   mdd_handle FWDestClass;
+   mdd_handle INDestClass;
+   mdd_handle OUTDestClass;
+
+   mdd_handle newChain;
+   mdd_handle resultClass;
+/*
+   FWForest->Shift(Forward, 12, newChain);      //Grab source port byte 2
+   FWForest->Shift(newChain, 12, newChain);     //Grab source port byte 1
+   FWForest->Shift(newChain, 12, FWSourceClass);     //Grab protocol
+
+   FWForest->Shift(Input, 12, newChain);        //Grab source port byte 2
+   FWForest->Shift(newChain, 12, newChain);     //Grab source port byte 1
+   FWForest->Shift(newChain, 12, INSourceClass);     //Grab protocol
+   
+   FWForest->Shift(Output, 12, newChain);       //Grab source port byte 2
+   FWForest->Shift(newChain, 12, newChain);     //Grab source port byte 1
+   FWForest->Shift(newChain, 12, OUTSourceClass);     //Grab protocol
+   
+   //Shift Destination Port to Top.
+   FWForest->Shift(Forward, 10, newChain);      //Grab destination port byte 2
+   FWForest->Shift(newChain, 10, newChain);     //Grab destination port byte 1
+   FWForest->Shift(newChain, 12, FWDestClass);     //Grab protocol
+   
+
+   FWForest->Shift(Input, 10, newChain);
+   FWForest->Shift(newChain, 10, newChain);
+   FWForest->Shift(newChain, 12, INDestClass);
+
+   FWForest->Shift(Output, 10, newChain);
+   FWForest->Shift(newChain, 10, newChain);
+   FWForest->Shift(newChain, 12, OUTDestClass);
+
+   FWForest->Max(FWSourceClass, INSourceClass, resultClass);
+
+   FWForest->DestroyMDD(FWSourceClass);
+   FWForest->DestroyMDD(INSourceClass);
+
+   FWForest->Max(resultClass, OUTSourceClass, resultClass);
+   FWForest->DestroyMDD(OUTSourceClass);
+
+   FWForest->Max(resultClass, FWDestClass, resultClass);
+   FWForest->DestroyMDD(FWDestClass);
+
+   FWForest->Max(resultClass, INDestClass, resultClass);
+   FWForest->DestroyMDD(INDestClass);
+
+   FWForest->Max(resultClass, OUTDestClass, resultClass);                                   
+   FWForest->DestroyMDD(OUTDestClass);
+*/
+   FWForest->Max(Forward, Input, resultClass);
+   FWForest->Max(resultClass, Output, resultClass);
+   
+   if (FWForest->
+       GetServiceArcs(resultClass, src, dst, arcs, numArcs) == SUCCESS)
+      return 1;
+   return 0;
+}
+
 int Firewall::PrintServiceClasses()
 {
    int numClasses;

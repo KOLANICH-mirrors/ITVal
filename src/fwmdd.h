@@ -114,6 +114,11 @@ class fw_fddl_forest:public fddl_forest {
                      int &numClasses, int services);
    int InternalBuildClassMDD(fddl_forest * forest, level k, node_idx p,
                              int &numClasses, int services);
+   
+   int BuildServiceGraphMDD(mdd_handle p, fddl_forest * forest, mdd_handle & r,
+                     int &numArcs);
+   int InternalBuildServiceGraphMDD(fddl_forest * forest, level k, node_idx p,
+                             int &numArcs);
 
    int JoinClasses(mdd_handle p, mdd_handle q, mdd_handle & r,
                    int &outNumClasses);
@@ -135,6 +140,9 @@ class fw_fddl_forest:public fddl_forest {
    int GetServiceClasses(mdd_handle p, service ** &output, int numClasses);
    void InternalGetServiceClasses(level k, node_idx p, int *low, int *high,
                                   int classNum, service * head);
+
+   int GetServiceArcs(mdd_handle p, int* src, int* dst, service*&output, int& numArcs);
+   int InternalGetServiceArcs(level k, node_idx p, int* src, int* dst, int* low, int* high, service*&output, int& numArcs);
 };
 
 #endif

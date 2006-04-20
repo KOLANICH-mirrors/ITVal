@@ -151,12 +151,48 @@ port *ParsePort(char *str)
    return newPort;
 }
 
+void ProcessComponent(char *piece, int& low, int& high){
+   if (piece == NULL || piece[0] == '*') {
+      low = -1;
+      high = -1;
+   }
+   else if (piece[0] =='['){
+      char first[4];
+      char second[4];
+      int pos;
+      pos = 1;
+
+      while (pos<=7 && piece[pos] != '-'){
+         first[pos-1] = piece[pos];
+         pos++;
+      }
+      if (piece[pos] != '-'){
+         printf("Incorrectly formatted range: %s [F%d].\n", piece, pos);
+         exit(-1);
+      }
+      sscanf(first, "%d", &low);
+      //pos = 1;
+      while (pos<=7 && piece[pos] != ']'){
+         second[pos-1] = piece[pos];
+         pos++;
+      }
+      if (piece[pos] != ']'){
+         printf("Incorrectly formatted range: %s [S%d].\n", piece, pos);
+         exit(-1);
+      }
+      sscanf(second, "%d", &high);
+   }
+   else {
+      sscanf(piece, "%d", &low);
+      high = low;
+   }
+}
+
 // Convert the string representation of an address into an address
 // struct.
 address *ParseAddr(char *val1, char *val2, char *val3, char *val4)
 {
    address *newAddr;
-
    newAddr = new address;
    if (!newAddr) {
       printf("Failed to allocate memory for address %s.%s.%s.%s\n",
@@ -164,42 +200,13 @@ address *ParseAddr(char *val1, char *val2, char *val3, char *val4)
              val3 != NULL ? val3 : "*", val4 != NULL ? val4 : "*");
       return NULL;
    }
-   if (val1 == NULL || val1[0] == '*') {
-      newAddr->low[0] = -1;
-      newAddr->high[0] = -1;
-   }
-   else {
-      sscanf(val1, "%d", &newAddr->low[0]);
-      newAddr->high[0] = newAddr->low[0];
-   }
+   ProcessComponent(val1,newAddr->low[0], newAddr->high[0]);
    delete[]val1;
-
-   if (val2 == NULL || val2[0] == '*') {
-      newAddr->low[1] = -1;
-      newAddr->high[1] = -1;
-   }
-   else {
-      sscanf(val2, "%d", &newAddr->low[1]);
-      newAddr->high[1] = newAddr->low[1];
-   }
+   ProcessComponent(val2,newAddr->low[1], newAddr->high[1]);
    delete[]val2;
-   if (val3 == NULL || val3[0] == '*') {
-      newAddr->low[2] = -1;
-      newAddr->high[2] = -1;
-   }
-   else {
-      sscanf(val3, "%d", &newAddr->low[2]);
-      newAddr->high[2] = newAddr->low[2];
-   }
+   ProcessComponent(val3,newAddr->low[2], newAddr->high[2]);
    delete[]val3;
-   if (val4 == NULL || val4[0] == '*') {
-      newAddr->low[3] = -1;
-      newAddr->high[3] = -1;
-   }
-   else {
-      sscanf(val4, "%d", &newAddr->low[3]);
-      newAddr->high[3] = newAddr->low[3];
-   }
+   ProcessComponent(val4,newAddr->low[3], newAddr->high[3]);
    delete[]val4;
    newAddr->next = NULL;
    return newAddr;
@@ -774,13 +781,58 @@ void DoCleanup()
 
 query *PrintClasses()
 {
+
    FW->PrintClasses();          //Nodes at level 19.
    return NULL;
 }
 
 query *PrintServiceClasses()
 {
+
    FW->PrintServiceClasses();
+   return NULL;
+}
+
+query *PrintServiceGraph()
+{
+   address* fromAd;
+   address* toAd;
+   group **grps;
+   int numGroups;
+
+   FW->GetClasses(grps, numGroups);
+   for (int i=0;i<numGroups;i++){
+      for (int j=0;j<numGroups;j++){
+        service* arcs;
+        int numArcs;
+
+         fromAd = grps[i]->list;
+         toAd = grps[j]->list;
+         FW->GetServiceGraph(fromAd->low, toAd->low, arcs, numArcs);
+
+         printf("There are %d arcs from %s to %s\n", numArcs, grps[i]->name, grps[j]->name);
+//         printf("There are %d arcs from %d.%d.%d.%d to %d.%d.%d.%d\n", numArcs, fromAd->low[0], fromAd->low[1], fromAd->low[2], fromAd->low[3], toAd->low[0],toAd->low[1],toAd->low[2],toAd->low[3]);
+         port* curPort;
+         int lastVal;
+         lastVal = -1;
+         curPort = arcs->list;
+         if (curPort != NULL){
+            printf("%d Port %d-", curPort->protocol, curPort->low);
+            lastVal = curPort->high;
+            curPort = curPort->next;
+         }
+         while (curPort != NULL){
+            if (curPort->low != lastVal - 1){
+               printf("%d\n", curPort->protocol, curPort->high);
+               printf("%d Port %d-", curPort->protocol, curPort->low);
+            }
+            lastVal = curPort->high;
+            curPort = curPort->next;
+         }
+         if (lastVal>=0)
+            printf("%d\n", lastVal);
+      }
+   }
    return NULL;
 }
 

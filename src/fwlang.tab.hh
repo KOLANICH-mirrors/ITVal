@@ -51,38 +51,39 @@ namespace yy
      STATE = 272,
      CLASSES = 273,
      SCLASSES = 274,
-     UDP = 275,
-     TCP = 276,
-     ICMP = 277,
-     BOTH = 278,
-     NUM = 279,
-     DOT = 280,
-     LOGGED = 281,
-     T_INVALID = 282,
-     T_NEW = 283,
-     T_ESTABLISHED = 284,
-     T_RELATED = 285,
-     FIN = 286,
-     SYN = 287,
-     RST = 288,
-     PSH = 289,
-     ACK = 290,
-     URG = 291,
-     NAME = 293,
-     LPAREN = 310,
-     RPAREN = 311,
-     SEMI = 312,
-     AND = 314,
-     OR = 316,
-     NOT = 318,
-     OUTFACE = 320,
-     INFACE = 321,
-     WITH = 322,
-     IN = 323,
-     ON = 324,
-     FOR = 325,
-     TO = 326,
-     FROM = 327
+     SGRAPH = 275,
+     UDP = 276,
+     TCP = 277,
+     ICMP = 278,
+     BOTH = 279,
+     NUM = 280,
+     DOT = 281,
+     LOGGED = 282,
+     T_INVALID = 283,
+     T_NEW = 284,
+     T_ESTABLISHED = 285,
+     T_RELATED = 286,
+     FIN = 287,
+     SYN = 288,
+     RST = 289,
+     PSH = 290,
+     ACK = 291,
+     URG = 292,
+     NAME = 294,
+     LPAREN = 311,
+     RPAREN = 312,
+     SEMI = 313,
+     AND = 315,
+     OR = 317,
+     NOT = 319,
+     OUTFACE = 321,
+     INFACE = 322,
+     WITH = 323,
+     IN = 324,
+     ON = 325,
+     FOR = 326,
+     TO = 327,
+     FROM = 328
    };
 
 
@@ -96,7 +97,7 @@ int yyerror(char* str);
 
 
 /* Line 321 of lalr1.cc.  */
-#line 100 "fwlang.tab.hh"
+#line 101 "fwlang.tab.hh"
 
 #include "stack.hh"
 #include "location.hh"
@@ -144,7 +145,7 @@ union YYSTYPE {
    char* val;
 };
 /* Line 321 of lalr1.cc.  */
-#line 148 "fwlang.tab.hh"
+#line 149 "fwlang.tab.hh"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -154,7 +155,7 @@ union YYSTYPE {
 
 
 /* Line 321 of lalr1.cc.  */
-#line 158 "fwlang.tab.hh"
+#line 159 "fwlang.tab.hh"
 /* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
    If N is 0, then set CURRENT to the empty location which ends
    the previous symbol: RHS[0] (always defined).  */

@@ -33,7 +33,7 @@ int FWLANG_LINE_NO = 0;
 %}
 %option noyywrap nounput batch debug
 
-NUM [0-9]*|"*"
+NUM [0-9]*|"*"|"["[0-9]*"-"[0-9]*"]"
 ALPHANUM [a-zA-Z][_a-zA-Z0-9\+\*]*
 COMMENT "#".*
 
@@ -50,6 +50,7 @@ COMMENT "#".*
 "SPORT" { ECHO; return SPORT; }
 "CLASSES" { ECHO; return CLASSES; }
 "SCLASSES" { ECHO; return SCLASSES; }
+"SGRAPH" { ECHO; return SGRAPH; }
 "DPORT" { ECHO; return DPORT; }
 "SADDY" { ECHO; return SADDY; }
 "DADDY" { ECHO; return DADDY; }

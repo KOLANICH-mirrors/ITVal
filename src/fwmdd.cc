@@ -623,6 +623,72 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
    return r;
 }
 
+int fw_fddl_forest::BuildServiceGraphMDD(mdd_handle p, fddl_forest * forest,
+                                  mdd_handle & r, int &numArcs)
+{
+
+   int *low;
+   int *high;
+
+   node_idx newresult;
+
+   if (p.index < 0)
+      return INVALID_MDD;
+
+   if (forest == NULL)
+      return INVALID_MDD;
+
+   for (level k = K; k > 0; k--) {
+      BuildCache[k]->Clear();
+   }
+
+   numArcs = 0;
+   newresult =
+      InternalBuildServiceGraphMDD(forest, K, p.index, numArcs);
+   if (r.index != newresult) {
+      forest->ReallocHandle(r);
+      forest->Attach(r, newresult);
+   }
+   return SUCCESS;
+}
+
+node_idx fw_fddl_forest::InternalBuildServiceGraphMDD(fddl_forest * forest, level k,
+                                               node_idx p, int &numArcs)
+{
+   node_idx r;
+   level newK;
+
+   newK = k - 11;
+
+   r = BuildCache[k]->Hit(k, p);
+   if (r >= 0)
+      return r;
+
+   if (p == 0) {
+      BuildCache[k]->Add(k, p, numArcs); //Is this a good idea?  I don't know.
+      numArcs++;
+      return numArcs - 1;
+   }
+
+   if (newK == 0) {
+      BuildCache[k]->Add(k, p, numArcs);
+      numArcs++;
+      return numArcs - 1;
+   }
+
+   r = forest->NewNode(newK);
+   node *nodeP;
+   nodeP = &FDDL_NODE(k, p);
+   for (arc_idx i = 0; i < nodeP->size; i++) {
+      forest->SetArc(newK, r, i,
+                     InternalBuildServiceGraphMDD(forest, k - 1,
+                                           FDDL_ARC(k, nodeP, i), numArcs));
+   }
+   r = forest->CheckIn(newK, r);
+   BuildCache[k]->Add(k, p, r);
+   return r;
+}
+
 node_idx fw_fddl_forest::InternalJoinClasses(level k, node_idx p, node_idx q,
                                              int &numClasses)
 {
@@ -897,6 +963,117 @@ void fw_fddl_forest::InternalGetClasses(level k, node_idx p, int *low,
                       classNum, head);
 }
 
+int fw_fddl_forest::GetServiceArcs(mdd_handle p, int* src, int* dst, service * &output, int& numArcs)
+{
+   int *low;
+   int *high;
+   if (p.index < 0)
+      return INVALID_MDD;
+   output = new service();
+   sprintf(output->name, "ServiceGraphArc");
+   output->list = NULL;
+   low = new int[3];
+   high = new int[3];
+   for (int i=0;i<3;i++){
+      low[i] = high[i] = -1;
+   }
+   for (level k=K;k>0;k--)
+      JoinCache[k]->Clear();
+   numArcs = 0;
+   InternalGetServiceArcs(K, p.index, src, dst, low, high, output, numArcs);
+   delete[]low;
+   delete[]high;
+   return SUCCESS;
+}
+
+int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* dst, int* low, int* high, service*& output, int& numArcs){
+/*
+   char spaces[23];
+   for (int i=0;i<K-k;i++){
+      spaces[i]=' ';
+      spaces[i+1]='\0';
+   }
+   printf("%s<%d, %d>\n", spaces,k, p);
+*/
+   
+   if (p==0){
+      return 0;
+   }
+
+   if (k==0){
+      return p;
+   }
+
+   node* nodeP;
+   nodeP = &FDDL_NODE(k,p);
+   if (nodeP->size == 0)
+      return 0;
+   
+   if (k==11){
+      for (int i=0; i<nodeP->size;i++){
+         node_idx q;
+         node_idx r;
+         q = FDDL_ARC(k,nodeP,i);
+         r = InternalGetServiceArcs(k-1, q, src, dst, low, high, output, numArcs);
+         if (r == 3){ // If the terminal node is ACCEPT.
+            port* newPort;
+            newPort = new port();
+            newPort->low = low[1]*256 + low[2];
+            newPort->high = high[1]*256 + high[2];
+            newPort->protocol = low[0];
+            newPort->next = output->list;
+            output->list = newPort;
+            //printf("Adding port: %d[%d]\n", newPort->protocol, newPort->low);
+            numArcs++;
+            return p;
+         }
+      }
+      return 0;
+   }
+   if (k<11){
+      node_idx r;
+      r = JoinCache[k]->Hit(p,p);
+      if (r >= 0){
+         return r;
+      }
+      for (int i=0; i<nodeP->size;i++){
+         node_idx q;
+         q = FDDL_ARC(k,nodeP,i);
+         if (q == 0)
+            continue;
+         r = InternalGetServiceArcs(k-1, q, src, dst, low, high, output, numArcs);
+         if (r == 3){
+            JoinCache[k]->Add(p,p,r);
+            return r;
+         }
+      }
+      JoinCache[k]->Add(p,p,0);
+      return 0;
+   }
+   
+   if (k<=14 && k>=12){
+      for (int i=0;i<nodeP->size;i++){
+         node_idx q;
+         low[14-k] = i;
+         high[14-k] = i;
+         q = FDDL_ARC(k,nodeP,i);
+         if (q != 0)
+            InternalGetServiceArcs(k-1, q, src, dst, low, high, output, numArcs);
+      }
+   }
+   else if (k<=18 && k>=15){
+      InternalGetServiceArcs(k-1, FDDL_ARC(k,nodeP, dst[18-k]), src,
+      dst, low, high, output, numArcs);
+   }
+   else if (k<=22 & k>=19){
+      InternalGetServiceArcs(k-1, FDDL_ARC(k,nodeP, src[22-k]), src,
+      dst, low, high, output, numArcs);
+   }
+   else{
+      printf("Error at level %d\n", k);
+   }
+}
+
 int fw_fddl_forest::GetServiceClasses(mdd_handle p, service ** &output,
                                       int numClasses)
 {
@@ -981,3 +1158,4 @@ void fw_fddl_forest::InternalGetServiceClasses(level k, node_idx p, int *low,
    InternalGetServiceClasses(k - 1, FDDL_ARC(k, nodeP, nodeP->size - 1), low,
                              high, classNum, head);
 }
+

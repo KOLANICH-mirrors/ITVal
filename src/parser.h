@@ -101,6 +101,7 @@ query *PerformQuery(int s, condition * c, int input_chain);
 //Compute Host Equivalence Classes and print them.
 query *PrintClasses();
 query *PrintServiceClasses();
+query *PrintServiceGraph();
 group *GetClasses();
 service *GetServiceClasses();
 

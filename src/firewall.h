@@ -146,6 +146,7 @@ class Firewall {
    int PrintServiceClasses();
    int GetClasses(group ** &Classes, int &numClasses);
    int GetServiceClasses(service ** &Classes, int &numClasses);
+   int GetServiceGraph(int* src, int* dst, service* &arcs, int& numArcs);
 };
 
 /* Create a META-Firewall from all the independent firewalls.*/
