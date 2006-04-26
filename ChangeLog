@@ -1,3 +1,11 @@
+ITVal-0.7: April 26, 2006 Robert Marmorstein
+        ITVal now supports ranged addresses in queries and group/service
+        definitions.   For instance, you can use the query: QUERY FROM
+        192.168.1.[10-20] to specify a group of adjacently addresses hosts;
+        Support for INFACE and OUTFACE queries has also been improved and more
+	work on the equivalence classes and GUI has been done.  They should 
+	still be considered beta features, though.
+
 ITVal-0.6-r1: March 7, 2006 Robert Marmorstein
 	ITVal now ignores "PKTTYPE = <blah>" style conditions in the options
 	section of the rule table.  Also fixed a bug that caused segmentation

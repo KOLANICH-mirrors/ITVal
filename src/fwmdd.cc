@@ -638,7 +638,7 @@ int fw_fddl_forest::BuildServiceGraphMDD(mdd_handle p, fddl_forest * forest,
    if (forest == NULL)
       return INVALID_MDD;
 
-   for (level k = K; k > 0; k--) {
+   for (level k = K; k >= 0; k--) {
       BuildCache[k]->Clear();
    }
 
@@ -977,7 +977,7 @@ int fw_fddl_forest::GetServiceArcs(mdd_handle p, int* src, int* dst, service * &
    for (int i=0;i<3;i++){
       low[i] = high[i] = -1;
    }
-   for (level k=K;k>0;k--)
+   for (level k=K;k>=0;k--)
       JoinCache[k]->Clear();
    numArcs = 0;
    InternalGetServiceArcs(K, p.index, src, dst, low, high, output, numArcs);
@@ -1009,7 +1009,7 @@ int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
    if (nodeP->size == 0)
       return 0;
    
-   if (k==11){
+   if (k==9){
       for (int i=0; i<nodeP->size;i++){
          node_idx q;
          node_idx r;
@@ -1018,9 +1018,9 @@ int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
          if (r == 3){ // If the terminal node is ACCEPT.
             port* newPort;
             newPort = new port();
+            newPort->protocol = low[0];
             newPort->low = low[1]*256 + low[2];
             newPort->high = high[1]*256 + high[2];
-            newPort->protocol = low[0];
             newPort->next = output->list;
             output->list = newPort;
             //printf("Adding port: %d[%d]\n", newPort->protocol, newPort->low);
@@ -1030,7 +1030,7 @@ int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
       }
       return 0;
    }
-   if (k<11){
+   if (k<9){
       node_idx r;
       r = JoinCache[k]->Hit(p,p);
       if (r >= 0){
@@ -1038,6 +1038,9 @@ int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
       }
       for (int i=0; i<nodeP->size;i++){
          node_idx q;
+         if (k==7 && i != 1){  //Only look at NEW connections
+            continue;
+         }
          q = FDDL_ARC(k,nodeP,i);
          if (q == 0)
             continue;
@@ -1051,17 +1054,27 @@ int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
       return 0;
    }
    
-   if (k<=14 && k>=12){
+   if (k==14){
       for (int i=0;i<nodeP->size;i++){
          node_idx q;
-         low[14-k] = i;
-         high[14-k] = i;
+         low[0] = i;
+         high[0] = i;
          q = FDDL_ARC(k,nodeP,i);
          if (q != 0)
             InternalGetServiceArcs(k-1, q, src, dst, low, high, output, numArcs);
       }
    }
-   else if (k<=18 && k>=15){
+   else if (k<=11 && k >= 10){
+      for (int i=0;i<nodeP->size;i++){
+         node_idx q;
+         low[12-k] = i;
+         high[12-k] = i;
+         q = FDDL_ARC(k,nodeP,i);
+         if (q != 0)
+            InternalGetServiceArcs(k-1, q, src, dst, low, high, output, numArcs);
+      }
+   }
+   else if ((k<=18 && k>=15) || (k<=13 && k>=12)){
       InternalGetServiceArcs(k-1, FDDL_ARC(k,nodeP, dst[18-k]), src,
       dst, low, high, output, numArcs);
    }

@@ -386,11 +386,11 @@ int Firewall::GetServiceGraph(int* src, int* dst, service*& arcs, int& numArcs){
    FWForest->Max(resultClass, OUTDestClass, resultClass);                                   
    FWForest->DestroyMDD(OUTDestClass);
 */
-   FWForest->Max(Forward, Input, resultClass);
-   FWForest->Max(resultClass, Output, resultClass);
+   //FWForest->Max(Forward, Input, resultClass);
+   //FWForest->Max(resultClass, Output, resultClass);
    
    if (FWForest->
-       GetServiceArcs(resultClass, src, dst, arcs, numArcs) == SUCCESS)
+       GetServiceArcs(Forward, src, dst, arcs, numArcs) == SUCCESS)
       return 1;
    return 0;
 }

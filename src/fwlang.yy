@@ -100,6 +100,7 @@ query_expression: QUERY CLASSES {$$ = PrintClasses();}
           | QUERY SGRAPH {$$ = PrintServiceGraph();}
           | QUERY subject condition {$$ = PerformQuery($2, $3, 1);}
           | QUERY subject input_chain condition {$$ = PerformQuery($2, $4, $3);} 
+          | QUERY input_chain subject condition {$$ = PerformQuery($3, $4, $2);} 
 			 ;
 
 input_chain: INPUT {$$ = 0;}

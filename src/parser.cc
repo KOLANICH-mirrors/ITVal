@@ -814,19 +814,22 @@ query *PrintServiceGraph()
 //         printf("There are %d arcs from %d.%d.%d.%d to %d.%d.%d.%d\n", numArcs, fromAd->low[0], fromAd->low[1], fromAd->low[2], fromAd->low[3], toAd->low[0],toAd->low[1],toAd->low[2],toAd->low[3]);
          port* curPort;
          int lastVal;
+         int lastProt;
          lastVal = -1;
          curPort = arcs->list;
          if (curPort != NULL){
             printf("%d Port %d-", curPort->protocol, curPort->low);
             lastVal = curPort->high;
+            lastProt = curPort->protocol;
             curPort = curPort->next;
          }
          while (curPort != NULL){
-            if (curPort->low != lastVal - 1){
+            if (curPort->protocol != lastProt || curPort->low != lastVal - 1){
                printf("%d\n", curPort->protocol, curPort->high);
                printf("%d Port %d-", curPort->protocol, curPort->low);
             }
             lastVal = curPort->high;
+            lastProt = curPort->protocol;
             curPort = curPort->next;
          }
          if (lastVal>=0)
