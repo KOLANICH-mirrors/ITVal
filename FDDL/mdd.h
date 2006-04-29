@@ -35,7 +35,7 @@ Williamsburg, VA 23185
 #   include <FDDL/mddtypes.h>
 #   include <FDDL/caches.h>
 #   include <FDDL/dynarray.h>
-#   include <FDDL/uniquetable.h>
+#   include <FDDL/datastructures/uniquetable.h>
 #   include <FDDL/portset.h>
 
 #   define ARC_STAR -1		//For "FW mdds"
