@@ -168,6 +168,34 @@ tuple_cache::Hit(node_idx p, node_idx *vals, int numvals)
 	}
 	return -1;
 }
+node_idx 
+tuple_cache::Hit(node_idx *vals, int numvals)
+{
+	int idx;
+	cache_node *cur;
+
+	idx = 0;
+	for (int i = 0; i < numvals; i++) {
+		idx *= 256;
+		idx += vals[i];
+		idx %= size;
+	}
+	cur = list[idx];
+	while (cur != NULL) {
+                if (cur->numvals != numvals){
+                   cur = cur->next;
+                   continue;
+                }
+                for (int i=0; i < numvals; i++){
+                   if (cur->vals[i] != vals[i]){
+                      cur = cur->next;
+                      continue;
+                   }
+                }
+	  return cur->r;
+	}
+	return -1;
+}
 
 void
 tuple_cache::Add(node_idx p, node_idx *vals, int numvals, node_idx r)
@@ -178,12 +206,37 @@ tuple_cache::Add(node_idx p, node_idx *vals, int numvals, node_idx r)
 	newNode = new cache_node;
 	newNode->p = p;
 	newNode->vals = new node_idx[numvals];
+        newNode->numvals = numvals;
 
 	for (int i = 0; i < numvals; i++)
 		newNode->vals[i] = vals[i];
 	newNode->r = r;
 
 	idx = p % size;
+	for (int i = 0; i < numvals; i++) {
+		idx *= 256;
+		idx += vals[i];
+	}
+	idx %= size;
+	newNode->next = list[idx];
+	list[idx] = newNode;
+}
+
+void
+tuple_cache::Add(node_idx *vals, int numvals, node_idx r)
+{
+	int idx;
+	cache_node *newNode;
+
+	newNode = new cache_node;
+	newNode->p = 0;
+	newNode->vals = new node_idx[numvals];
+
+	for (int i = 0; i < numvals; i++)
+		newNode->vals[i] = vals[i];
+	newNode->r = r;
+
+	idx = 0;
 	for (int i = 0; i < numvals; i++) {
 		idx *= 256;
 		idx += vals[i];

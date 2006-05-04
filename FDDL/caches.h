@@ -78,6 +78,7 @@ typedef class tuple_cache {
 	 public:
 		node_idx p;
 		node_idx *vals;
+                int numvals;
 		node_idx r;
 		cache_node *next;
 		        cache_node() {
@@ -106,8 +107,10 @@ typedef class tuple_cache {
 		delete[]list;
 	}
 
+	node_idx Hit(node_idx *vals, int numvals);
 	node_idx Hit(node_idx p, node_idx *vals, int numvals);
 	void    Add(node_idx p, node_idx *vals, int numvals, node_idx r);
+	void    Add(node_idx *vals, int numvals, node_idx r);
 	void    Clear();
 };
 #endif

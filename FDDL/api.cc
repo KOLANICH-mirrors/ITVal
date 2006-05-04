@@ -1,4 +1,3 @@
-
 /*
 FDDL: A Free Decision Diagram Library
 Copyright (C) 2004 Robert Marmorstein
@@ -126,6 +125,36 @@ fddl_forest::LessThan(mdd_handle root, int value, mdd_handle & result)
 		ReallocHandle(result);
 		Attach(result, newresult);
 	}
+	return SUCCESS;
+}
+
+int
+fddl_forest::Apply(mdd_handle* roots, int num_roots, node_idx (*func)(node_idx *, int), mdd_handle& result){
+
+        node_idx* indices;	
+        node_idx newresult;
+        if (num_roots < 1)
+           return INVALID_MDD;
+
+        indices = new node_idx[num_roots];
+
+        for (int i=0;i<num_roots;i++){
+           indices[i] = roots[i].index;
+           if (roots[i].index < 0){
+               delete[] indices;
+               return INVALID_MDD;
+           }
+        }
+
+	for (level k = K; k > 0; k--)
+	   ApplyCache[k]->Clear();
+
+	newresult = InternalApply(K, indices, num_roots, func);
+	if (result.index != newresult) {
+		ReallocHandle(result);
+		Attach(result, newresult);
+	}
+        delete[] indices;
 	return SUCCESS;
 }
 
@@ -270,6 +299,46 @@ fddl_forest::InternalLessThan(level k, node_idx p, int value)
 	}
 	result = CheckIn(k, result);
 	LessThanCache[k]->Add(p, value, result);
+	return result;
+}
+
+node_idx 
+fddl_forest::InternalApply(level k, node_idx* roots, int num_roots, 
+node_idx (*func)(node_idx *, int))
+{
+	node_idx i;
+	arc_idx j;
+	node_idx result, u;
+	node_idx *indices;
+
+	if (k == 0) {
+           return func(roots, num_roots);
+	};
+
+	result = ApplyCache[k]->Hit(roots, num_roots);
+	if (result >= 0)
+           return result;
+
+	result = NewNode(k);
+
+        indices = new node_idx[num_roots];
+         
+        for (j=0;j<maxVals[k];j++){
+           for (i=0;i<num_roots;i++){
+              node* nodeP;
+              nodeP = &FDDL_NODE(k,roots[i]);
+              if (j<nodeP->size){
+                 indices[i] = FDDL_ARC(k,nodeP, j);
+              }
+              else
+                 indices[i] = 0;
+           }
+	   u = InternalApply(k - 1, indices, num_roots, func);
+	   SetArc(k, result, j, u);
+        }
+	result = CheckIn(k, result);
+	ApplyCache[k]->Add(roots, num_roots, result);
+        delete[] indices;
 	return result;
 }
 

@@ -35,7 +35,7 @@ Williamsburg, VA 23185
 #   include <FDDL/mddtypes.h>
 #   include <FDDL/caches.h>
 #   include <FDDL/dynarray.h>
-#   include <FDDL/datastructures/uniquetable.h>
+#   include <FDDL/uniquetable.h>
 #   include <FDDL/portset.h>
 
 #   define ARC_STAR -1		//For "FW mdds"
@@ -248,6 +248,7 @@ protected:
   cache **ComplementCache;
   cache **BComplementCache;
   cache **LessThanCache;	//Cache for "Less Than" operation
+  tuple_cache **ApplyCache;
   cache **ValRestrictCache;	//Cache for "ValRestrict" operation
   cache **CombineCache;
   cache **ReplaceCache;
@@ -327,6 +328,7 @@ public:
     BComplementCache = new cache *[K + 1];
     ValRestrictCache = new cache *[K + 1];
     LessThanCache = new cache *[K + 1];
+    ApplyCache = new tuple_cache *[K + 1];
     CombineCache = new cache *[K + 1];
     ReplaceCache = new cache *[K + 1];
     ProjectOntoCache = new cache *[K + 1];
@@ -350,6 +352,7 @@ public:
 	BComplementCache[k] = new cache;
 	ValRestrictCache[k] = new cache;
 	LessThanCache[k] = new cache;
+	ApplyCache[k] = new tuple_cache;
 	CombineCache[k] = new cache;
 	ReplaceCache[k] = new cache;
 	ProjectOntoCache[k] = new cache;
@@ -407,6 +410,9 @@ public:
 	if (LessThanCache[k])
 	  delete LessThanCache[k];
 
+	if (ApplyCache[k])
+	  delete ApplyCache[k];
+
 	if (CombineCache[k])
 	  delete CombineCache[k];
 
@@ -440,6 +446,7 @@ public:
     delete[]ComplementCache;
     delete[]BComplementCache;
     delete[]ValRestrictCache;
+    delete[]ApplyCache;
     delete[]LessThanCache;
     delete[]CombineCache;
     delete[]ReplaceCache;
@@ -475,6 +482,7 @@ public:
   int Complement (mdd_handle p, mdd_handle & result);
   int BinaryComplement (mdd_handle p, mdd_handle & result);
   int LessThan (mdd_handle p, int value, mdd_handle & result);
+  int Apply(mdd_handle* roots, int num_roots, node_idx (*func)(node_idx*, int), mdd_handle & result);
   int ValRestrict (mdd_handle p, int value, mdd_handle & result);
   int Combine (mdd_handle p, mdd_handle q, int cache_index,
 	       mdd_handle & result);
@@ -553,6 +561,7 @@ public:
   node_idx InternalComplement (level k, node_idx p);
   node_idx InternalBComplement (level k, node_idx p);
   node_idx InternalLessThan (level k, node_idx p, int value);
+  node_idx InternalApply (level k, node_idx* roots, int numroots, node_idx (*func)(node_idx *, int));
   node_idx InternalValRestrict (level k, node_idx p, int value);
   node_idx InternalCombine (level k, node_idx p, node_idx q, int chain_index);
   node_idx InternalSelect (level k, node_idx p, int num_chains,
