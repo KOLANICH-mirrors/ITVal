@@ -36,7 +36,6 @@ Williamsburg, VA 23185
 #   include <FDDL/caches.h>
 #   include <FDDL/dynarray.h>
 #   include <FDDL/uniquetable.h>
-#   include <FDDL/portset.h>
 
 #   define ARC_STAR -1		//For "FW mdds"
 
@@ -505,7 +504,6 @@ public:
 		    int *low, int *high);
   void PrintAddy (mdd_handle root, level k);
   void PrintAddy (level k, node_idx p, int *vals, int depth);
-  int PrintPort (level k, node_idx p, int highByte, int depth, portset * p);
   void PrintStates (node_idx root);
   void PrintStates (level k, node_idx root, int *states);
   void PrintByRange (mdd_handle root);

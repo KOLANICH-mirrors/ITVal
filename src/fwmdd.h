@@ -35,6 +35,7 @@ Williamsburg, VA 23185
 #   include <FDDL/mdd.h>
 #   include "nat.h"
 #   include <FDDL/structures.h>
+#   include "portset.h"
 
 /*
  * The class fw_fddl_forest enhances the fddl_forest by providing
@@ -143,6 +144,7 @@ class fw_fddl_forest:public fddl_forest {
 
    int GetServiceArcs(mdd_handle p, int* src, int* dst, service*&output, int& numArcs);
    int InternalGetServiceArcs(level k, node_idx p, int* src, int* dst, int* low, int* high, service*&output, int& numArcs);
+  int PrintPort (level k, node_idx p, int highByte, int depth, portset * p);
 };
 
 #endif

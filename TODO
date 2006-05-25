@@ -1,4 +1,6 @@
 Realistic MASQUERADE (per interface) and REDIRECT.
+Add support for "multiport dports" matches.
+Add support for "PKTTYPE = X" matches.
 Limit rules?
 TCPMSS rules.
 
