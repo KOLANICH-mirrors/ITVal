@@ -143,7 +143,9 @@ class fw_fddl_forest:public fddl_forest {
                                   int classNum, service * head);
 
    int GetServiceArcs(mdd_handle p, int* src, int* dst, service*&output, int& numArcs);
-   int InternalGetServiceArcs(level k, node_idx p, int* src, int* dst, int* low, int* high, service*&output, int& numArcs);
+   int InternalGetServiceArcs(level k, node_idx p, int* src, int* dst,
+      int* low, int* high, service*&output, int& numArcs);
+  void PrintPort (mdd_handle h, level k);
   int PrintPort (level k, node_idx p, int highByte, int depth, portset * p);
 };
 

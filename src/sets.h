@@ -22,8 +22,11 @@
  * Robert Marmorstein Department of Computer Science College of William
  * and Mary Williamsburg, VA 23185 
  */
+
 #ifndef FDDL_PORTSET_H
 #   define FDDL_PORTSET_H 1
+
+#include "stdio.h"
 class   portset {
 	char    ports[8192];
  public:

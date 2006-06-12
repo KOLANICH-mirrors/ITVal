@@ -1,4 +1,5 @@
 #include "sets.h"
+#include "fwmdd.h"
 
 void    
 fw_fddl_forest::PrintPort(mdd_handle root, level k)
