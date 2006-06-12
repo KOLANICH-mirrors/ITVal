@@ -103,7 +103,7 @@ ECHO_N = -n
 ECHO_T = 
 EGREP = grep -E
 EXEEXT = 
-F77 = gfortran
+F77 = g77
 FFLAGS = -g -O2
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
@@ -136,7 +136,7 @@ YACC = bison -y
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
-ac_ct_F77 = gfortran
+ac_ct_F77 = g77
 ac_ct_RANLIB = ranlib
 ac_ct_STRIP = strip
 am__fastdepCC_FALSE = #
@@ -179,7 +179,7 @@ target_alias =
 INCLUDES = -I $(top_builddir) -I $(top_srcdir)
 lib_LTLIBRARIES = libFDDL.la 
 libFDDL_la_SOURCES = mdd.cc api.cc caches.cc uniquetable.cc
-pkginclude_HEADERS = mdd.h mddtypes.h caches.h dynarray.h portset.h uniquetable.h structures.h
+pkginclude_HEADERS = mdd.h mddtypes.h caches.h dynarray.h uniquetable.h structures.h
 all: all-am
 
 .SUFFIXES:

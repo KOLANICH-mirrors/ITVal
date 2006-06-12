@@ -1,5 +1,5 @@
 //Getline replacement courtesy of Brandon Niemczyk
-//(http://sfexplore.com/~bniemczyk/?page=getline_script
+//(http://sfexplore.com/~bniemczyk/?page=getline_script)
 
 #include <unistd.h>
 #include <stdio.h>

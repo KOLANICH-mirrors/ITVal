@@ -26,7 +26,6 @@
 #   define FDDL_PORTSET_H 1
 class   portset {
 	char    ports[65536];
-
  public:
 
 	int     numPorts;
