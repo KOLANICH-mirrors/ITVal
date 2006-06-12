@@ -35,7 +35,7 @@ Williamsburg, VA 23185
 #   include <FDDL/mdd.h>
 #   include "nat.h"
 #   include <FDDL/structures.h>
-#   include "portset.h"
+#   include "sets.h"
 
 /*
  * The class fw_fddl_forest enhances the fddl_forest by providing
