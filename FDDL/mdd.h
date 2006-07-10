@@ -55,11 +55,13 @@ Williamsburg, VA 23185
 //Useful Macros for accessing nodes and arc information
 
 #   define FDDL_NODE(k,p) (*((*nodes[(k)])[(p)]))
-
 #   define FULL_ARC(k,node,i) (*((*arcs[(k)])[(node)->down+(i)]))
+#   define FULL_LABEL(k,node,i) (*((*labels[(k)])[(node)->down+(i)]))
 
 #   define SPARSE_INDEX(k,node,i) (*((*arcs[(k)])[((node)->down+(2*(i)))]))
 #   define SPARSE_ARC(k,node,i) (*((*arcs[(k)])[((node)->down+(2*(i)+1))]))
+#   define LABEL_INDEX(k,node,i) (*((*labels[(k)])[((node)->down+(2*(i)))]))
+#   define SPARSE_LABEL(k,node,i) (*((*labels[(k)])[((node)->down+(2*(i)+1))]))
 
 #   define IS_SPARSE(node) ((node->flags & SPARSE))
 #   define IS_DELETED(node) ((node->flags & DELETED))
@@ -72,6 +74,12 @@ enum mdd_op_return_val
     COMPLEMENT_FAILED, INVALID_LEVEL };
 
 class fddl_forest;
+
+class label{
+   public:
+   int rule_num;
+   label* next;
+};
 
 class print_range
 {
@@ -269,7 +277,8 @@ public:
   } dynarray < node_idx > **node_remap_array;
 
   dynarray < node > **nodes;	//An array [1..K] of heaps of MDD nodes.
-  dynarray < node_idx > **arcs;	//An array [1..L] of heaps of downpointers.
+  dynarray < node_idx > **arcs;	//An array [1..K] of heaps of MDD arcs.
+  dynarray < label* > **labels;//An array [1..K] of labels for each arc.
 
   //Build a new MDD forest of numlevels levels.
   //The domain of each level is specified as an integer range
@@ -293,11 +302,13 @@ public:
 
     nodes = new dynarray < node > *[K + 1];
     arcs = new dynarray < node_idx > *[K + 1];
+    labels = new dynarray < label* > *[K + 1];
 
     for (int k = 1; k <= K; k++)
       {
 	nodes[k] = new dynarray < node >;
 	arcs[k] = new dynarray < node_idx > (0);
+	labels[k] = new dynarray < label* > (0);
       }
 
     //Keep track of the last used position of the node and arc arrays
@@ -382,6 +393,9 @@ public:
 	if (arcs[k])
 	  delete arcs[k];
 
+	if (labels[k])
+	  delete labels[k];
+
 	if (ProjectCache[k])
 	  delete ProjectCache[k];
 
@@ -455,6 +469,7 @@ public:
     delete[]SelectCache;
     delete[]PrintCache;
     delete[]arcs;
+    delete[]labels;
     delete[]nodes;
     delete[]maxVals;
     delete[]last;

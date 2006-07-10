@@ -56,8 +56,8 @@ class fw_fddl_forest:public fddl_forest {
 
  public:
 
-     fw_fddl_forest(int numlevels, int *maxvals):fddl_forest(numlevels,
-                                                             maxvals) {
+    fw_fddl_forest(int numlevels, int *maxvals):fddl_forest(numlevels, maxvals){
+
       NMAPCache = new cache *[K + 1];
       DNATCache = new cache *[K + 1];
       SNATCache = new cache *[K + 1];

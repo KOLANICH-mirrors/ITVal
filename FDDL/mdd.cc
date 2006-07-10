@@ -561,7 +561,9 @@ void
 fddl_forest::CompactTopLevel()
 {
 	dynarray < node_idx >*arc_temp_array;	//Store the new arcs for level K
+	dynarray < label* >*label_temp_array;	//Store the new arcs for level K
 	arc_temp_array = new dynarray < node_idx >(0);
+	label_temp_array = new dynarray < label* >(0);
 	node_idx i;
 	arc_idx j;
 
