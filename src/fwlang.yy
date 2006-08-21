@@ -23,10 +23,12 @@ int yyerror(char* str);
    group* group_rec;
    service* service_rec;
    query* query_rec;
+   assert* assert_rec;
    condition* condition_rec;
    int sub;
    int sv;
    int fv;
+   int assert_op;
    port* port_rec;
    char *name;
    address* address_rec;
@@ -39,6 +41,7 @@ int yyerror(char* str);
 %left <group_rec> GROUP	      "group"
 %left <service_rec> SERVICE   "service"
 %left <query_rec> QUERY	      "query"
+%left <assert_rec> ASSERT	"assert"
 
 %token <input_chain> INPUT FORWARD OUTPUT "selected chain"
 %token <sub> PACKET SPORT DPORT SADDY DADDY STATE "query subject"
@@ -48,7 +51,7 @@ int yyerror(char* str);
 %token <prot> UDP TCP ICMP BOTH	    "protocol"
 %token <val> NUM		 "number"
 %token <char> DOT		 "."
-
+%token <assert_op> IS SUBSET_OF "assertion operators"
 %token <condition_rec> LOGGED	    "logged condition"
 %token <sv> T_INVALID T_NEW T_ESTABLISHED T_RELATED   "connection state"
 %token <fv> FIN SYN RST PSH ACK URG		      "tcp flag"
@@ -65,11 +68,14 @@ int yyerror(char* str);
 %type <sub> subject				      "subject keyword"
 %type <input_chain> input_chain			      "input chain"
 %type <prot> protocol				      "protocol keyword"
+%type <assert_rec>assert_expression		      "assert expression"
 %type <query_rec> query_expression		      "query expression"
 %type <service_rec> service_expression		      "service declaration"
 %type <group_rec> group_expression		      "address group declaration"
 %type <address_rec> addy_list			      "address list"
 %type <port_rec> port_list			      "port list"
+
+%type <assert_op> assert_op			      "assertion operator"
 
 %token <dummy> LPAREN RPAREN SEMI
 %left <condition_rec> AND			      "AND"
@@ -82,12 +88,13 @@ statement: expression | expression statement;
 expression: group_expression SEMI 
         | service_expression SEMI 
         | query_expression SEMI
+	| assert_expression SEMI
         | SEMI
         ;
         
 group_expression: GROUP NAME addy_list {$$ = DefineGroup($2, $3); delete[] $2;};
 
-service_expression: SERVICE NAME port_list {$$ = DefineService($2, $3); delete[] $2};
+service_expression: SERVICE NAME port_list {$$ = DefineService($2, $3); delete[] $2;};
 
 addy_list: addy_list addr {$$ = AppendAddy($1,$2);}
             | addr {$$ = AppendAddy(NULL, $1);};
@@ -100,8 +107,16 @@ query_expression: QUERY CLASSES {$$ = PrintClasses();}
           | QUERY SGRAPH {$$ = PrintServiceGraph();}
           | QUERY subject condition {$$ = PerformQuery($2, $3, 1);}
           | QUERY subject input_chain condition {$$ = PerformQuery($2, $4, $3);} 
-          | QUERY input_chain subject condition {$$ = PerformQuery($3, $4, $2);} 
-			 ;
+          | QUERY input_chain subject condition {$$ = PerformQuery($3, $4, $2);}
+;
+
+assert_expression: ASSERT condition assert_op condition {$$ = PerformAssertion($2, $4, $3, 1);}
+		 | ASSERT input_chain condition assert_op condition { $$ = PerformAssertion($3, $5, $4, $2);}
+		 ;
+
+assert_op: IS {$$ = 0;} 
+	 | SUBSET_OF {$$=1;}
+	 ;
 
 input_chain: INPUT {$$ = 0;}
            | FORWARD {$$ = 1;}
@@ -155,6 +170,7 @@ addr: NUM DOT NUM DOT NUM DOT NUM {$$ = ParseAddr($1,$3,$5,$7);}
     | NUM {$$=ParseAddr($1,NULL,NULL,NULL);};
 
 port: NUM {$$=ParsePort($1);};
+
 %%
 void
 yy::parser::error (const yy::parser::location_type& l, const std::string& m)

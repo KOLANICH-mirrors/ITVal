@@ -28,7 +28,9 @@ class Topology {
      Topology() {
       numIfaces = 0;
       ifaces = new Interface *[256];
-   } Topology(char *fname) {
+     }
+
+     Topology(char *fname) {
       FILE *iFile;
       char name[256];
       int ip[4];
@@ -50,11 +52,8 @@ class Topology {
       }
       fclose(iFile);
    }
-   ~Topology() {
-      for (int i = 0; i < numIfaces; i++)
-         delete ifaces[i];
-      delete[]ifaces;
-   }
+
+   ~Topology();
 };
 
 #endif

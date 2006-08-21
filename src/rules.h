@@ -26,6 +26,7 @@ College of William and Mary
 Williamsburg, VA 23185
 */
 
+
 #ifndef __RULES_H__
 #   define __RULES_H__
 
@@ -38,7 +39,8 @@ Williamsburg, VA 23185
 //have been broken into lists of ranges.
 class processed_rule {
  public:
-
+   int id;
+   int chain_id;
    address_range * from;
    address_range *to;
 
@@ -62,7 +64,10 @@ class processed_rule {
       next = NULL;
       in = -1;
       out = -1;
-   } ~processed_rule() {
+      id = -1;
+      chain_id = -1;
+     } 
+     ~processed_rule() {
       port_range *cur;
       delete from;
       delete to;
@@ -86,9 +91,13 @@ class rule_tuple {
  public:
    int low[23];
    int high[23];
+   int id;
+   int chain_id;
    rule_tuple *next;
 
      rule_tuple() {
+	id = -1;
+	chain_id = -1;
       next = NULL;
 }};
 

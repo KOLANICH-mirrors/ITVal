@@ -1,4 +1,3 @@
-
 /*
 FDDL: A Free Decision Diagram Library
 Copyright (C) 2004 Robert Marmorstein
@@ -27,6 +26,7 @@ College of William and Mary
 Williamsburg, VA 23185
 */
 
+
 #include <stdio.h>
 #include <assert.h>
 #include "fwmdd.h"
@@ -34,10 +34,7 @@ Williamsburg, VA 23185
 #define MAX(a, b) (a>b ? a : b)
 #define MIN(a, b) (a<b ? a : b)
 
-int
-  fw_fddl_forest::QueryIntersect(mdd_handle root, mdd_handle root2,
-                                 mdd_handle & result)
-{
+int fw_fddl_forest::QueryIntersect(mdd_handle root, mdd_handle root2, mdd_handle & result) {
    if (root.index < 0)
       return INVALID_MDD;
    if (root2.index < 0)
@@ -47,7 +44,87 @@ int
    for (level k = K; k > 0; k--) {
       QIntersectCache[k]->Clear();
    }
+#ifdef DEBUG
+   PrintMDD();
+   printf("\nQueryIntersect: %d %d\n", root.index, root2.index);
+#endif
    newresult = InternalQIntersect(K, root.index, root2.index);
+#ifdef DEBUG
+   PrintMDD();
+   printf("\nQueryIntersect (result): %d\n", root.index, newresult);
+#endif 
+
+   if (result.index != newresult) {
+      ReallocHandle(result);
+      Attach(result, newresult);
+   }
+   return 0;
+}
+
+int fw_fddl_forest::PrintHistory(mdd_handle root){
+   if (root.index < 0)
+      return INVALID_MDD;
+   QIntersectCache[0] = new cache;
+   for (level k = K; k >= 0; k--) {
+      QIntersectCache[k]->Clear();
+   }
+   InternalPrintHistory(K, root.index, 0,0);
+   delete QIntersectCache[0];
+   QIntersectCache[0]=NULL;
+   return SUCCESS;
+}
+
+void fw_fddl_forest::InternalPrintHistory(level k, node_idx p, int chain_num, int rule_num){
+   int i;
+   node* nodeP;
+   int result;
+   
+   if (p==0)
+      return;
+   
+   if (k==0){
+      result = QIntersectCache[0]->Hit(chain_num, rule_num);
+      if (result >=0)
+	 return;
+      printf("Chain %d Rule %d\n", chain_num, rule_num);
+      QIntersectCache[0]->Add(chain_num, rule_num, 1);
+      return;
+   }
+
+   result = QIntersectCache[k]->Hit(p, 1);
+   if (result >= 0)
+      return;
+   
+   nodeP = &FDDL_NODE(k,p);
+   if (k==1){
+      for (int i=0;i<nodeP->size;i++){
+         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP,i), chain_num, i);
+      }
+   }
+   else if (k==2){
+      for (int i=0;i<nodeP->size;i++){
+         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP,i), i, 0);
+      }
+   }
+   else{
+      for (int i=0;i<nodeP->size;i++){
+         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP, i), 0, 0);
+      }
+   }
+   QIntersectCache[k]->Add(p, 1, 1);
+}
+
+int fw_fddl_forest::HistoryIntersect(mdd_handle root, mdd_handle root2, mdd_handle & result) {
+   if (root.index < 0)
+      return INVALID_MDD;
+   if (root2.index < 0)
+      return INVALID_MDD;
+   node_idx newresult;
+
+   for (level k = K; k > 0; k--) {
+      QIntersectCache[k]->Clear();
+   }
+   newresult = InternalHIntersect(K, root.index, root2.index);
    if (result.index != newresult) {
       ReallocHandle(result);
       Attach(result, newresult);
@@ -501,12 +578,78 @@ node_idx fw_fddl_forest::InternalQIntersect(level k, node_idx p, node_idx q)
 
    if (p == 0)
       return 0;                 //If it's not accepted
+
    if (q == 0)
       return 0;                 //Or not relevant to the query
+
    if (k == 0) {
       if (q == 2)
          return 1;              //If it's a log rule return 1.
+
       if (p == 3 && q == 1) {   //If it's relevant and accepted.
+         return 1;
+      }
+
+      return 0;	
+   }
+   result = QIntersectCache[k]->Hit(p, q);
+   if (result >= 0)
+      return result;
+
+   result = NewNode(k);
+   nodeP = &FDDL_NODE(k, p);
+   nodeQ = &FDDL_NODE(k, q);
+
+   if (IS_SPARSE(nodeP)) {      //If node <k.p> is stored sparsely, unpack it into a static array of appropriate size
+      psize = UnpackNode(k, p, ptemp);
+   }
+   else {
+      psize = nodeP->size;
+      ptemp = new node_idx[psize];
+
+      for (i = 0; i < psize; i++)
+         ptemp[i] = FULL_ARC(k, nodeP, i);
+   }
+   if (IS_SPARSE(nodeQ)) {      //If node <k.q> is stored sparsely, unpack it into a static array of appropriate size
+      qsize = UnpackNode(k, q, qtemp);
+   }
+   else {
+      qsize = nodeQ->size;
+      qtemp = new node_idx[qsize];
+
+      for (i = 0; i < qsize; i++)
+         qtemp[i] = FULL_ARC(k, nodeQ, i);
+   }
+   for (i = 0; i <= maxVals[k]; i++) {
+      u = InternalQIntersect(k - 1, i < psize ? ptemp[i] : 0,
+                             i < qsize ? qtemp[i] : 0);
+      SetArc(k, result, i, u);
+   }
+   delete[]qtemp;
+   delete[]ptemp;
+   result = CheckIn(k, result);
+   QIntersectCache[k]->Add(p, q, result);
+   return result;
+}
+
+node_idx fw_fddl_forest::InternalHIntersect(level k, node_idx p, node_idx q)
+{
+   arc_idx i;
+   node_idx result, u;
+   node *nodeP, *nodeQ;
+   int psize, qsize;
+   int dummy;
+   arc_idx *ptemp;
+   arc_idx *qtemp;
+
+   if (p == 0)
+      return 0;                 //If it's not accepted
+
+   if (q == 0)
+      return 0;                 //Or not relevant to the query
+
+   if (k == 0) {
+      if (p == 1 && q == 1) {   //If it's relevant and accepted.
          return 1;
       }
       return 0;
@@ -540,7 +683,7 @@ node_idx fw_fddl_forest::InternalQIntersect(level k, node_idx p, node_idx q)
          qtemp[i] = FULL_ARC(k, nodeQ, i);
    }
    for (i = 0; i <= maxVals[k]; i++) {
-      u = InternalQIntersect(k - 1, i < psize ? ptemp[i] : 0,
+      u = InternalHIntersect(k - 1, i < psize ? ptemp[i] : 0,
                              i < qsize ? qtemp[i] : 0);
       SetArc(k, result, i, u);
    }

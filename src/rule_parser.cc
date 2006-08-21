@@ -337,6 +337,7 @@ int rule_parser::ReadVerboseRule(rule * newRule, char *line, size_t length)
       strncpy(newRule->source, source, 1024);
       strncpy(newRule->out, out, 1024);
       strncpy(newRule->in, in, 1024);
+      strncpy(newRule->opt, opt, 1024);
       strncpy(newRule->protocol, protocol, 1024);
       strncpy(newRule->target, target, 1024);
    }

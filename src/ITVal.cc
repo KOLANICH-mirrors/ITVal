@@ -30,6 +30,8 @@ topology file.\n      -F or -f <rulefile> : Append a filter rule set file. \
 
 #include <stdio.h>
 #include "parser.h"
+#include "chains.h"
+#include "rule_parser.h"
 #include "firewall.h"
 #include <FDDL/mdd.h>
 #include "parser_interface.hh"
@@ -47,6 +49,8 @@ typedef struct filename_node {
 /* Free group and service declarations, plus MDDs. */
 void DoCleanup();
 
+int chain::numChains = 0;
+
 /* Main Routine.  Syntax: ITVal <query file> {<filter1> <nat1> ...} */
 int main(int argc, char **argv)
 {
@@ -60,6 +64,7 @@ int main(int argc, char **argv)
    char flag;
 
    fw_fddl_forest *FWForest;
+   fw_fddl_forest *HistoryForest;
    Firewall *metaFirewall;
 
    filename_node *fn;
@@ -75,8 +80,24 @@ int main(int argc, char **argv)
       255, 255, 255, 255        /* Source Address               */
    };
 
+   int hranges[25] = { 
+      1,			/* Exists */
+      65536,      		/* Rule ID */
+      65536,      		/* Chain ID */
+      1, 1, 1, 1, 1, 1,         /* Flags (FIN, SYN, RST, PSH, ACK, URG) */
+      3,                        /* Connection State             */
+      255, 255,                 /* Output and Input Interface   */
+      255, 255,                 /* Destination Port             */
+      255, 255,                 /* Source Port                  */
+      2,                        /* Protocol                     */
+      255, 255, 255, 255,       /* Destination Address          */
+      255, 255, 255, 255        /* Source Address               */
+   };
+
    FWForest = new fw_fddl_forest(23, ranges);
    FWForest->ToggleSparsity(false);     /* @BUG@: Sparse nodes don't work. */
+   HistoryForest = new fw_fddl_forest(25, hranges);
+   HistoryForest->ToggleSparsity(false);/* @BUG@: Sparse nodes don't work. */
 
    strncpy(queryName, "NOQUERY", 7);
 
@@ -186,11 +207,11 @@ int main(int argc, char **argv)
       if (fileList->verbose_input == 1)
          fws[i] =
             new Firewall(fileList->filterName, fileList->natName, FWForest,
-                         top, 1);
+                         top, 1, HistoryForest);
       else
          fws[i] =
             new Firewall(fileList->filterName, fileList->natName, FWForest,
-                         top);
+                         top, HistoryForest);
       i = i + 1;
       del = fileList;
       fileList = fileList->next;
@@ -198,7 +219,7 @@ int main(int argc, char **argv)
    }
 
    /* Create the meta firewall. */
-   metaFirewall = MergeFWs(FWForest, fws, num_fws);     //@Need Topology here?@
+   metaFirewall = MergeFWs(FWForest, fws, num_fws, HistoryForest);     //@Need Topology here?@
 
 
    for (int i = 0; i < num_fws; i++) {
@@ -218,9 +239,10 @@ int main(int argc, char **argv)
    pi.parse(queryName);
 
    DoCleanup();
-   if (top != NULL)
-      delete top;
+//   if (top != NULL)
+//      delete top;
    delete metaFirewall;
    delete FWForest;
+   delete HistoryForest;
    return 0;
 }

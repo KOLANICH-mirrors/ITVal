@@ -32,9 +32,12 @@ Williamsburg, VA 23185
 #   include <stdlib.h>
 #   include "topology.h"
 
+
 //An unprocessed rule grabbed straight from the text file.
 class rule {
  public:
+   int id;
+   int chain_id;
    char target[1024];
    char protocol[1024];
    char opt[1024];
@@ -46,7 +49,9 @@ class rule {
    int pktCond;
    rule *next;
 
-     rule() {
+     rule() { 
+	id = -1;
+	chain_id = -1; //No chain.
       next = NULL;
 }};
 

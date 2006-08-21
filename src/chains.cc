@@ -28,6 +28,8 @@
  * that it generates numeric addresses and port numbers.
  */
 
+//#define DEBUG
+
 #include <unistd.h>
 #include <stdio.h>
 
@@ -141,9 +143,6 @@ void Firewall::BuildFWRules(char *fname)
       // break;
 
       if (length == 0) {        // If the line is empty, ignore.
-#ifdef DEBUG
-         printf("%d: Ignoring empty line.\n", lineNo);
-#endif
          free(oldLine);
          line = NULL;
          length = getline(&line, &bufsize, ruleFile);
@@ -171,7 +170,7 @@ void Firewall::BuildFWRules(char *fname)
             printf("%d: Bad chain definition\n", lineNo);
             exit(-1);
          }
-         printf("%d: Chain %s\n", lineNo, newChain->name);
+         printf("%d: Chain %s[%d]\n", lineNo, newChain->name,newChain->id);
 #endif
 
          current_chain++;
@@ -179,6 +178,7 @@ void Firewall::BuildFWRules(char *fname)
          num_chains = current_chain + 1;
 
          chain_array[current_chain] = newChain;
+         cur->chain_id = chain_array[current_chain]->id;
 
          // Allocate the first rule
          // cur = new rule;
@@ -208,8 +208,12 @@ void Firewall::BuildFWRules(char *fname)
             cur->next = chain_array[current_chain]->rules;
             chain_array[current_chain]->rules = cur;
 
+            cur->id = chain_array[current_chain]->numRules;
+            chain_array[current_chain]->numRules++;
+
             // Allocate next rule
             cur = new rule;
+	    cur->chain_id = chain_array[current_chain]->id;
          }
          // Do priming read
          free(oldLine);
@@ -380,11 +384,20 @@ void Firewall::BuildVerboseFWRules(char *fname)
          // Grab its name from the input line
          ReadChain(line, length, newChain);
 
+#ifdef DEBUG
+         if (newChain == NULL) {
+            printf("%d: Bad chain definition\n", lineNo);
+            exit(-1);
+         }
+         printf("%d: Chain %s[%d]\n", lineNo, newChain->name,newChain->id);
+#endif
+
          current_chain++;
          // Set number of chains
          num_chains = current_chain + 1;
 
          chain_array[current_chain] = newChain;
+         cur->chain_id = chain_array[current_chain]->id;
 
          // Allocate the first rule
          // cur = new rule;
@@ -414,8 +427,15 @@ void Firewall::BuildVerboseFWRules(char *fname)
             cur->next = chain_array[current_chain]->rules;
             chain_array[current_chain]->rules = cur;
 
+	    cur->id = chain_array[current_chain]->numRules;
+	    chain_array[current_chain]->numRules++;
+#ifdef DEBUG
+	    PrintRule(*cur);
+#endif 
+
             // Allocate next rule
             cur = new rule;
+	    cur->chain_id = chain_array[current_chain]->id;
          }
          // Do priming read
          free(oldLine);
@@ -595,6 +615,7 @@ void Firewall::BuildNATRules(char *fname)
 
          // Allocate the first rule
          cur = new rule;
+	 cur->chain_id = nat_chains[current_nchain]->id;
 
          // Consume the "header display" line
          free(oldLine);
@@ -623,8 +644,13 @@ void Firewall::BuildNATRules(char *fname)
          cur->next = nat_chains[current_nchain]->rules;
          nat_chains[current_nchain]->rules = cur;
 
+         cur->id = nat_chains[current_nchain]->numRules;
+	 nat_chains[current_nchain]->numRules++;
+
+
          // Allocate next rule
          cur = new rule;
+	 cur->chain_id = nat_chains[current_nchain]->id;
       }
       // Do priming read
       free(oldLine);
@@ -696,9 +722,9 @@ void Firewall::BuildNATRules(char *fname)
 // Build outputMDD, storing the set of all accepted packets
 // and Logged, an MDD storing the set of logged packets.
 void Firewall::BuildChains(int input_chain, mdd_handle & outputMDD,
-                           mdd_handle & Logged)
+                           mdd_handle & Logged, mdd_handle & outHistMDD)
 {
-   AssembleChains(chain_array, chain_array[input_chain], outputMDD, Logged);
+   AssembleChains(chain_array, chain_array[input_chain], outputMDD, Logged, outHistMDD);
 }
 
 // Find, by sequential search, chain <name>.

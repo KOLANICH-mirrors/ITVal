@@ -36,6 +36,7 @@ Williamsburg, VA 23185
 class condition {
  public:
    mdd_handle h;
+   mdd_handle history;
 };
 
 //A query, consisting of a subject (what info to display) and a
@@ -44,6 +45,12 @@ class query {
  public:
    int subject;                           //0 PACKET, 1 SADDY, 2 DADDY, 3 SPORT, 4 DPORT, 5 STATE
    condition *cond;
+};
+
+class assert {
+   condition *left;
+   condition *right;
+   int op;
 };
 
 //Convert a port string into a port struct
@@ -97,6 +104,7 @@ condition *IntersectConditions(condition * c1, condition * c2);
 //Intersect the set of accepted packets with the query filter and
 //display the result.
 query *PerformQuery(int s, condition * c, int input_chain);
+assert *PerformAssertion(condition *left, condition *right, int assertion_operator, int input_chain);
 
 //Compute Host Equivalence Classes and print them.
 query *PrintClasses();

@@ -37,27 +37,39 @@ Williamsburg, VA 23185
 #   include "rules.h"
 #   include "nat.h"
 
+
 class chain {
  public:
-   char name[256];                        //Name of the chain
-   char fname[256];                       //For debugging, name of the file.
-   int Default;                           //Default policy of the chain.
+ int numRules;
+ static int numChains;
+   int id;			      //integer id of chain.
+   char name[256];                    //Name of the chain
+   char fname[256];                   //For debugging, name of the file.
+   int Default;                       //Default policy of the chain.
 
-   rule *rules;                           //List of original, unprocessed, rules
-   processed_rule *newRules;              //List of intermediate, expanded, rules
-   rule_tuple *tup;                       //List of tuples
+   rule *rules;                       //List of original, unprocessed, rules
+   processed_rule *newRules;          //List of intermediate, expanded, rules
+   rule_tuple *tup;                   //List of tuples
 
      chain() {
       rules = NULL;
       newRules = NULL;
       tup = NULL;
       Default = -1;
-   } chain(char *fileName) {
+      chain::numChains++;
+      id = chain::numChains;
+      numRules = 1;  //Default policy counts as rule 0.
+     } 
+     
+     chain(char *fileName) {
       rules = NULL;
       newRules = NULL;
       tup = NULL;
       Default = -1;
       strncpy(fname, fileName, 256);
+      chain::numChains++;
+      id = chain::numChains;
+      numRules = 1;  //Default policy counts as rule 0.
    }
 
    ~chain() {

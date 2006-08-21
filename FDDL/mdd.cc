@@ -46,16 +46,108 @@ static float numSolutions;
 
 fddl_forest *thisForest;
 
-unsigned int 
+static unsigned int 
 ExternalHashNode(level k, node_idx p)
 {
 	return thisForest->hashnode(k, p);
 }
 
-int 
+static int 
 ExternalCompare(level k, node_idx p, node_idx q)
 {
 	return thisForest->compare(k, p, q);
+}
+
+  
+fddl_forest::fddl_forest (int numlevels, int *maxvals)
+  {
+    node_remap_array = NULL;
+    sparseEnabled = true;
+    K = numlevels - 1;
+    maxVals = new int[K + 1];
+
+    for (level k = 0; k <= K; k++)
+      maxVals[k] = maxvals[k];
+
+    //Initialize structures for a dynamic array of MDD nodes and arcs
+    //for each level of the forest.
+
+    nodes = new dynarray < node > *[K + 1];
+    arcs = new dynarray < node_idx > *[K + 1];
+    labels = new dynarray < label* > *[K + 1];
+
+    for (int k = 1; k <= K; k++)
+      {
+	nodes[k] = new dynarray < node >;
+	arcs[k] = new dynarray < node_idx > (0);
+	labels[k] = new dynarray < label* > (0);
+      }
+
+    //Keep track of the last used position of the node and arc arrays
+    //respectively.
+
+    last = new node_idx[K + 1];
+    tail = new int[K + 1];
+
+    for (int k = 1; k <= K; k++)
+      {
+	last[k] = 1;		//Node 0 is reserved.
+	tail[k] = 0;
+      }
+
+    //Initialize caches for common operations
+    node_remap_array = new dynarray < node_idx > *[K + 1];
+
+    for (level k = K; k > 0; k--)
+      node_remap_array[k] = NULL;
+
+    MaxCache = new cache *[K + 1];
+    ProjectCache = new cache *[K + 1];
+    PruneCache = new cache *[K + 1];
+    RestrictCache = new cache *[K + 1];
+    MinCache = new cache *[K + 1];
+    ComplementCache = new cache *[K + 1];
+    BComplementCache = new cache *[K + 1];
+    ValRestrictCache = new cache *[K + 1];
+    LessThanCache = new cache *[K + 1];
+    ApplyCache = new tuple_cache *[K + 1];
+    CombineCache = new cache *[K + 1];
+    ReplaceCache = new cache *[K + 1];
+    ProjectOntoCache = new cache *[K + 1];
+    ReplaceStrictCache = new cache *[K + 1];
+    PrintCache = new cache *[K + 1];
+    SelectCache = new tuple_cache *[K + 1];
+    ShiftCache = new cache *[K + 1];
+
+    for (int k = 1; k <= K; k++)
+      {
+	FDDL_NODE (k, 0).in = 0;
+	FDDL_NODE (k, 0).size = 0;
+	FDDL_NODE (k, 0).flags = 0;
+	FDDL_NODE (k, 0).down = 0;
+	ProjectCache[k] = new cache;
+	PruneCache[k] = new cache;
+	RestrictCache[k] = new cache;
+	MaxCache[k] = new cache;
+	MinCache[k] = new cache;
+	ComplementCache[k] = new cache;
+	BComplementCache[k] = new cache;
+	ValRestrictCache[k] = new cache;
+	LessThanCache[k] = new cache;
+	ApplyCache[k] = new tuple_cache;
+	CombineCache[k] = new cache;
+	ReplaceCache[k] = new cache;
+	ProjectOntoCache[k] = new cache;
+	ReplaceStrictCache[k] = new cache;
+	SelectCache[k] = new tuple_cache;
+	ShiftCache[k] = new cache;
+	PrintCache[k] = new cache;
+      }
+
+    //Create a hashtable of K levels to act as the Unique Table
+    UT = new uniquetable (K, ExternalHashNode, ExternalCompare);
+    garbage_alg = O_LAZY;
+    garbage_threshold = 1;
 }
 
 unsigned int 
@@ -561,9 +653,7 @@ void
 fddl_forest::CompactTopLevel()
 {
 	dynarray < node_idx >*arc_temp_array;	//Store the new arcs for level K
-	dynarray < label* >*label_temp_array;	//Store the new arcs for level K
 	arc_temp_array = new dynarray < node_idx >(0);
-	label_temp_array = new dynarray < label* >(0);
 	node_idx i;
 	arc_idx j;
 

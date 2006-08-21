@@ -36,21 +36,39 @@ char* Port2Text(port* p){
 
 int PythonPipe::OpenPipe(){
    pid_t myPid;
-   char prefix[5];
 
-   //Create two FIFO queues with unique names that start with "ITV"
-   
-   strncpy(prefix, "ITV", 5);
-   inName = tempnam("/tmp/", prefix);
-   outName = tempnam("/tmp/", prefix);
+   //Create two FIFO queues with unique names that start with "xITVal_"
+   inName = new char[19];
+   outName = new char[19];
+   strncpy(inName, "/tmp/xITVal_XXXXXX", 18); 
+   strncpy(outName, "/tmp/xITVal_XXXXXX", 18); 
+   if (mkstemp(inName) < 0){
+      perror("xITVal mkstemp inFile");
+      return -1;
+   }
+
+   if (mkstemp(outName) < 0){
+      perror("xITVal mkstemp outFile");
+      return -1;
+   }
+
+   if (unlink(inName) < 0){
+      perror("xITVal unlink inFile");
+      return -1;
+   }
+
+   if (unlink(outName) < 0){
+      perror("xITVal unlink outFile");
+      return -1;
+   }
 
    if (mkfifo(inName, 0666) < 0){
-      perror("xITVal");
+      perror("xITVal mkfifo inFile");
       return -1;
    }
 
    if (mkfifo(outName, 0666) < 0){
-      perror("xITVal");
+      perror("xITVal mkfifo outFile");
       return -1;
    }
 
@@ -71,13 +89,13 @@ int PythonPipe::OpenPipe(){
    //Open the files
    inFile = fopen(inName, "r");
    if (!inFile){
-      perror("xITVal");
+      perror("xITVal open inPipe");
       return -1;
    }
 
-   outFile = fopen(outName, "w");
+   outFile = fopen(outName, "w+");
    if (!outFile){
-      perror("xITVal");
+      perror("xITVal open outPipe");
       return -1;
    }
    
@@ -89,8 +107,10 @@ int PythonPipe::ClosePipe(){
    fclose(outFile);
    unlink(inName);
    unlink(outName);
-   free(inName);
-   free(outName);
+   delete[] inName;
+   delete[] outName;
+   inName = NULL;
+   outName = NULL;
 }
 
 int PythonPipe::ReadList(PyList*& l){

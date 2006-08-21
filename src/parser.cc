@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "parser.h"
-#include "fwlang.tab.hh"
+#include "y.tab.h"
 #include "firewall.h"
 
 // Limit of 256 address groups
@@ -233,14 +233,17 @@ condition *BuildConditionFromGroup(group * g, int op)
 {
 
    condition *sc;
-   int *low;
-   int *high;
+   int *low, *hlow;
+   int *high, *hhigh;
    address *prev;
    address *cur;
    int i;
 
    low = new int[23];
    high = new int[23];
+
+   hlow = new int[25];
+   hhigh = new int[25];
 
    sc = new condition;
 
@@ -250,6 +253,8 @@ condition *BuildConditionFromGroup(group * g, int op)
       for (i = 22; i >= 1; i--) {
          low[i] = 0;
          high[i] = FW->FWForest->GetMaxVal(i);
+         hlow[i+2] = 0;
+         hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
       }
       // If it's a source address group, copy the values into positions
       // 19 through 22.
@@ -257,9 +262,13 @@ condition *BuildConditionFromGroup(group * g, int op)
          for (i = 22; i > 18; i--) {
             low[i] = cur->low[22 - i];
             high[i] = cur->high[22 - i];
+            hlow[i+2] = cur->low[22 - i];
+            hhigh[i+2] = cur->high[22 - i];
             if (cur->high[22 - i] < 0) {
                low[i] = 0;
                high[i] = FW->FWForest->GetMaxVal(i);
+               hlow[i+2] = 0;
+               hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
             }
          }
          // If it's a destination address group, copy them into
@@ -270,14 +279,22 @@ condition *BuildConditionFromGroup(group * g, int op)
          for (i = 18; i > 14; i--) {
             low[i] = cur->low[18 - i];
             high[i] = cur->high[18 - i];
+            hlow[i+2] = cur->low[18 - i];
+            hhigh[i+2] = cur->high[18 - i];
             if (cur->high[18 - i] < 0) {
                low[i] = 0;
                high[i] = FW->FWForest->GetMaxVal(i);
+               hlow[i+2] = 0;
+               hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
             }
          }
       }
       // 1 means in the query, 0 means not in the query.
       high[0] = low[0] = 1;
+      hlow[0] = hhigh[0] = 1;
+
+      hlow[1] = hlow[2] = 0;
+      hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
 
       // If this is the first address, we use MakeMDDFromTuple
       // Otherwise, we use Assign.
@@ -285,6 +302,8 @@ condition *BuildConditionFromGroup(group * g, int op)
          FW->FWForest->MakeMDDFromTuple(low, high, sc->h);
       else
          FW->FWForest->Assign(sc->h, low, high, sc->h);
+      FW->HistoryForest->Assign(sc->history, hlow, hhigh, sc->history);
+   
       prev = cur;
       cur = cur->next;
       if (g->named == 0) {
@@ -293,6 +312,8 @@ condition *BuildConditionFromGroup(group * g, int op)
    }
    delete[]high;
    delete[]low;
+   delete[]hhigh;
+   delete[]hlow;
    if (g->named == 0)
       delete g;
 
@@ -306,14 +327,16 @@ condition *BuildConditionFromGroup(group * g, int op)
 condition *BuildConditionFromService(service * s, int op)
 {
    condition *sc;
-   int *low;
-   int *high;
+   int *low, *hlow;
+   int *high, *hhigh;
    port *cur;
    port *prev;
    int i;
 
    low = new int[23];
    high = new int[23];
+   hlow = new int[25];
+   hhigh = new int[25];
 
    sc = new condition;
 
@@ -323,6 +346,8 @@ condition *BuildConditionFromService(service * s, int op)
       for (i = 22; i >= 1; i--) {
          low[i] = 0;
          high[i] = FW->FWForest->GetMaxVal(i);
+         hlow[i+2] = 0;
+         hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
       }
       // If it's a source port, break it into two bytes
       // and store it in positions 10 and 11.
@@ -332,6 +357,11 @@ condition *BuildConditionFromService(service * s, int op)
             low[13] = cur->low / 256;
             high[12] = cur->high % 256;
             low[12] = cur->low % 256;
+
+            hhigh[15] = cur->high / 256;
+            hlow[15] = cur->low / 256;
+            hhigh[14] = cur->high % 256;
+            hlow[14] = cur->low % 256;
          }
       }
       else {
@@ -342,20 +372,34 @@ condition *BuildConditionFromService(service * s, int op)
             low[11] = cur->low / 256;
             high[10] = cur->high % 256;
             low[10] = cur->low % 256;
+
+            hhigh[13] = cur->high / 256;
+            hlow[13] = cur->low / 256;
+            hhigh[12] = cur->high % 256;
+            hlow[12] = cur->low % 256;
          }
       }
       // If it's a "BOTH" query, use UDP(1) and TCP(2)
       if (cur->protocol < 0) {
          low[14] = 1;
          high[14] = 2;
+
+         hlow[16] = 1;
+         hhigh[16] = 2;
       }
       else {
          // Otherwise, just copy the protocol value into position 12.
          high[14] = low[14] = cur->protocol;
+         
+	 hhigh[16] = hlow[16] = cur->protocol;
       }
 
       // 1 means in the query, 0 means not in the query.
       high[0] = low[0] = 1;
+      hlow[0] = hlow[1] = 0;
+
+      hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+      hhigh[0] = hlow[0] = 1;
 
       // If this is the first port, use MakeMDDFromTuple.
       // Otherwise, use Assign.
@@ -363,6 +407,14 @@ condition *BuildConditionFromService(service * s, int op)
          FW->FWForest->MakeMDDFromTuple(low, high, sc->h);
       else
          FW->FWForest->Assign(sc->h, low, high, sc->h);
+      for (int k=22;k>=0;k--){
+	 hlow[k+2] = low[k];
+	 hhigh[k+2] = high[k];
+      }
+      hlow[1] = hlow[2] = 0;
+      hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+      hlow[0] = hhigh[0] = 1;
+      FW->HistoryForest->Assign(sc->history, hlow, hhigh, sc->history);
       prev = cur;
       cur = cur->next;
       if (s->named == 0) {
@@ -380,6 +432,8 @@ condition *BuildConditionFromService(service * s, int op)
 #endif
    delete[]high;
    delete[]low;
+   delete[]hhigh;
+   delete[]hlow;
    if (s->named == 0)
       delete s;
 
@@ -391,12 +445,14 @@ condition *BuildConditionFromService(service * s, int op)
 condition *BuildConditionFromState(int state)
 {
    condition *sc;
-   int *low;
-   int *high;
+   int *low, *hlow;
+   int *high, *hhigh;
    int i;
 
    low = new int[23];
    high = new int[23];
+   hlow = new int[25];
+   hhigh = new int[25];
 
    sc = new condition;
 
@@ -404,17 +460,27 @@ condition *BuildConditionFromState(int state)
    for (i = 22; i >= 1; i--) {
       low[i] = 0;
       high[i] = FW->FWForest->GetMaxVal(i);
+      hlow[i+2] = 0;
+      hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
    }
    // Set position 7 according to the value of state.  
    high[7] = low[7] = state;
+   hhigh[9] = hlow[9] = state;
 
    // 1 means in the query, 0 means not in the query.
    high[0] = low[0] = 1;
+   hhigh[0] = hlow[0] = 1;
+
+   hlow[1] = hlow[2] = 0;
+   hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
 
    // Make an MDD from the tuple.
    FW->FWForest->MakeMDDFromTuple(low, high, sc->h);
+   FW->HistoryForest->MakeMDDFromTuple(hlow, hhigh, sc->history);
    delete[]high;
    delete[]low;
+   delete[]hhigh;
+   delete[]hlow;
    return sc;
 }
 
@@ -422,24 +488,32 @@ condition *BuildConditionFromState(int state)
 condition *BuildConditionFromIface(char *name, int in_out)
 {
    condition *newCond;
-   int *low;
-   int *high;
+   int *low, *hlow;
+   int *high, *hhigh;
    int i;
 
    newCond = new condition;
    low = new int[23];
    high = new int[23];
+   hlow = new int[25];
+   hhigh = new int[25];
 
    // Initialize all elements to [0-MAX]
    for (i = 22; i >= 1; i--) {
       low[i] = 0;
       high[i] = FW->FWForest->GetMaxVal(i);
+      hlow[i+2] = 0;
+      hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
    }
 
    if (FW->T == NULL) {
       low[0] = high[0] = 1;
+      hlow[0] = hlow[1] = 0;
+      hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+      hhigh[0] = hlow[0] = 1;
       // Make an MDD from the tuple.
       FW->FWForest->MakeMDDFromTuple(low, high, newCond->h);
+      FW->HistoryForest->MakeMDDFromTuple(hlow, hhigh, newCond->history);
       delete[]high;
       delete[]low;
       return newCond;
@@ -448,19 +522,26 @@ condition *BuildConditionFromIface(char *name, int in_out)
    switch (in_out) {
       case 0:
          low[9] = high[9] = FW->T->FindInterface(name);
+         hlow[11] = hhigh[11] = FW->T->FindInterface(name);
          if (low[9] < 0)
             printf("Warning: Could not find input interface: %s\n", name);
          break;
       case 1:
          low[8] = high[8] = FW->T->FindInterface(name);
+         hlow[10] = hhigh[10] = FW->T->FindInterface(name);
          if (low[8] < 0)
             printf("Warning: Could not find output interface: %s\n", name);
          break;
    }
    // 1 means in the query, 0 means not in the query.
    low[0] = high[0] = 1;
+   hhigh[0] = hlow[0] = 1;
+
+   hlow[1] = hlow[2] = 0;
+   hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
    // Make an MDD from the tuple.
    FW->FWForest->MakeMDDFromTuple(low, high, newCond->h);
+   FW->HistoryForest->MakeMDDFromTuple(hlow, hhigh, newCond->history);
 
 #ifdef DEBUG
    for (level k = 22; k > 0; k--)
@@ -470,6 +551,8 @@ condition *BuildConditionFromIface(char *name, int in_out)
 
    delete[]high;
    delete[]low;
+   delete[]hhigh;
+   delete[]hlow;
    return newCond;
 }
 
@@ -477,39 +560,49 @@ condition *BuildConditionFromIface(char *name, int in_out)
 condition *BuildConditionFromFlag(int flag)
 {
    condition *newCond;
-   int *low;
-   int *high;
+   int *low, *hlow;
+   int *high, *hhigh;
    int i;
 
    newCond = new condition;
    low = new int[23];
    high = new int[23];
+   hlow = new int[25];
+   hhigh = new int[25];
 
    // Initialize all elements to [0-MAX]
    for (i = 22; i >= 1; i--) {
       low[i] = 0;
       high[i] = FW->FWForest->GetMaxVal(i);
+      hlow[i+2] = 0;
+      hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
    }
 
    // Set the appropriate value to 1.
    switch (flag) {
       case 0:                  // FIN
          low[6] = high[6] = 1;
+         hlow[8] = hhigh[8] = 1;
          break;
       case 1:                  // SYN
          low[5] = high[5] = 1;
+         hlow[7] = hhigh[7] = 1;
          break;
       case 2:                  // RST
          low[4] = high[4] = 1;
+         hlow[6] = hhigh[6] = 1;
          break;
       case 3:                  // PSH
          low[3] = high[3] = 1;
+         hlow[5] = hhigh[5] = 1;
          break;
       case 4:                  // ACK
          low[2] = high[2] = 1;
+         hlow[4] = hhigh[4] = 1;
          break;
       case 5:                  // URG
          low[1] = high[1] = 1;
+         hlow[3] = hhigh[3] = 1;
          break;
       default:
          printf("Bad TCP flag: %d.\n", flag);
@@ -517,10 +610,17 @@ condition *BuildConditionFromFlag(int flag)
    }
    // 1 means in the query, 0 means not in the query.
    low[0] = high[0] = 1;
+   hlow[0] = hhigh[0] = 1;
+
+   hlow[1] = hlow[2] = 0;
+   hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
    // Make an MDD from the tuple.
    FW->FWForest->MakeMDDFromTuple(low, high, newCond->h);
+   FW->HistoryForest->MakeMDDFromTuple(hlow, hhigh, newCond->history);
    delete[]high;
    delete[]low;
+   delete[]hhigh;
+   delete[]hlow;
    return newCond;
 }
 
@@ -535,6 +635,7 @@ condition *NegateCondition(condition * c)
    // Use the binary complement operator, which stores the
    // result in newCond->h.
    FW->FWForest->BinaryComplement(c->h, newCond->h);
+   FW->HistoryForest->BinaryComplement(c->history, newCond->history);
 
    // We can now free the initial condition
    FW->FWForest->DestroyMDD(c->h);
@@ -559,10 +660,13 @@ condition *UnionConditions(condition * c1, condition * c2)
    // We use the "MAX" operation on MDDs, which stores
    // the result in newCond->h.
    FW->FWForest->Max(c1->h, c2->h, newCond->h);
+   FW->HistoryForest->Max(c1->history, c2->history, newCond->history);
 
    // Now c1 and c2 are no longer useful, so they can be freed.
    FW->FWForest->DestroyMDD(c1->h);
    FW->FWForest->DestroyMDD(c2->h);
+   FW->HistoryForest->DestroyMDD(c1->history);
+   FW->HistoryForest->DestroyMDD(c2->history);
    delete c1;
    delete c2;
 
@@ -585,6 +689,7 @@ condition *IntersectConditions(condition * c1, condition * c2)
 
    // Use the MIN operation on MDDs.
    FW->FWForest->Min(c1->h, c2->h, newCond->h);
+   FW->HistoryForest->Min(c1->history, c2->history, newCond->history);
 
    // Now we can free c1 and c2.
 
@@ -592,6 +697,8 @@ condition *IntersectConditions(condition * c1, condition * c2)
 
    FW->FWForest->DestroyMDD(c1->h);
    FW->FWForest->DestroyMDD(c2->h);
+   FW->HistoryForest->DestroyMDD(c1->history);
+   FW->HistoryForest->DestroyMDD(c2->history);
    delete c1;
    delete c2;
 
@@ -610,22 +717,28 @@ condition *IntersectConditions(condition * c1, condition * c2)
 query *PerformQuery(int subject, condition * c, int input_chain)
 {
    mdd_handle result;
+   mdd_handle hresult;
    int mask[23];
 
    for (int i = 0; i < 23; i++)
       mask[i] = 0;
+   
 
    // Intersect the set of accepted packets with the set of packets
    // relevant to the query (stored in condition "c").
    if (input_chain == 0) {
       FW->FWForest->QueryIntersect(FW->Input, c->h, result);
+      FW->HistoryForest->HistoryIntersect(FW->InputHist, c->history, hresult);
    }
    if (input_chain == 1) {
       FW->FWForest->QueryIntersect(FW->Forward, c->h, result);
+      FW->HistoryForest->HistoryIntersect(FW->ForwardHist, c->history, hresult);
    }
    if (input_chain == 2) {
       FW->FWForest->QueryIntersect(FW->Output, c->h, result);
+      FW->HistoryForest->HistoryIntersect(FW->OutputHist, c->history, hresult);
    }
+     FW->HistoryForest->PrintHistory(hresult);
 #ifdef DEBUG
    printf("Rules: %d Query: %d\n", FW->Forward.index, c->h.index);
 //   FW->FWForest->PruneMDD(result);
@@ -688,9 +801,54 @@ query *PerformQuery(int subject, condition * c, int input_chain)
    }
    // Now that the query is done, free the query condition.
    FW->FWForest->DestroyMDD(c->h);
+   FW->HistoryForest->DestroyMDD(c->history);
+   FW->HistoryForest->DestroyMDD(hresult);
    delete c;
 
    return NULL;
+}
+
+assert* PerformAssertion(condition* left, condition* right, int assert_op, int input_chain){
+   	condition* A;
+	condition* notB;
+	condition* result;
+	A = new condition;
+        if (input_chain == 0) {
+           FW->FWForest->QueryIntersect(FW->Input, left->h, A->h);
+        }
+        if (input_chain == 1) {
+            FW->FWForest->QueryIntersect(FW->Forward, left->h, A->h);
+        }
+        if (input_chain == 2) {
+           FW->FWForest->QueryIntersect(FW->Output, left->h, A->h);
+        }
+	result = new condition;
+	switch (assert_op){
+	   case 0:
+	      if (A->h.index != right->h.index){
+                 printf("Assertion failed.\n");
+	      }
+	      else
+   	         printf("Assertion held.\n");
+	      break;
+	   case 1:
+	      notB = new condition;
+              FW->FWForest->BinaryComplement(right->h, notB->h);
+              FW->FWForest->Min(notB->h, A->h, result->h);
+	      delete notB;
+	      if (result->h.index != 0){
+	         printf("Assertion failed.\n");
+	      }
+	      else 
+		 printf("Assertion held.\n");
+	      break;
+	      default:
+	      printf("Illegal Assertion Operator.\n");
+	      exit(-1);
+	      break;
+	}
+	delete result;
+	return NULL;
 }
 
 // Add port "newPort" to the port list "list" and return the result.
@@ -774,6 +932,9 @@ void DoCleanup()
    FW->FWForest->DestroyMDD(FW->Input);
    FW->FWForest->DestroyMDD(FW->Output);
    FW->FWForest->DestroyMDD(FW->Forward);
+   FW->HistoryForest->DestroyMDD(FW->InputHist);
+   FW->HistoryForest->DestroyMDD(FW->OutputHist);
+   FW->HistoryForest->DestroyMDD(FW->ForwardHist);
    FW->FWForest->DestroyMDD(FW->InputLog);
    FW->FWForest->DestroyMDD(FW->OutputLog);
    FW->FWForest->DestroyMDD(FW->ForwardLog);

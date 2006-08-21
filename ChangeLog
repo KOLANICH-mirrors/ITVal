@@ -1,3 +1,8 @@
+ITVal-0.8: June 17, 2006 Robert Marmorstein
+	Began preliminary support for guided repair.  Adding history options
+	to the MDD library.  Redesigning the GUI in QT/KDE.  Fixed several
+	memory leaks in Topology handling.
+
 ITVal-0.7: April 26, 2006 Robert Marmorstein
         ITVal now supports ranged addresses in queries and group/service
         definitions.   For instance, you can use the query: QUERY FROM

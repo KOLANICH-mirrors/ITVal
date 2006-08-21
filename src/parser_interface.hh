@@ -3,17 +3,13 @@
 
 #include <string>
 
-union YYSTYPE;
 namespace yy
 {
   class location;
   class parser;
-}
-class parser_interface;
+};
 
-#define YY_DECL int yylex (YYSTYPE* yylval, yy::location* yylloc, parser_interface& parser)
-
-YY_DECL;
+#define YY_DECL int yylex (yy::parser::semantic_type* yylval, yy::location* yylloc, parser_interface& parser)
 
 class parser_interface
 {

@@ -1,4 +1,17 @@
 #include "topology.h"
+   
+Topology::~Topology() {
+   if (!ifaces)
+      return;
+      for (int i = 0; i < numIfaces; i++){
+	 if (ifaces[i]){
+            delete ifaces[i];
+	    ifaces[i] = NULL;
+	 }
+      }
+      delete[]ifaces;
+      ifaces = NULL;
+   }
 
 int Topology::FindInterface(char *name)
 {

@@ -44,13 +44,13 @@ class Firewall {
    void BuildVerboseFWRules(char *fname);
    void BuildNATRules(char *fname);
    void BuildChains(int input_chain, mdd_handle & outputMDD,
-                    mdd_handle & logMDD);
+                    mdd_handle & logMDD, mdd_handle & outHistMDD);
 
    void AssembleChains(chain ** chain_array, chain * ch, mdd_handle & outMDD,
-                       mdd_handle & logMDD);
+                       mdd_handle & logMDD, mdd_handle & outHistMDD);
 
-   void ProcessChain(chain ** chain_array, mdd_handle inMDD, rule_tuple * tup,
-                     mdd_handle & outMDD, mdd_handle & logMDD);
+   void ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle inHistMDD, rule_tuple * tup,
+                     mdd_handle & outMDD, mdd_handle & logMDD,  mdd_handle & outHistMDD);
 
    void BuildRules(processed_rule * pr, rule_tuple * &tup);
 
@@ -74,8 +74,7 @@ class Firewall {
                       rule_tuple * &stack);
 
    void ConvertNATRules(processed_nat_rule * pnr, nat_tuple * &stack);
-   void DoNAT(nat_tuple * tup, mdd_handle inMDD, mdd_handle & outMDD,
-              mdd_handle & logMDD);
+   void DoNAT(nat_tuple * tup, mdd_handle inMDD, mdd_handle inHistMDD, mdd_handle & outMDD, mdd_handle & logMDD, mdd_handle & outHistMDD);
 
    void ProcessNATSource(processed_nat_rule * pr, nat_tuple * tup,
                          nat_tuple * &stack);
@@ -99,49 +98,30 @@ class Firewall {
    fw_fddl_forest *FWForest;
    fw_fddl_forest *ClassForest;
    fw_fddl_forest *ServiceClassForest;
+   fw_fddl_forest *HistoryForest;
    mdd_handle Input;
+   mdd_handle InputHist;
    mdd_handle InputLog;
    mdd_handle Output;
+   mdd_handle OutputHist;
    mdd_handle OutputLog;
    mdd_handle Forward;
+   mdd_handle ForwardHist;
    mdd_handle ForwardLog;
 
    int FindChain(char *name);
    int FindNATChain(char *name);
-   void NATChains(int input_chain, mdd_handle inMDD, mdd_handle & outMDD,
-                  mdd_handle & logMDD);
+   void NATChains(int input_chain, mdd_handle inMDD, mdd_handle inHistMDD, mdd_handle & outMDD,
+                  mdd_handle & logMDD, mdd_handle & outHistMDD);
 
-     Firewall(fw_fddl_forest * F);
+     Firewall(fw_fddl_forest * F, fw_fddl_forest * H);
 
      Firewall(char *filterName, char *natName, fw_fddl_forest * F,
-              Topology * top);
+              Topology * top, fw_fddl_forest * H);
      Firewall(char *filterName, char *natName, fw_fddl_forest * F,
-              Topology * top, int verbose);
+              Topology * top, int verbose, fw_fddl_forest * H);
 
-    ~Firewall() {
-      while (natHead != NULL) {
-         processed_nat_rule *cur;
-           cur = natHead;
-           natHead = (processed_nat_rule *) natHead->next;
-         delete cur;
-      } for (int i = 0; i < num_chains; i++)
-         if (chain_array[i] != NULL)
-            delete chain_array[i];
-
-      for (int i = 0; i < num_nat_chains; i++)
-         if (nat_chains[i] != NULL)
-            delete nat_chains[i];
-
-      FWForest->DestroyMDD(Input);
-      FWForest->DestroyMDD(InputLog);
-      FWForest->DestroyMDD(Output);
-      FWForest->DestroyMDD(OutputLog);
-      FWForest->DestroyMDD(Forward);
-      FWForest->DestroyMDD(ForwardLog);
-
-      delete ClassForest;
-      delete ServiceClassForest;
-   }
+   ~Firewall();
    int PrintClasses();
    int PrintServiceClasses();
    int GetClasses(group ** &Classes, int &numClasses);
@@ -150,5 +130,5 @@ class Firewall {
 };
 
 /* Create a META-Firewall from all the independent firewalls.*/
-Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int num_fws);
+Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int num_fws, fw_fddl_forest * HForest);
 Topology *MergeTopology(Topology * curTop, Topology * newTop);

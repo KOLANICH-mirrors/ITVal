@@ -133,6 +133,8 @@ void ProcessInfo(char *info, processed_rule * p, rule_parser * rp)
 void ProcessRule(rule * r, processed_rule * p, rule_parser * rp,
                  Topology * top)
 {
+   p->id = r->id;
+   p->chain_id = r->chain_id;
    // Munge the source and destination addresses
    ConvertARange(r->source, p->from);
    ConvertARange(r->dest, p->to);

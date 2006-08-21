@@ -29,27 +29,33 @@
 #include <assert.h>
 
 void
-  Firewall::DoNAT(nat_tuple * tup, mdd_handle inMDD, mdd_handle & outMDD,
-                  mdd_handle & logMDD)
+  Firewall::DoNAT(nat_tuple * tup, mdd_handle inMDD, mdd_handle inHistMDD, mdd_handle & outMDD,
+                  mdd_handle & logMDD, mdd_handle & outHistMDD)
 {
 
    mdd_handle interMDD;
+   mdd_handle interHistMDD;
+   int hlow[25];
+   int hhigh[25];
 
    if (tup == NULL)
       return;
-   DoNAT((nat_tuple *) tup->next, inMDD, outMDD, logMDD);
+   DoNAT((nat_tuple *) tup->next, inMDD, inHistMDD, outMDD, logMDD, outHistMDD);
 
    if (tup->low[0] == DNAT) {
       // NAT rule
       FWForest->DNAT(inMDD, tup, outMDD);
+      HistoryForest->DNAT(inHistMDD, tup, outHistMDD);
       FWForest->DNAT(logMDD, tup, logMDD);
    }
    else if (tup->low[0] == SNAT) {
       FWForest->SNAT(inMDD, tup, outMDD);
+      HistoryForest->SNAT(inHistMDD, tup, outHistMDD);
       FWForest->SNAT(logMDD, tup, logMDD);
    }
    else if (tup->low[0] == NETMAP) {
       FWForest->NETMAP(inMDD, tup, outMDD);
+      HistoryForest->NETMAP(inHistMDD, tup, outHistMDD);
       FWForest->NETMAP(logMDD, tup, logMDD);
    }
    else if (tup->low[0] == ACCEPT || tup->low[0] == DROP
@@ -58,8 +64,20 @@ void
 
       // Insert it into the MDD.
       FWForest->MakeMDDFromTuple(tup->low, tup->high, interMDD);
+
+      for (int i=0;i<=22;i++){
+         hlow[i+2]=tup->low[i];
+         hhigh[i+2]=tup->high[i];
+      }
+      hlow[2] = hhigh[2] = tup->chain_id;
+      hlow[1] = hhigh[1] = tup->id;
+      hlow[0] = hhigh[0] = 1;
+      HistoryForest->MakeMDDFromTuple(hlow, hhigh, interHistMDD);
+
       FWForest->Replace(inMDD, interMDD, true, outMDD);
+      HistoryForest->Replace(inHistMDD, interHistMDD, true, outHistMDD);
       FWForest->DestroyMDD(interMDD);
+      HistoryForest->DestroyMDD(interHistMDD);
 
       // Remove it from the LOG
       tup->low[0] = tup->high[0] = 0;
@@ -71,14 +89,13 @@ void
    }
 }
 
-void Firewall::NATChains(int chain_num, mdd_handle inMDD, mdd_handle & outMDD,
-                         mdd_handle & logMDD)
+void Firewall::NATChains(int chain_num, mdd_handle inMDD, mdd_handle inHistMDD, mdd_handle & outMDD, mdd_handle & logMDD, mdd_handle & outHistMDD)
 {
    nat_tuple *stack;
 
    stack = NULL;
    ConvertNATRules(nat_chains[chain_num]->natRules, stack);
-   DoNAT(stack, inMDD, outMDD, logMDD); // To reverse the order
+   DoNAT(stack, inMDD, inHistMDD, outMDD, logMDD, outHistMDD); // To reverse the order
 }
 
 void Firewall::ProcessNATTarget(processed_nat_rule * pr, nat_tuple * tup,

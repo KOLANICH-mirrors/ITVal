@@ -1,5 +1,5 @@
 #include "parser_interface.hh"
-#include "fwlang.tab.hh"
+#include "y.tab.h"
 
 parser_interface::parser_interface():trace_scanning(false),
 trace_parsing(false)

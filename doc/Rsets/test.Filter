@@ -9,6 +9,7 @@ Chain FORWARD (policy ACCEPT 2 packets, 128 bytes)
     0     0 DROP       tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           tcp dpt:65535 
     0     0 ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0           udp dpt:1194 
     0     0 ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0           udp spt:1194 
+    0     0 ACCEPT     udp  --  *      *       0.0.0.0/0            0.0.0.0/0           udp dpt:25
 
 Chain OUTPUT (policy ACCEPT 17M packets, 3056M bytes)
  pkts bytes target     prot opt in     out     source               destination         

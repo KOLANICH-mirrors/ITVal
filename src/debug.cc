@@ -43,6 +43,7 @@ void PrintRange(address_range * ar)
 // Unprocessed Rules
 void PrintRule(rule newRule)
 {
+   printf("Id: %d\n", newRule.id);
    printf("Target: %s\n", newRule.target);
    printf("Protocol: %s\n", newRule.protocol);
    printf("Opt: %s\n", newRule.opt);

@@ -26,10 +26,12 @@
 
 #define SIZE_OF_LEVEL_18 256
 
-Firewall::Firewall(fw_fddl_forest * F)
+Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H)
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
    FWForest = F;
+   HistoryForest = H;
+   
    num_nat_chains = -1;
    num_chains = -1;
    for (int i = 0; i < 256; i++) {
@@ -43,7 +45,7 @@ Firewall::Firewall(fw_fddl_forest * F)
 };
 
 Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
-                   Topology * top)
+                   Topology * top, fw_fddl_forest *H)
 {
    int ranges[5] = { 65536, 256, 256, 256, 256 };
    int high[23];
@@ -54,8 +56,9 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    int output_chain;
 
    FWForest = F;
+   HistoryForest = H;
    T = top;
-
+   
    num_nat_chains = -1;
    num_chains = -1;
    for (int i = 0; i < 256; i++) {
@@ -93,9 +96,9 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
       exit(-1);
    }
 
-   BuildChains(forward_chain, Forward, ForwardLog);
-   BuildChains(input_chain, Input, InputLog);
-   BuildChains(output_chain, Output, OutputLog);
+   BuildChains(forward_chain, Forward, ForwardLog, ForwardHist);
+   BuildChains(input_chain, Input, InputLog, InputHist);
+   BuildChains(output_chain, Output, OutputLog, OutputHist);
    ClassForest = new fw_fddl_forest(5, ranges);
    ClassForest->ToggleSparsity(false);
    ServiceClassForest = new fw_fddl_forest(4, ranges);
@@ -104,7 +107,7 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
 }
 
 Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
-                   Topology * top, int verbose)
+                   Topology * top, int verbose, fw_fddl_forest * H)
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
    int high[23];
@@ -116,6 +119,9 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
 
    FWForest = F;
    T = top;
+
+   HistoryForest = H;
+
    num_nat_chains = -1;
    num_chains = -1;
    for (int i = 0; i < 256; i++) {
@@ -153,9 +159,16 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
       exit(-1);
    }
 
-   BuildChains(forward_chain, Forward, ForwardLog);
-   BuildChains(input_chain, Input, InputLog);
-   BuildChains(output_chain, Output, OutputLog);
+   BuildChains(forward_chain, Forward, ForwardLog, ForwardHist);
+   BuildChains(input_chain, Input, InputLog, InputHist);
+   BuildChains(output_chain, Output, OutputLog, OutputHist);
+
+   //@DEBUG@//
+   //printf("ForwardHist: %d InputHist: %d OutputHist %d\n", ForwardHist.index, InputHist.index, OutputHist.index);
+ //  for (level k = 24; k > 0; k--){
+  //    HistoryForest->Compact(k);
+  // }
+  // HistoryForest->PrintMDD();
 
 #ifdef DEBUG
    for (level k = 22; k > 0; k--)
@@ -168,6 +181,38 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    ServiceClassForest->ToggleSparsity(false);
    natHead = NULL;
 }
+
+Firewall::~Firewall() {
+      while (natHead != NULL) {
+         processed_nat_rule *cur;
+           cur = natHead;
+           natHead = (processed_nat_rule *) natHead->next;
+         delete cur;
+      } for (int i = 0; i < num_chains; i++)
+         if (chain_array[i] != NULL)
+            delete chain_array[i];
+
+      for (int i = 0; i < num_nat_chains; i++)
+         if (nat_chains[i] != NULL)
+            delete nat_chains[i];
+
+      FWForest->DestroyMDD(Input);
+      HistoryForest->DestroyMDD(InputHist);
+      FWForest->DestroyMDD(InputLog);
+      FWForest->DestroyMDD(Output);
+      HistoryForest->DestroyMDD(OutputHist);
+      FWForest->DestroyMDD(OutputLog);
+      FWForest->DestroyMDD(Forward);
+      HistoryForest->DestroyMDD(ForwardHist);
+      FWForest->DestroyMDD(ForwardLog);
+
+      delete ClassForest;
+      delete ServiceClassForest;
+      if (T)
+         delete T;
+      T = NULL;
+   }
+
 
 int Firewall::PrintClasses()
 {
@@ -585,8 +630,9 @@ int Firewall::GetServiceClasses(service ** &classes, int &numClasses)
 
 /* Create a Meta-Firewall */
 /* Need to do something about Topologies, here. */
-Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n)
+Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n, fw_fddl_forest * HistoryForest)
 {
+   Topology* tmp;
    Firewall *f;
    int prerouting, postrouting;
 
@@ -595,26 +641,27 @@ Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n)
    if (n == 0)
       return NULL;
 
-   f = new Firewall(FWForest);
+   f = new Firewall(FWForest, HistoryForest);
 
    prerouting = fws[0]->FindNATChain("Prerouting");
    postrouting = fws[0]->FindNATChain("Postrouting");
 
    if (prerouting >= 0) {
-      fws[0]->NATChains(postrouting, fws[0]->Forward, f->Forward,
-                        f->ForwardLog);
-      fws[0]->NATChains(postrouting, fws[0]->Input, f->Input, f->InputLog);
-      fws[0]->NATChains(postrouting, fws[n - 1]->Output, f->Output,
-                        f->OutputLog);
+      fws[0]->NATChains(postrouting, fws[0]->Forward, fws[0]->ForwardHist, f->Forward, f->ForwardLog, f->ForwardHist);
+      fws[0]->NATChains(postrouting, fws[0]->Input, fws[0]->InputHist, f->Input, f->InputLog, f->InputHist);
+      fws[0]->NATChains(postrouting, fws[n - 1]->Output, fws[n - 1]->OutputHist, f->Output, f->OutputLog, f->OutputHist);
    }
    else {
       FWForest->Attach(f->Forward, fws[0]->Forward.index);
+      HistoryForest->Attach(f->ForwardHist, fws[0]->ForwardHist.index);
       FWForest->Attach(f->ForwardLog, fws[0]->ForwardLog.index);
 
       FWForest->Attach(f->Input, fws[0]->Input.index);
+      HistoryForest->Attach(f->InputHist, fws[0]->InputHist.index);
       FWForest->Attach(f->InputLog, fws[0]->InputLog.index);
 
       FWForest->Attach(f->Output, fws[n - 1]->Output.index);
+      HistoryForest->Attach(f->OutputHist, fws[n - 1]->OutputHist.index);
       FWForest->Attach(f->OutputLog, fws[n - 1]->OutputLog.index);
    }
 
@@ -623,36 +670,43 @@ Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n)
       FWForest->Min(f->Input, fws[i]->Forward, f->Forward);
       FWForest->Min(f->Output, fws[(n - 1) - i]->Forward, f->Forward);
 
+      HistoryForest->Min(f->ForwardHist, fws[i]->ForwardHist, f->ForwardHist);
+      HistoryForest->Min(f->InputHist, fws[i]->ForwardHist, f->ForwardHist);
+      HistoryForest->Min(f->OutputHist, fws[(n - 1) - i]->ForwardHist, f->ForwardHist);
+
       prerouting = fws[i]->FindNATChain("Prerouting");
       postrouting = fws[i - 1]->FindNATChain("Postrouting");
 
       /* SNAT the chains (and postrouting NETMAP them) */
       if (postrouting >= 0) {
-         fws[i]->NATChains(postrouting, f->Forward, f->Forward,
-                           f->ForwardLog);
-         fws[i]->NATChains(postrouting, f->Input, f->Input, f->InputLog);
+         fws[i]->NATChains(postrouting, f->Forward, f->ForwardHist, f->Forward,
+                           f->ForwardLog, f->ForwardHist);
+         fws[i]->NATChains(postrouting, f->Input, f->InputHist,f->Input, f->InputLog,f->InputHist);
       }
       /* DNAT the chains and (Prerouting NETMAP them) */
       if (prerouting >= 0) {
-         fws[i]->NATChains(prerouting, f->Forward, f->Forward, f->ForwardLog);
-         fws[i]->NATChains(prerouting, f->Input, f->Input, f->InputLog);
+         fws[i]->NATChains(prerouting, f->Forward, f->ForwardHist, f->Forward, f->ForwardLog, f->ForwardHist);
+         fws[i]->NATChains(prerouting, f->Input, f->InputHist, f->Input, f->InputLog, f->InputHist);
       }
 
       prerouting = fws[(n - 1) - i]->FindNATChain("Prerouting");
       postrouting = fws[n - i]->FindNATChain("Postrouting");
       if (postrouting >= 0) {
-         fws[n - i]->NATChains(postrouting, f->Output, f->Output,
-                               f->OutputLog);
+         fws[n - i]->NATChains(postrouting, f->Output, f->OutputHist, f->Output,
+                               f->OutputLog, f->OutputHist);
       }
       if (prerouting >= 0) {
-         fws[n - i]->NATChains(prerouting, f->Output, f->Output,
-                               f->OutputLog);
+         fws[n - i]->NATChains(prerouting, f->Output, f->OutputHist, f->Output,
+                               f->OutputLog, f->OutputHist);
       }
    }
 
    f->T = NULL;
    for (int i = 0; i < n; i++) {
-      f->T = MergeTopology(f->T, fws[i]->T);
+      tmp = MergeTopology(f->T, fws[i]->T);
+      if (f->T)
+         delete f->T;
+      f->T = tmp;
    }
    return f;
 }
@@ -662,13 +716,18 @@ Topology *MergeTopology(Topology * curTop, Topology * newTop)
 {
    Topology *newT;
    newT = new Topology();
-   if (newTop == NULL)
-      return newT;
+   newT->numIfaces = 0;
+   if (newTop == NULL){
+      delete newT;
+      return NULL;
+      //return newT;
+   }
    for (int i = 0; i < newTop->numIfaces; i++) {
-      newT->ifaces[i] = newTop->ifaces[i];
-      if (newTop->ifaces[i] != NULL)
+      if (newTop->ifaces[i] != NULL){
          printf("Copying %s\n", newTop->ifaces[i]->name);
-      newT->numIfaces++;
+         newT->ifaces[i] = new Interface(newTop->ifaces[i]->name, newTop->ifaces[i]->ip);
+         newT->numIfaces++;
+      }
    }
    return newT;
 }

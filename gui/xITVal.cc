@@ -1,10 +1,15 @@
 #include "PythonPipe.h"
 #include "../src/firewall.h"
+#include "../src/rule_parser.h"
+#include "../src/chains.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
+int chain::numChains = 0;
+
 int BuildMetaFirewall(PythonPipe* pp, Firewall*& mf){
+   fw_fddl_forest* HistoryForest;
    Firewall** fws;
    int num_fws;
    fw_fddl_forest* f;
@@ -27,10 +32,25 @@ int BuildMetaFirewall(PythonPipe* pp, Firewall*& mf){
        255, 255, 255, 255,         /* Destination Address          */
        255, 255, 255, 255          /* Source Address               */
    };
+
+   int hranges[24] = { 
+       65536,       /* Chain Num                 */
+       65536,       /* Rule Num                 */
+       1, 1, 1, 1, 1, 1,           /* Flags (FIN, SYN, RST, PSH, ACK, URG) */
+       3,                          /* Connection State             */
+       255, 255,                   /* Output and Input Interface   */
+       255, 255,                   /* Destination Port             */
+       255, 255,                   /* Source Port                  */
+       2,                          /* Protocol                     */
+       255, 255, 255, 255,         /* Destination Address          */
+       255, 255, 255, 255          /* Source Address               */
+   };
  
-   
+
    f = new fw_fddl_forest(23, ranges);
    f->ToggleSparsity(false); //Fix this @BUG@ later.
+   HistoryForest = new fw_fddl_forest(24, hranges);
+   HistoryForest->ToggleSparsity(false);
 
    
    pp->WriteString("Send Filter Names\n");
@@ -65,7 +85,7 @@ int BuildMetaFirewall(PythonPipe* pp, Firewall*& mf){
       else{
          top = new Topology(curTop->str);
       }
-      fws[i] = new Firewall (curFilter->str, curNAT->str, f, top, 1);
+      fws[i] = new Firewall (curFilter->str, curNAT->str, f, top, 1,HistoryForest);
       i = i + 1;
       curFilter = curFilter->next;
       curNAT = curNAT->next;
@@ -76,7 +96,7 @@ int BuildMetaFirewall(PythonPipe* pp, Firewall*& mf){
    delete nats;
    delete tops;
    
-   mf = MergeFWs(f, fws, num_fws);
+   mf = MergeFWs(f, fws, num_fws, HistoryForest);
    for (i=0;i<num_fws;i++){
       delete fws[i];
    }

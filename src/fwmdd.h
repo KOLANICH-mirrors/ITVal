@@ -37,6 +37,7 @@ Williamsburg, VA 23185
 #   include <FDDL/structures.h>
 #   include "sets.h"
 
+
 /*
  * The class fw_fddl_forest enhances the fddl_forest by providing
  * certain algorithms specific to firewall representation.  In 
@@ -104,6 +105,12 @@ class fw_fddl_forest:public fddl_forest {
 
    int QueryIntersect(mdd_handle p, mdd_handle q, mdd_handle & result);
    node_idx InternalQIntersect(level k, node_idx p, node_idx q);
+   int HistoryIntersect(mdd_handle p, mdd_handle q, mdd_handle & result);
+   node_idx InternalHIntersect(level k, node_idx p, node_idx q);
+
+   int PrintHistory(mdd_handle p);
+   void InternalPrintHistory(level k, node_idx p, int chain_num, int rule_num);
+
    int DNAT(mdd_handle p, nat_tuple * pnr, mdd_handle & result);
    node_idx InternalDNAT(level k, node_idx p, node_idx q, nat_tuple * pnr);
    int SNAT(mdd_handle p, nat_tuple * pnr, mdd_handle & result);
