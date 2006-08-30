@@ -81,7 +81,7 @@ int main(int argc, char **argv)
    };
 
    int hranges[25] = { 
-      1,			/* Exists */
+      256,			/* Exists */
       65536,      		/* Rule ID */
       65536,      		/* Chain ID */
       1, 1, 1, 1, 1, 1,         /* Flags (FIN, SYN, RST, PSH, ACK, URG) */

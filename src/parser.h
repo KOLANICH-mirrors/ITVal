@@ -73,7 +73,15 @@ group *BuildGroupFromAddress(address * a);
 
 //Construct a query condition representing the set of all logged
 //packets.
-condition *GetLoggedCondition();
+condition *GetLoggedCondition(int input_chain);
+
+//Construct a query condition representing the set of all packets
+//accepted by chain "input_chain".
+condition *BuildAcceptCondition(int input_chain);
+
+//Construct a query condition representing the set of all packets
+//dropped by chain "input_chain".
+condition *BuildDropCondition(int input_chain);
 
 //Construct a query condition from a group of addresses
 condition *BuildConditionFromGroup(group * g, int op);
@@ -103,8 +111,10 @@ condition *IntersectConditions(condition * c1, condition * c2);
 
 //Intersect the set of accepted packets with the query filter and
 //display the result.
-query *PerformQuery(int s, condition * c, int input_chain);
-assert *PerformAssertion(condition *left, condition *right, int assertion_operator, int input_chain);
+//query *PerformQuery(int s, condition * c, int input_chain);
+query *PerformQuery(int s, condition * c);
+//assert *PerformAssertion(condition *left, condition *right, int assertion_operator, int input_chain);
+assert *PerformAssertion(condition *left, condition *right, int assertion_operator);
 
 //Compute Host Equivalence Classes and print them.
 query *PrintClasses();

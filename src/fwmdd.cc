@@ -34,6 +34,84 @@ Williamsburg, VA 23185
 #define MAX(a, b) (a>b ? a : b)
 #define MIN(a, b) (a<b ? a : b)
 
+int fw_fddl_forest::Accepted(mdd_handle root, mdd_handle& result){
+   node_idx newresult;
+   if (root.index < 0)
+      return INVALID_MDD;
+
+   for (level k=K;k>0;k--){
+      AcceptCache[k]->Clear();
+   }
+   newresult = InternalAccepted(K, root.index);
+   //PrintMDD();
+   //printf("Accepted:: %d\n", newresult);
+   if (result.index != newresult){
+      ReallocHandle(result);
+      Attach(result, newresult);
+   }
+   return SUCCESS;
+}
+
+int fw_fddl_forest::Dropped(mdd_handle root, mdd_handle& result){
+   node_idx newresult;
+   if (root.index < 0)
+      return INVALID_MDD;
+
+   for (level k=K;k>0;k--){
+      DropCache[k]->Clear();
+   }
+   newresult = InternalDropped(K, root.index);
+   if (result.index != newresult){
+      ReallocHandle(result);
+      Attach(result, newresult);
+   }
+   return SUCCESS;
+}
+
+node_idx fw_fddl_forest::InternalAccepted(level k, node_idx p){
+   node_idx r;
+   node* nodeP;
+   if (p==0)
+      return 0;
+   if (k==0)
+      return (p == 3);
+   r = AcceptCache[k]->Hit(k,p);
+   if (r>=0)
+      return r;
+   r = NewNode(k);
+   nodeP = &FDDL_NODE(k,p);
+   for (int i=0;i<nodeP->size;i++){
+      node_idx j;
+      j = FDDL_ARC(k,nodeP, i);
+      SetArc(k,r,i, InternalAccepted(k-1, FDDL_ARC(k,nodeP, i)));
+   }
+   r = CheckIn(k,r);
+   AcceptCache[k]->Add(k,p,r);
+   return r;
+}
+
+node_idx fw_fddl_forest::InternalDropped(level k, node_idx p){
+   node_idx r;
+   node* nodeP;
+   if (p==0)
+      return 0;
+   if (k==0)
+      return p == 2;
+   r = DropCache[k]->Hit(k,p);
+   if (r>=0)
+      return r;
+   r = NewNode(k);
+   nodeP = &FDDL_NODE(k,p);
+   for (int i=0;i<nodeP->size;i++){
+      node_idx j;
+      j = FDDL_ARC(k,nodeP, i);
+      SetArc(k,r,i, InternalDropped(k-1, FDDL_ARC(k,nodeP, i)));
+   }
+   r = CheckIn(k,r);
+   DropCache[k]->Add(k,p,r);
+   return r;
+}
+
 int fw_fddl_forest::QueryIntersect(mdd_handle root, mdd_handle root2, mdd_handle & result) {
    if (root.index < 0)
       return INVALID_MDD;
@@ -58,7 +136,7 @@ int fw_fddl_forest::QueryIntersect(mdd_handle root, mdd_handle root2, mdd_handle
       ReallocHandle(result);
       Attach(result, newresult);
    }
-   return 0;
+   return SUCCESS;
 }
 
 int fw_fddl_forest::PrintHistory(mdd_handle root){

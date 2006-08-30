@@ -1451,6 +1451,9 @@ fddl_forest::PrintMDD()
 						 nodeI->down,
 						 nodeI->size, nodeI->flags & SPARSE ? 'S' : ' ');
 			}
+			else{
+                           printf("%d[D] ", i);
+			}
 		}
 		printf("\t: %d\n", tail[k]);
 		lastVal = (-1);

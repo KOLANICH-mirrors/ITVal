@@ -362,8 +362,8 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       inHistMDD, rule_tuple * tup, mdd_handle & outMDD, mdd_handle & logMDD,
       mdd_handle & outHistMDD){
 
-   int hlow[25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-   int hhigh[25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+//   int hlow[25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+//   int hhigh[25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
    // criteriaMDD represents the set of packets that match tup.
    mdd_handle criteriaMDD;
 
@@ -393,17 +393,22 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    // If it's a log rule, insert it into the Log MDD and return.
    if (tup->high[0] == -1) {
       tup->low[0] = tup->high[0] = 1;
+      tup->hlow[0] = tup->hhigh[0] = 1;
       FWForest->Assign(logMDD, tup->low, tup->high, logMDD);
-      tup->low[0] = tup->high[0] = -1;
 
-      //FWForest->DestroyMDD(inMDD);
+      tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
+      tup->hlow[1] = tup->hhigh[1] = tup->id;  
+      HistoryForest->Assign(outHistMDD, tup->hlow, tup->hhigh, outHistMDD);
+
+      tup->low[0] = tup->high[0] = -1;
+      tup->hlow[0] = tup->hhigh[0] = -1;
+
       return;
    }
+
    // Otherwise, take the output of the previous function off the stack
    // and make it the input MDD.
 
-
-//   FWForest->DestroyMDD(inMDD);
    FWForest->Attach(inMDD, outMDD.index);
    HistoryForest->Attach(inHistMDD, outHistMDD.index);
 
@@ -413,14 +418,16 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
    // Create the intermediate MDD
    FWForest->MakeMDDFromTuple(tup->low, tup->high, criteriaMDD);
-      for (int k=22;k>=0;k--){
-         hlow[k+2] = tup->low[k];
-         hhigh[k+2] = tup->high[k];
-      } 
-      hlow[2] = hhigh[2] = tup->chain_id; 
-      hlow[1] = hhigh[1] = tup->id;  
-      hlow[0] = hhigh[0] = 1;
-      HistoryForest->Assign(historyMDD, hlow, hhigh, historyMDD);
+   for (int k=22;k>=0;k--){
+      tup->hlow[k+2] = tup->low[k];
+      tup->hhigh[k+2] = tup->high[k];
+   } 
+   tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
+   tup->hlow[1] = tup->hhigh[1] = tup->id;  
+//   tup->hlow[0] = tup->hhigh[0] = 1;
+   tup->hlow[0] = tup->low[0];
+   tup->hhigh[0] = tup->high[0];
+   HistoryForest->MakeMDDFromTuple(tup->hlow, tup->hhigh, historyMDD);
 
 #ifdef VERBOSE_DEBUG
    printf("Make Criteria MDD: %d\n", criteriaMDD.index);
@@ -441,17 +448,20 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
 //      FWForest->Replace(inMDD, criteriaMDD, true, outMDD);
       for (int k=22;k>=0;k--){
-         hlow[k+2] = tup->low[k];
-         hhigh[k+2] = tup->high[k];
+         tup->hlow[k+2] = tup->low[k];
+         tup->hhigh[k+2] = tup->high[k];
       } 
-      hlow[2] = hhigh[2] = tup->chain_id; 
-      hlow[1] = hhigh[1] = tup->id;  
-      hlow[0] = hhigh[0] = 1;
+      tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
+      tup->hlow[1] = tup->hhigh[1] = tup->id;  
+//      tup->hlow[0] = tup->hhigh[0] = 1;
+      tup->hlow[0] = tup->low[0];
+      tup->hhigh[0] = tup->high[0];
       FWForest->Assign(inMDD, tup->low, tup->high, outMDD);
-      HistoryForest->Assign(inHistMDD, hlow, hhigh, outHistMDD);
 
-      // Clean up inMDD and interMDD since we don't need 'em anymore.
-//      FWForest->DestroyMDD(inMDD);  
+      //Union the input MDD with the intermediate and store in "outHistMDD".
+      HistoryForest->Max(inHistMDD, historyMDD, outHistMDD);
+
+      // Clean up the intermediary MDDs, since we don't need 'em anymore.
       FWForest->DestroyMDD(criteriaMDD);
       HistoryForest->DestroyMDD(historyMDD);
 
@@ -481,7 +491,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    else {
       // If the target is another chain, we have to construct the other
       // chain first.  But only that PART of the chain which matches
-      // the tuple we're working on.  So . . .
+      // the tuple we're working on (otherwise, loops are an issue).  So . . .
 
       chain *nextChain;                   // The chain this rule targets.
 
@@ -524,7 +534,8 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
 
       FWForest->Replace(inMDD, resultMDD, true, outMDD);
-      HistoryForest->Replace(inHistMDD, resultHistMDD, true, outHistMDD);
+      //Any rule in the new chain that affects the packet needs to be counted now.
+      HistoryForest->Max(inHistMDD, resultHistMDD, outHistMDD); //Is this correct?@@@@
 
       // Clean up inMDD, resultMDD, and targetMDD, 
       // since they have served their purposes.
@@ -539,6 +550,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 #endif
 
       FWForest->DestroyMDD(resultMDD);
+      FWForest->DestroyMDD(resultHistMDD);
 #ifdef VERBOSE_DEBUG
       printf("Clean Result MDD:\n");
       PrintRuleTuple(tup);      // For debugging
@@ -626,8 +638,11 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
       hhigh[i+2] = high[i];
       hlow[i+2] = low[i];
    }
-   hlow[0] = 1;
-   hhigh[0] = 1;
+//   hlow[0] = 1;
+//   hhigh[0] = 1;
+   hlow[0] = low[0];
+   hhigh[0] = high[0];
+
    hlow[1] = 0;
    hhigh[1] = 0;
 

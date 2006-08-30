@@ -54,6 +54,8 @@ class fw_fddl_forest:public fddl_forest {
    cache **QIntersectCache;
    cache **BuildCache;
    cache **JoinCache;
+   cache **AcceptCache;
+   cache **DropCache;
 
  public:
 
@@ -65,6 +67,8 @@ class fw_fddl_forest:public fddl_forest {
       QIntersectCache = new cache *[K + 1];
       BuildCache = new cache *[K + 1];
       JoinCache = new cache *[K + 1];
+      AcceptCache = new cache *[K + 1];
+      DropCache = new cache *[K + 1];
 
       for (int k = 1; k <= K; k++) {
          NMAPCache[k] = new cache;
@@ -73,7 +77,11 @@ class fw_fddl_forest:public fddl_forest {
          QIntersectCache[k] = new cache;
          JoinCache[k] = new cache;
          BuildCache[k] = new cache;
-      } JoinCache[0] = new cache;
+	 AcceptCache[k] = new cache;
+	 DropCache[k] = new cache;
+      } 
+
+      JoinCache[0] = new cache;
    }
 
    //Clean up data structures used by the forest
@@ -91,6 +99,10 @@ class fw_fddl_forest:public fddl_forest {
             delete JoinCache[k];
          if (BuildCache[k])
             delete BuildCache[k];
+         if (AcceptCache[k])
+            delete AcceptCache[k];
+         if (DropCache[k])
+            delete DropCache[k];
       }
       if (JoinCache[0])
          delete JoinCache[0];
@@ -101,12 +113,19 @@ class fw_fddl_forest:public fddl_forest {
       delete[]BuildCache;
       delete[]JoinCache;
       delete[]QIntersectCache;
+      delete[]AcceptCache;
+      delete[]DropCache;
    }
 
    int QueryIntersect(mdd_handle p, mdd_handle q, mdd_handle & result);
    node_idx InternalQIntersect(level k, node_idx p, node_idx q);
    int HistoryIntersect(mdd_handle p, mdd_handle q, mdd_handle & result);
    node_idx InternalHIntersect(level k, node_idx p, node_idx q);
+
+   int Accepted(mdd_handle p, mdd_handle & result);
+   node_idx InternalAccepted(level k, node_idx p);
+   int Dropped(mdd_handle p, mdd_handle & result);
+   node_idx InternalDropped(level k, node_idx p);
 
    int PrintHistory(mdd_handle p);
    void InternalPrintHistory(level k, node_idx p, int chain_num, int rule_num);

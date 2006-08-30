@@ -89,6 +89,8 @@ class processed_rule {
 //into an MDD.
 class rule_tuple {
  public:
+   int hlow[25];
+   int hhigh[25];
    int low[23];
    int high[23];
    int id;

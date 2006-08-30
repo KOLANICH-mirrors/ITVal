@@ -35,8 +35,8 @@ void
 
    mdd_handle interMDD;
    mdd_handle interHistMDD;
-   int hlow[25];
-   int hhigh[25];
+//   int hlow[25];
+//   int hhigh[25];
 
    if (tup == NULL)
       return;
@@ -66,13 +66,15 @@ void
       FWForest->MakeMDDFromTuple(tup->low, tup->high, interMDD);
 
       for (int i=0;i<=22;i++){
-         hlow[i+2]=tup->low[i];
-         hhigh[i+2]=tup->high[i];
+         tup->hlow[i+2]=tup->low[i];
+         tup->hhigh[i+2]=tup->high[i];
       }
-      hlow[2] = hhigh[2] = tup->chain_id;
-      hlow[1] = hhigh[1] = tup->id;
-      hlow[0] = hhigh[0] = 1;
-      HistoryForest->MakeMDDFromTuple(hlow, hhigh, interHistMDD);
+      tup->hlow[2] = tup->hhigh[2] = tup->chain_id;
+      tup->hlow[1] = tup->hhigh[1] = tup->id;
+//      tup->hlow[0] = tup->hhigh[0] = 1;
+      tup->hlow[0] = tup->low[0];
+      tup->hhigh[0] = tup->high[0];
+      HistoryForest->MakeMDDFromTuple(tup->hlow, tup->hhigh, interHistMDD);
 
       FWForest->Replace(inMDD, interMDD, true, outMDD);
       HistoryForest->Replace(inHistMDD, interHistMDD, true, outHistMDD);

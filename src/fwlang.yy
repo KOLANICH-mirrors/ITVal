@@ -81,7 +81,7 @@ int yyerror(char* str);
 %left <condition_rec> AND			      "AND"
 %left <condition_rec> OR			      "OR"
 %right <condition_rec> NOT			      "NOT"
-%left <condition_rec> FROM TO FOR ON IN WITH INFACE OUTFACE "query primitive"
+%left <condition_rec> FROM TO FOR ON IN WITH INFACE OUTFACE ACCEPTED DROPPED"query primitive"
 
 %%
 statement: expression | expression statement;
@@ -105,13 +105,14 @@ port_list: port_list complete_port {$$ = AppendPort($1, $2);}
 query_expression: QUERY CLASSES {$$ = PrintClasses();} 
           | QUERY SCLASSES {$$ = PrintServiceClasses();}
           | QUERY SGRAPH {$$ = PrintServiceGraph();}
-          | QUERY subject condition {$$ = PerformQuery($2, $3, 1);}
-          | QUERY subject input_chain condition {$$ = PerformQuery($2, $4, $3);} 
-          | QUERY input_chain subject condition {$$ = PerformQuery($3, $4, $2);}
+          | QUERY subject condition {$$ = PerformQuery($2, $3);}
+//          | QUERY subject condition {$$ = PerformQuery($2, $3, 1);}
+//          | QUERY subject input_chain condition {$$ = PerformQuery($2, $4, $3);} 
+//          | QUERY input_chain subject condition {$$ = PerformQuery($3, $4, $2);}
 ;
 
-assert_expression: ASSERT condition assert_op condition {$$ = PerformAssertion($2, $4, $3, 1);}
-		 | ASSERT input_chain condition assert_op condition { $$ = PerformAssertion($3, $5, $4, $2);}
+assert_expression: ASSERT condition assert_op condition {$$ = PerformAssertion($2, $4, $3);}
+//		 | ASSERT input_chain condition assert_op condition { $$ = PerformAssertion($3, $5, $4, $2);}
 		 ;
 
 assert_op: IS {$$ = 0;} 
@@ -137,7 +138,7 @@ condition: simple_condition {$$ = $1;}
         | condition OR condition {$$ = UnionConditions($1,$3);}
         | NOT condition {$$ = NegateCondition($2);}
         | LPAREN condition RPAREN {$$ = $2;}
-        | LOGGED { $$ = GetLoggedCondition();}
+        | LOGGED input_chain { $$ = GetLoggedCondition($2);}
         ;
         
 simple_condition: FROM compound_addy {$$=BuildConditionFromGroup($2, 0);}
@@ -148,6 +149,8 @@ simple_condition: FROM compound_addy {$$=BuildConditionFromGroup($2, 0);}
         | WITH flag_name {$$=BuildConditionFromFlag($2);}
 	| INFACE NAME {$$=BuildConditionFromIface($2, 0); delete[] $2;}
 	| OUTFACE NAME {$$=BuildConditionFromIface($2, 1); delete[] $2;}
+	| ACCEPTED input_chain {$$=BuildAcceptCondition($2);}
+	| DROPPED input_chain {$$=BuildDropCondition($2);} 
         ;
 
 compound_addy: NAME {$$ = GroupLookup($1); delete[] $1;}

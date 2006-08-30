@@ -23,6 +23,8 @@
  * and Mary Williamsburg, VA 23185 
  */
 
+//#define ASSERT_DEBUG
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "parser.h"
@@ -214,14 +216,84 @@ address *ParseAddr(char *val1, char *val2, char *val3, char *val4)
 
 // Create a "condition" object representing the set of all logged
 // packets.
-condition *GetLoggedCondition()
+condition *GetLoggedCondition(int input_chain)
 {
    condition *sc;
 
    sc = new condition;
-   FW->FWForest->Attach(sc->h, FW->ForwardLog.index);   // Change to take
-   // input chain
-   // into account.
+   switch(input_chain){
+      case 0:
+         FW->FWForest->Attach(sc->h, FW->InputLog.index); 
+         FW->HistoryForest->Attach(sc->history, FW->InputHist.index); 
+	 break;
+      case 1:
+         FW->FWForest->Attach(sc->h, FW->ForwardLog.index);
+         FW->HistoryForest->Attach(sc->history, FW->ForwardHist.index); 
+	 break;
+      case 2:
+         FW->FWForest->Attach(sc->h, FW->OutputLog.index);  
+         FW->HistoryForest->Attach(sc->history, FW->OutputHist.index); 
+	 break;
+      default:
+	 printf("Illegal input chain to Logged.\n");
+	 break;
+   }
+   return sc;
+}
+
+condition* BuildAcceptCondition(int input_chain)
+{
+   condition *sc;
+
+   sc = new condition;
+   switch(input_chain){
+      case 0:
+         FW->FWForest->Accepted(FW->Input, sc->h); 
+         FW->HistoryForest->Accepted(FW->InputHist, sc->history); 
+	 break;
+      case 1:
+         FW->FWForest->Accepted(FW->Forward, sc->h); 
+         FW->HistoryForest->Accepted(FW->ForwardHist, sc->history); 
+	 for (int k=25;k>0;k--){
+	    FW->HistoryForest->Compact(k);
+            if (k<=23){
+               FW->FWForest->Compact(k);
+	    }
+	 }
+	 break;
+      case 2:
+         FW->FWForest->Accepted(FW->Output, sc->h); 
+         FW->HistoryForest->Accepted(FW->OutputHist, sc->history); 
+	 break;
+      default:
+	 printf("Illegal input chain to Logged.\n");
+	 break;
+   }
+   return sc;
+}
+
+condition* BuildDropCondition(int input_chain)
+{
+   condition *sc;
+
+   sc = new condition;
+   switch(input_chain){
+      case 0:
+         FW->FWForest->Dropped(FW->Input, sc->h);
+         FW->HistoryForest->Dropped(FW->InputHist, sc->history); 
+	 break;
+      case 1:
+         FW->FWForest->Dropped(FW->Forward, sc->h); 
+         FW->HistoryForest->Dropped(FW->ForwardHist, sc->history);
+	 break;
+      case 2:
+         FW->FWForest->Dropped(FW->Output, sc->h); 
+         FW->HistoryForest->Dropped(FW->OutputHist, sc->history); 
+	 break;
+      default:
+	 printf("Illegal input chain to Logged.\n");
+	 break;
+   }
    return sc;
 }
 
@@ -714,6 +786,7 @@ condition *IntersectConditions(condition * c1, condition * c2)
 // Perform the query described by condition object "c" by intersecting
 // "c" with the set of accepted packets.  Then, display the appropriate 
 // information, as determined by the value of "subject".
+/*
 query *PerformQuery(int subject, condition * c, int input_chain)
 {
    mdd_handle result;
@@ -807,7 +880,86 @@ query *PerformQuery(int subject, condition * c, int input_chain)
 
    return NULL;
 }
+*/
+query *PerformQuery(int subject, condition * c)
+{
+   int mask[23];
 
+   for (int i = 0; i < 23; i++)
+      mask[i] = 0;
+   
+
+   // Intersect the set of accepted packets with the set of packets
+   // relevant to the query (stored in condition "c").
+   FW->HistoryForest->PrintHistory(c->history);
+#ifdef DEBUG
+   printf("Rules: %d Query: %d\n", FW->Forward.index, c->h.index);
+   //FW->FWForest->PruneMDD(c->h);
+   for (level k = 22; k > 0; k--)
+      FW->FWForest->Compact(k);
+   FW->FWForest->PrintMDD();
+#endif
+
+   // "Project" the results to Display the requested information
+   switch (subject) {
+      case 0:
+         FW->FWForest->PruneMDD(c->h);
+         for (level k = 22; k > 0; k--)
+            FW->FWForest->Compact(k);
+         FW->FWForest->PrintMDD();
+         // FW->FWForest->PrintStates(c->h.index);
+         break;
+      case 1:
+         printf("# Ports: ");
+         // Source port starts at level 13
+         mask[14] = 1;
+         mask[13] = 1;
+         mask[12] = 1;
+         FW->FWForest->PrintRanges(c->h, mask);
+         break;
+      case 2:
+         printf("# Ports: ");
+         // Destination port starts at level 11
+         mask[14] = 1;
+         mask[11] = 1;
+         mask[10] = 1;
+         FW->FWForest->PrintRanges(c->h, mask);
+//         FW->FWForest->PrintPort(c->h, 8);
+         break;
+      case 3:
+         printf("# Addresses: ");
+         // Source addresses start at level 22
+         mask[22] = 1;
+         mask[21] = 1;
+         mask[20] = 1;
+         mask[19] = 1;
+         FW->FWForest->PrintRanges(c->h, mask);
+         //FW->FWForest->PrintAddy(c->h, 22);
+         break;
+      case 4:
+         printf("# Addresses: ");
+         // Destination addresses start at level 18
+         mask[18] = 1;
+         mask[17] = 1;
+         mask[16] = 1;
+         mask[15] = 1;
+         FW->FWForest->PrintRanges(c->h, mask);
+         break;
+      case 5:
+         printf("# States: ");
+         // The state value is stored at level 7
+         mask[7] = 1;
+         FW->FWForest->PrintRanges(c->h, mask);
+         break;
+   }
+   // Now that the query is done, free the query condition.
+   FW->FWForest->DestroyMDD(c->h);
+   FW->HistoryForest->DestroyMDD(c->history);
+   delete c;
+   return NULL;
+}
+
+/*
 assert* PerformAssertion(condition* left, condition* right, int assert_op, int input_chain){
    	condition* A;
 	condition* notB;
@@ -835,6 +987,43 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int i
 	      notB = new condition;
               FW->FWForest->BinaryComplement(right->h, notB->h);
               FW->FWForest->Min(notB->h, A->h, result->h);
+	      delete notB;
+	      if (result->h.index != 0){
+	         printf("Assertion failed.\n");
+	      }
+	      else 
+		 printf("Assertion held.\n");
+	      break;
+	      default:
+	      printf("Illegal Assertion Operator.\n");
+	      exit(-1);
+	      break;
+	}
+	delete result;
+	return NULL;
+}
+*/
+assert* PerformAssertion(condition* left, condition* right, int assert_op){
+	condition* notB;
+	condition* result;
+	result = new condition;
+#ifdef ASSERT_DEBUG
+FW->FWForest->PrintMDD();
+printf("Left: %d\n", left->h.index);
+printf("Right: %d\n", right->h.index);
+#endif
+	switch (assert_op){
+	   case 0: //left IS (equal to) right
+	      if (left->h.index != right->h.index){
+                 printf("Assertion failed.\n");
+	      }
+	      else
+   	         printf("Assertion held.\n");
+	      break;
+	   case 1: //left SUBSET OF right (non-strict)
+	      notB = new condition;
+              FW->FWForest->BinaryComplement(right->h, notB->h);
+              FW->FWForest->Min(notB->h, left->h, result->h);
 	      delete notB;
 	      if (result->h.index != 0){
 	         printf("Assertion failed.\n");
