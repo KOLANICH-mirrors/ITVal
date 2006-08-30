@@ -270,13 +270,6 @@ namespace yy
     YYCDEBUG << "Starting parse" << std::endl;
 
 
-    /* User initialization code.  */
-    #line 14 "/home/robert/ITVal/src/fwlang.yy"
-{
-yylloc.begin.filename = yylloc.end.filename = &pi.file;
-}
-  /* Line 555 of yacc.c.  */
-#line 279 "fwlang.cc"
     /* Initialize the stacks.  The initial state will be pushed in
        yynewstate, since the latter expects the semantical and the
        location values to have been already stored, initialize these
@@ -703,7 +696,7 @@ yylloc.begin.filename = yylloc.end.filename = &pi.file;
 
 
     /* Line 675 of lalr1.cc.  */
-#line 706 "fwlang.cc"
+#line 699 "fwlang.cc"
 	default: break;
       }
     YY_SYMBOL_PRINT ("-> $$ =", yyr1_[yyn], &yyval, &yyloc);

@@ -10,10 +10,10 @@ int yyerror(char* str);
 %parse-param {parser_interface& pi}
 %lex-param {parser_interface& pi}
 %locations
-%initial-action
-{
-@$.begin.filename = @$.end.filename = &pi.file;
-}
+//%initial-action
+//{
+//@$.begin.filename = @$.end.filename = &pi.file;
+//}
 %debug
 %error-verbose
 

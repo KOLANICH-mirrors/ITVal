@@ -690,7 +690,7 @@ Williamsburg, VA 23185
 */
 #line 29 "fwlang_scanner.ll"
 #include "src/parser.h"
-#include "src/y.tab.h"
+#include "src/fwlang.tab.hh"
 #include "src/parser_interface.hh"
 YY_DECL;
 

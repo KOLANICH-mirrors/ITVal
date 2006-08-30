@@ -1,4 +1,4 @@
-BUILT_SOURCES = src/y.tab.h
+BUILT_SOURCES = src/fwlang.tab.hh
 AM_YFLAGS = -d
 bin_PROGRAMS = ITVal xITVal
 
