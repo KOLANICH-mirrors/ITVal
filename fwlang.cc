@@ -33,7 +33,7 @@
    version 2.2 of Bison.  */
 
 
-#include "src/y.tab.h"
+#include "src/fwlang.tab.hh"
 YY_DECL;
 
 /* User implementation prologue.  */

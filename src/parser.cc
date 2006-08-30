@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "parser.h"
-#include "y.tab.h"
+#include "fwlang.tab.hh"
 #include "firewall.h"
 
 // Limit of 256 address groups
