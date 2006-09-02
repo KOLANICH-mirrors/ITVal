@@ -1,5 +1,5 @@
 #include "topology.h"
-   
+  
 Topology::~Topology() {
    if (!ifaces)
       return;
@@ -53,3 +53,18 @@ void Topology::PrintMapping()
    }
    printf("# ----------------------------------------------------\n");
 }
+
+int* Topology::GetIP(char * name){
+   int ifnum;
+   int* ip;
+   ifnum = FindInterface(name);
+   if (ifnum<0)
+      return NULL;
+   ip = new int[4];
+   for (int i=0;i<4;i++){
+      ip[i] = ifaces[ifnum]->ip[i];
+   }
+   return ip;
+}
+
+

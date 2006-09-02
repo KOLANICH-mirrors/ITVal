@@ -12,6 +12,6 @@ ITVal_LDADD = @LEXLIB@ FDDL/libFDDL.la
 
 xITVal_LDADD = @LEXLIB@ FDDL/libFDDL.la
 
-EXTRA_DIST = COPYING ChangeLog LICENSE man/ITVal.n
+EXTRA_DIST = COPYING ChangeLog LICENSE man/ITVal.n src/fwlang.tab.hh src/fwlang.tab.cc
 
 SUBDIRS = FDDL doc 

@@ -34,9 +34,9 @@
 
 
 #include "src/fwlang.tab.hh"
-YY_DECL;
 
 /* User implementation prologue.  */
+YY_DECL;
 
 
 /* Line 317 of lalr1.cc.  */

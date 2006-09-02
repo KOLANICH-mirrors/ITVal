@@ -28,10 +28,8 @@
 #include "firewall.h"
 #include <assert.h>
 
-void
-  Firewall::DoNAT(nat_tuple * tup, mdd_handle inMDD, mdd_handle inHistMDD, mdd_handle & outMDD,
-                  mdd_handle & logMDD, mdd_handle & outHistMDD)
-{
+void Firewall::DoNAT(nat_tuple * tup, mdd_handle inMDD, mdd_handle inHistMDD,
+      mdd_handle & outMDD, mdd_handle & logMDD, mdd_handle & outHistMDD) {
 
    mdd_handle interMDD;
    mdd_handle interHistMDD;
@@ -48,10 +46,20 @@ void
       HistoryForest->DNAT(inHistMDD, tup, outHistMDD);
       FWForest->DNAT(logMDD, tup, logMDD);
    }
+   else if (tup->low[0] == REDIRECT) {
+//      FWForest->DNAT(inMDD, tup, outMDD);
+//      HistoryForest->DNAT(inHistMDD, tup, outHistMDD);
+//      FWForest->DNAT(logMDD, tup, logMDD);
+   }
    else if (tup->low[0] == SNAT) {
       FWForest->SNAT(inMDD, tup, outMDD);
       HistoryForest->SNAT(inHistMDD, tup, outHistMDD);
       FWForest->SNAT(logMDD, tup, logMDD);
+   }
+   else if(tup->low[0] == MASQUERADE){
+//      FWForest->SNAT(inMDD, tup, outMDD);
+//      HistoryForest->SNAT(inHistMDD, tup, outHistMDD);
+//      FWForest->SNAT(logMDD, tup, logMDD);
    }
    else if (tup->low[0] == NETMAP) {
       FWForest->NETMAP(inMDD, tup, outMDD);
@@ -127,10 +135,16 @@ void Firewall::ProcessNATTarget(processed_nat_rule * pr, nat_tuple * tup,
    else if (strncmp(pr->target, "NETMAP", 6) == 0) {    // If it's a NETMAP.
       tup->low[0] = tup->high[0] = NETMAP;
    }
+   else if (strncmp(pr->target, "MASQUERADE", 10) == 0) {// If MASQUERADE.
+	tup->low[0] = tup->high[0] = MASQUERADE;
+   }
+   else if (strncmp(pr->target, "REDIRECT", 8) == 0) {// If REDIRECT.
+	tup->low[0] = tup->high[0] = REDIRECT;
+   }
    else {
-      // If it's not LOG, ACCEPT, DROP, REJECT, DNAT, or NETMAP, it must be a 
-      // user-defined chain.  We add 4 to distinguish it from the
-      // builtin targets.
+      // If it's not LOG, ACCEPT, DROP, REJECT, DNAT, or NETMAP, 
+      // MASQUERADE, or REDIRECT, it must be a user-defined chain.  
+      // We add 4 to distinguish it from the builtin targets.
       val = FindNATChain(pr->target);
       if (val < 0) {
          printf("Couldn't find chain: %s\n", pr->target);
@@ -320,8 +334,8 @@ void Firewall::ProcessNATSource(processed_nat_rule * pr, nat_tuple * tup,
 
 // In reverse order(to preserve the IP tables semantics), turn a linked
 // list of processed_nat_rules beginning with "head" into a stack of
-// tuples 
-// suitable for modifying the filter MDD.
+// tuples suitable for modifying the filter MDD.
+
 void Firewall::ConvertNATRules(processed_nat_rule * head, nat_tuple * &stack)
 {
    nat_tuple *tup;                        // A placeholder output tuple

@@ -3,6 +3,23 @@ ITVal-0.8: June 17, 2006 Robert Marmorstein
 	to the MDD library.  Redesigning the GUI in QT/KDE.  Fixed several
 	memory leaks in Topology handling.
 
+	Added "ACCEPTED" and "DROPPED" primitive conditions that specify the
+	set of accepted and dropped packets respectively.  Queries no longer
+	automatically intersect the query condition with "ACCEPTED".  This
+	allows the user to generate more complex and interesting queries
+	such as:
+	QUERY FROM 192.168.1.* AND ((FOR TCP 25 AND ACCEPTED) OR (FOR 22 AND
+	      DROPPED));
+	
+	Added "ASSERT" statements. ASSERT allows the user to check whether 
+	two conditions are equivalent or if one is a subset of the other.  
+	The syntax of ASSERT is: 
+	
+	ASSERT <condition> <operator> <condition>;
+
+	where <operator> is either "IS" or "SUBSET OF".
+	
+
 ITVal-0.7: April 26, 2006 Robert Marmorstein
         ITVal now supports ranged addresses in queries and group/service
         definitions.   For instance, you can use the query: QUERY FROM

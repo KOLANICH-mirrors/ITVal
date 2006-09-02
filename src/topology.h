@@ -18,6 +18,7 @@ class Topology {
 
  public:
    int FindInterface(char *name);
+   int* GetIP(char* name);
    char *LookupInterface(int idx);
    int AddAnonymousInterface(char *name);
    void PrintMapping();

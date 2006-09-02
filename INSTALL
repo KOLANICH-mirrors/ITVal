@@ -7,6 +7,21 @@ Software Foundation, Inc.
 This file is free documentation; the Free Software Foundation gives
 unlimited permission to copy, distribute and modify it.
 
+Quick Start
+===========
+The following four step process can be used to install ITVal in most
+circumstances.  If installation using this process fails, see below for more
+detailed instructions or file a bug report at http://itval.sourceforge.net.
+
+Step 1.  Type "./configure" in the ITVal directory.
+Step 2.  Run "make".
+Step 3.  Become superuser.
+Step 4.  Run "make install".
+
+By default, the "ITVal" binaries will be installed to /usr/local/bin and the
+FDDL libraries will be installed to /usr/local/lib.  Make sure that your
+environment settings (i.e. your PATH variable) reflect these locations.
+
 Basic Installation
 ==================
 

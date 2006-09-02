@@ -29,6 +29,12 @@
 #include <FDDL/mdd.h>
 #include "firewall.h"
 
+
+void BreakMASQPorts(char *str, nat_range * &NATRange, char prot, Firewall * FW){
+   printf("MASQUERADE ports have not been implemented yet.\n");
+   NATRange = NULL;
+}
+
 void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW)
 {
    char *ch;
@@ -273,6 +279,14 @@ void ProcessNATInfo(char *info, processed_nat_rule * p, Firewall * FW,
             BreakNAT(word1, NATRange, p->protocol, FW);
             p->nat = NATRange;
          }
+	 else if (!strncmp(word1, "masq ports:", 11)){ //MASQUERADE
+            BreakMASQPorts(word1, NATRange, p->protocol, FW);
+            p->nat = NATRange;
+	 }
+	 else if (!strncmp(word1, "redir ports", 11)){ //REDIRECT
+            BreakMASQPorts(word1, NATRange, p->protocol, FW);
+            p->nat = NATRange;
+	 }
          else if (!strncmp(p->target, "NETMAP", 6)) {
             BreakNMAP(word1, NATRange, FW);
             p->nat = NATRange;
