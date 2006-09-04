@@ -51,7 +51,7 @@ int yyerror(char* str);
 %token <prot> UDP TCP ICMP BOTH	    "protocol"
 %token <val> NUM		 "number"
 %token <char> DOT		 "."
-%token <assert_op> IS SUBSET_OF "assertion operators"
+%token <assert_op> IS ISNT SUBSET_OF NOT_SUBSET_OF "assertion operators"
 %token <condition_rec> LOGGED	    "logged condition"
 %token <sv> T_INVALID T_NEW T_ESTABLISHED T_RELATED   "connection state"
 %token <fv> FIN SYN RST PSH ACK URG		      "tcp flag"
@@ -117,6 +117,8 @@ assert_expression: ASSERT condition assert_op condition {$$ = PerformAssertion($
 
 assert_op: IS {$$ = 0;} 
 	 | SUBSET_OF {$$=1;}
+	 | ISNT {$$ = 2;}
+	 | NOT_SUBSET_OF {$$ = 3;}
 	 ;
 
 input_chain: INPUT {$$ = 0;}

@@ -82,6 +82,7 @@ COMMENT "#".*
 "IN" {ECHO; return yy::parser::token::IN;}
 "OR" {ECHO; return yy::parser::token::OR;}
 "AND" {ECHO; return yy::parser::token::AND;}
+"NOT SUBSET OF" {ECHO; return yy::parser::token::NOT_SUBSET_OF;}
 "NOT" {ECHO; return yy::parser::token::NOT;}
 "WITH" {ECHO; return yy::parser::token::WITH;}
 "INFACE" {ECHO; return yy::parser::token::INFACE;}
@@ -89,6 +90,7 @@ COMMENT "#".*
 "INPUT" {ECHO; return yy::parser::token::INPUT;}
 "FORWARD" {ECHO; return yy::parser::token::FORWARD;}
 "OUTPUT" {ECHO; return yy::parser::token::OUTPUT;}
+"ISN'T" {ECHO; return yy::parser::token::ISNT;}
 "IS" {ECHO; return yy::parser::token::IS;}
 "SUBSET OF" {ECHO; return yy::parser::token::SUBSET_OF;}
 "\." {ECHO; return yy::parser::token::DOT;}

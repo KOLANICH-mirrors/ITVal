@@ -1,4 +1,3 @@
-Realistic MASQUERADE (per interface) and REDIRECT.
 Add support for "multiport dports" matches.
 Add support for "PKTTYPE = X" matches.
 Limit rules?
@@ -11,3 +10,5 @@ Write -GOOD- man pages.
 Exception list (make output cleaner).
 
 When encountering a pkt_type match, mask correct IP addresses?
+
+Test new MASQUERADE and REDIRECT code.

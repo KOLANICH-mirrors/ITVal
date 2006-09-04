@@ -46,14 +46,12 @@ Queries are saved in a query file which is used as input to the tool.
 The queries are of the form:
 
 .PP 
-QUERY <subject> <input_chain> <predicate>;
+QUERY <subject> <predicate>;
 
 .PP 
-The subject tells ITVal what information to print about packets that
-match the query conditions.  The input_chain tells ITVal whether to
-consider packets that are forwarded through the firewall, incoming to
-the firewall, or outputted by the firewall.  The predicate provides a
-list of criteria that are used to specify the packets to consider.
+The subject tells ITVal what information to print about packets that match the
+query conditions.  The predicate provides a list of criteria that are used to
+specify the packets to consider.
 
 .SH QUERY SUBJECTS
 The following query subjects are allowed:
@@ -71,11 +69,46 @@ The following query subjects are allowed:
 .B CLASSES - Firewall-equivalent host lists.
 .PP
 .B SCLASSES - Firewall-equivalent service lists.
+.PP
 
 The CLASSES and SCLASSES queries are special queries that generate a list of
 firewall-equivalent hosts and services.  Each set in the list represents a
 class of hosts or services that are treated identically by the firewall system.
-The query requires no input_chain or predicate and is described below.
+These special queries requires no predicate and are described below.
+
+.SH QUERY PREDICATES
+The query predicate is built from eleven simple primitives:
+.PP
+.B ACCEPTED <input_chain> - Accepted packets for a particular chain.
+.PP
+.B DROPPED <input_chain> - Discarded packets for a particular chain.
+.PP 
+.B FROM <alist> - matches packets from the addresses in <alist>. 
+.PP 
+.B TO <alist> - matches packets to the addresses in <alist>.
+.PP 
+.B ON <plist> - matches packets from the source ports in <plist>.
+.PP 
+.B FOR <plist> - matches packets for the destination ports in <plist>.
+.PP 
+.B IN <states> - matches packets associated with any connection state in
+.PP 
+<states>.
+.PP
+.B INFACE <interface> - matches packets incoming on a particular network interface
+.PP
+.B OUTFACE <interface> - matches packets outgoing on a particular network interface
+.PP 
+.B WITH <flags> - matches TCP packets that have the flags in <flags> set
+to true.
+.PP 
+.B LOGGED - matches packets for which a LOG rule exists in the rule set.
+
+These packets may or may not actually be logged by the firewall
+depending on certain external criteria such as rate limiting, etc.
+
+.PP 
+Queries may be combined using the NOT, AND, and OR operators.
 
 .SH INPUT CHAINS
 iptables uses three built-in chains to organize firewall rules.  The
@@ -92,32 +125,6 @@ firewall hosts.  The OUTPUT chain of the meta-firewall handles all
 packets outbound from the innermost firewall that pass through all of
 the other firewall hosts.  The FORWARD chain handles packets that pass
 through all of the firewall hosts in either direction.
-
-.SH QUERY PREDICATES
-The query predicate is built from seven simple primitives:
-.PP 
-.B FROM <alist> - matches packets from the addresses in <alist>. 
-.PP 
-.B TO <alist> - matches packets to the addresses in <alist>.
-.PP 
-.B ON <plist> - matches packets from the source ports in <plist>.
-.PP 
-.B FOR <plist> - matches packets for the destination ports in <plist>.
-.PP 
-.B IN <states> - matches packets associated with any connection state in
-.PP 
-<states>.
-.PP 
-.B WITH <flags> - matches TCP packets that have the flags in <flags> set
-to true.
-.PP 
-.B LOGGED - matches packets for which a LOG rule exists in the rule set.
-
-These packets may or may not actually be logged by the firewall
-depending on certain external criteria such as rate limiting, etc.
-
-.PP 
-Queries may be combined using the NOT, AND, and OR operators.
 
 .SH ADDRESS LISTS
 
@@ -170,11 +177,23 @@ can be used to access the same hosts under the same conditions, they
 will appear in the same service class.  Service classes can be also be
 used for anomaly detection.
 
+.SH ASSERTIONS
+
+The ASSERT keyword is similar to the QUERY keyword, but allows the user to
+compare two conditions for equality or containment.  Assertions are of the form:
+.PP
+ASSERT <condition1> <operator> <condition2>;
+
+where condition1 and condition2 are constructed just as for queries and the
+operator can be either IS or SUBSET OF.
+
 .SH SEE ALSO
 .PP
 Freenix '05: An Automated Technique for iptables Firewall Analysis
 .PP
 LISA '05: An Open-Source Solution for Testing NAT'd and Nested iptables Firewalls
+.PP
+LISA '06: Firewall Analysis with Policy-Based Host Classification
 .PP
 iptables(8)
 .PP

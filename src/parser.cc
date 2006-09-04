@@ -1031,6 +1031,24 @@ printf("Right: %d\n", right->h.index);
 	      else 
 		 printf("Assertion held.\n");
 	      break;
+	   case 2:  //left ISN'T (equal to) right
+	      if (left->h.index == right->h.index){
+                 printf("Assertion failed.\n");
+	      }
+	      else
+		 printf("Assertion held.\n");
+	      break;
+	   case 3: //left NOT SUBSET OF right (non-strict)
+	      notB = new condition;
+              FW->FWForest->BinaryComplement(right->h, notB->h);
+              FW->FWForest->Min(notB->h, left->h, result->h);
+	      delete notB;
+	      if (result->h.index == 0){
+	         printf("Assertion failed.\n");
+	      }
+	      else 
+		 printf("Assertion held.\n");
+	      break;
 	      default:
 	      printf("Illegal Assertion Operator.\n");
 	      exit(-1);
