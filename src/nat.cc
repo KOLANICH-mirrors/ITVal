@@ -31,11 +31,57 @@
 
 
 void BreakMASQPorts(char *str, nat_range * &NATRange, char prot, Firewall * FW){
-   printf("MASQUERADE ports have not been implemented yet.\n");
-   NATRange = NULL;
+   char *ch;
+   char word3[1024];
+   char word4[1024];
+   int length;
+   //printf("MASQUERADE AND REDIRECT ports have not been implemented yet.\n");
+   NATRange = new nat_range;
+   NATRange->next = NULL;
+   NATRange->ports.port1 = 0;
+   NATRange->ports.port2 = 65535;
+   NATRange->ports.next = NULL;
+   for (int i = 0; i < 23; i++) {
+      NATRange->low[i] = 0;
+      NATRange->high[i] = FW->FWForest->GetMaxVal(i);
+   }
+   if (prot == 'a') {
+      NATRange->low[14] = 0;
+      NATRange->high[14] = 2;
+   }
+   else if (prot == 'i') {
+      NATRange->low[14] = NATRange->high[14] = 0;
+   }
+   else if (prot == 'u') {
+      NATRange->low[14] = NATRange->high[14] = 1;
+   }
+   else if (prot == 't') {
+      NATRange->low[14] = NATRange->high[14] = 2;
+   }
+   str += 11;  //Scan past "masq ports:" or "redir ports".
+   length = strlen(str);
+   ch = str;
+   while (ch - str < length && *ch != '-') {
+      word3[ch - str] = *ch;
+      word4[ch - str] = *ch; // Assume no port range
+      ch++;
+   }
+   word3[ch - str] = '\0';
+   word4[ch - str] = '\0';
+   if (*ch == '-') {         // If there IS a range, get it.
+      length -= (ch - str);
+      str = ch;
+      while (ch - str < length && *ch != ':') {
+         word4[ch - str] = *ch;
+         ch++;
+      }
+      word4[ch - str] = '\0';
+   }
+   sscanf(word3, "%d", &NATRange->ports.port1);
+   sscanf(word4, "%d", &NATRange->ports.port2);
 }
 
-void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW)
+void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW, char* target)
 {
    char *ch;
    char word1[1024];
@@ -43,6 +89,7 @@ void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW)
    char word3[1024];
    char word4[1024];
    int length;
+   int offset;
 
    address_range low;
    address_range high;
@@ -86,15 +133,19 @@ void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW)
    NATRange->addys.low = low.low;
    NATRange->addys.high = high.high;
 
-   NATRange->low[18] = (((NATRange->addys.low / 256) / 256) / 256) % 256;
-   NATRange->low[17] = ((NATRange->addys.low / 256) / 256) % 256;
-   NATRange->low[16] = (NATRange->addys.low / 256) % 256;
-   NATRange->low[15] = NATRange->addys.low % 256;
+   offset = 0;
+   if (!strncmp(target, "SNAT",4)){
+      offset = 4;
+   }
+   NATRange->low[18+offset] = (((NATRange->addys.low / 256) / 256) / 256) % 256;
+   NATRange->low[17+offset] = ((NATRange->addys.low / 256) / 256) % 256;
+   NATRange->low[16+offset] = (NATRange->addys.low / 256) % 256;
+   NATRange->low[15+offset] = NATRange->addys.low % 256;
 
-   NATRange->high[18] = (((NATRange->addys.high / 256) / 256) / 256) % 256;
-   NATRange->high[17] = ((NATRange->addys.high / 256) / 256) % 256;
-   NATRange->high[16] = (NATRange->addys.high / 256) % 256;
-   NATRange->high[15] = NATRange->addys.high % 256;
+   NATRange->high[18+offset] = (((NATRange->addys.high / 256) / 256) / 256) % 256;
+   NATRange->high[17+offset] = ((NATRange->addys.high / 256) / 256) % 256;
+   NATRange->high[16+offset] = (NATRange->addys.high / 256) % 256;
+   NATRange->high[15+offset] = NATRange->addys.high % 256;
 
    if (prot == 'a') {
       NATRange->low[14] = 0;
@@ -138,18 +189,32 @@ void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW)
       NATRange->ports.port1 = 0;
       NATRange->ports.port2 = 65535;
    }
+   if (!strncmp(target, "DNAT", 4)){
+      NATRange->low[13] = NATRange->low[13] = 0;
+      NATRange->high[13] = NATRange->high[13] = 255;
 
-   NATRange->low[13] = NATRange->low[12] = 0;
-   NATRange->high[13] = NATRange->high[12] = 255;
+      NATRange->low[12] = NATRange->low[12] = 0;
+      NATRange->high[12] = NATRange->high[12] = 255;
 
-   NATRange->low[12] = NATRange->low[12] = 0;
-   NATRange->high[12] = NATRange->high[12] = 255;
+      NATRange->low[11] = (NATRange->ports.port1 / 256) % 256;
+      NATRange->low[10] = NATRange->ports.port1 % 256;
 
-   NATRange->low[11] = (NATRange->ports.port1 / 256) % 256;
-   NATRange->low[10] = NATRange->ports.port1 % 256;
+      NATRange->high[11] = (NATRange->ports.port2 / 256) % 256;
+      NATRange->high[10] = NATRange->ports.port2 % 256;
+   }
+   else{
+      NATRange->low[11] = NATRange->low[11] = 0;
+      NATRange->high[11] = NATRange->high[11] = 255;
 
-   NATRange->high[11] = (NATRange->ports.port2 / 256) % 256;
-   NATRange->high[10] = NATRange->ports.port2 % 256;
+      NATRange->low[10] = NATRange->low[10] = 0;
+      NATRange->high[10] = NATRange->high[10] = 255;
+
+      NATRange->low[13] = (NATRange->ports.port1 / 256) % 256;
+      NATRange->low[13] = NATRange->ports.port1 % 256;
+
+      NATRange->high[12] = (NATRange->ports.port2 / 256) % 256;
+      NATRange->high[12] = NATRange->ports.port2 % 256;
+   }
 }
 
 void BreakNMAP(char *str, nat_range * &NATRange, Firewall * FW)
@@ -184,6 +249,356 @@ void BreakNMAP(char *str, nat_range * &NATRange, Firewall * FW)
    NATRange->high[1] = ((NATRange->addys.high / 256) / 256) % 256;
    NATRange->high[2] = (NATRange->addys.high / 256) % 256;
    NATRange->high[3] = NATRange->addys.high % 256;
+}
+
+processed_nat_rule* ConvertToDNAT(processed_nat_rule * p, Firewall * FW){
+   int* ip;
+   processed_nat_rule *newP;
+   newP = (processed_nat_rule *)p->next;
+   if (p->out == -1){
+      for (int outFace = 0; outFace<FW->T->numIfaces;outFace++){
+         processed_nat_rule *newP2;
+         newP2 = new processed_nat_rule;
+	 newP2->from = new address_range;
+	 newP2->to = new address_range;
+	 newP2->sports = NULL;
+	 newP2->dports = NULL;
+
+         port_range* cur;
+	 cur = p->sports;
+	 while (cur != NULL){
+	    port_range* newPort;
+	    newPort = new port_range;
+	    newPort->port1 = cur->port1;
+	    newPort->port2 = cur->port2;
+	    newPort->next = newP2->sports;
+	    newP2->sports = cur;
+	    cur = cur->next;
+	 }
+	 cur = p->dports;
+	 while (cur != NULL){
+	    port_range* newPort;
+	    newPort = new port_range;
+	    newPort->port1 = cur->port1;
+	    newPort->port2 = cur->port2;
+	    newPort->next = newP2->dports;
+	    newP2->dports = cur;
+	    cur = cur->next;
+	 }
+	 newP2->in = p->in;
+	 newP2->out = outFace;
+	 newP2->id = p->id;
+	 newP2->chain_id = p->chain_id;
+         nat_range* newRange;
+	 newRange = new nat_range;
+	 newRange->next = NULL;
+
+	 //Should test that p->nat->ports.next is always NULL....
+	 newRange->ports.port1 = p->nat->ports.port1;
+	 newRange->ports.port2 = p->nat->ports.port2;
+	 newRange->ports.next = NULL;
+	 for (int i=0;i<23;i++){
+            newRange->low[i] = 0;
+	    newRange->high[i] = FW->FWForest->GetMaxVal(i);
+	 }
+	 char* name;
+	 name = FW->T->LookupInterface(outFace);
+	 if (!name){
+	    printf("Error!  Could not find name for interface %d\n", outFace);
+            return NULL;
+	 }
+         ip = FW->T->GetIP(name);
+	 newRange->low[18] = ip[0];
+	 newRange->low[17] = ip[1];
+	 newRange->low[16] = ip[2];
+	 newRange->low[15] = ip[3];
+	 newRange->high[18] = ip[0];
+	 newRange->high[17] = ip[1];
+	 newRange->high[16] = ip[2];
+	 newRange->high[15] = ip[3];
+	 
+	 delete[] ip;
+         if (p->protocol == 'a') {
+            newRange->low[14] = 0;
+	    newRange->high[14] = 2;
+	 }
+         else if (p->protocol == 'i') {
+	    newRange->low[14] = newRange->high[14] = 0;
+	 }
+         else if (p->protocol == 'u') {
+	    newRange->low[14] = newRange->high[14] = 1;
+	 }
+	 else if (p->protocol == 't') {
+	    newRange->low[14] = newRange->high[14] = 2;
+         }
+	 newRange->low[11] = (newRange->ports.port1 / 256) % 256;
+	 newRange->low[10] = newRange->ports.port1 % 256;
+	 newRange->high[11] = (newRange->ports.port2 / 256) % 256;
+         newRange->high[10] = newRange->ports.port2 % 256;
+	 newP2->nat = newRange;
+	 newP2->next = newP;
+	 newP = newP2;
+      }
+   }
+   else{
+         processed_nat_rule *newP2;
+         newP2 = new processed_nat_rule;
+	 newP2->from = new address_range;
+	 newP2->to = new address_range;
+	 newP2->sports = NULL;
+	 newP2->dports = NULL;
+
+         port_range* cur;
+	 cur = p->sports;
+	 while (cur != NULL){
+	    port_range* newPort;
+	    newPort = new port_range;
+	    newPort->port1 = cur->port1;
+	    newPort->port2 = cur->port2;
+	    newPort->next = newP2->sports;
+	    newP2->sports = cur;
+	    cur = cur->next;
+	 }
+	 cur = p->dports;
+	 while (cur != NULL){
+	    port_range* newPort;
+	    newPort = new port_range;
+	    newPort->port1 = cur->port1;
+	    newPort->port2 = cur->port2;
+	    newPort->next = newP2->dports;
+	    newP2->dports = cur;
+	    cur = cur->next;
+	 }
+	 newP2->in = p->in;
+	 newP2->out = p->out;
+	 newP2->id = p->id;
+	 newP2->chain_id = p->chain_id;
+         nat_range* newRange;
+	 newRange = new nat_range;
+	 newRange->next = NULL;
+
+	 //Should test that p->nat->ports.next is always NULL....
+	 newRange->ports.port1 = p->nat->ports.port1;
+	 newRange->ports.port2 = p->nat->ports.port2;
+	 newRange->ports.next = NULL;
+	 for (int i=0;i<23;i++){
+            newRange->low[i] = 0;
+	    newRange->high[i] = FW->FWForest->GetMaxVal(i);
+	 }
+	 char* name;
+	 name = FW->T->LookupInterface(p->out);
+	 if (!name){
+	    printf("Error!  Could not find name for interface %d\n", p->out);
+            return NULL;
+	 }
+         ip = FW->T->GetIP(name);
+	 newRange->low[18] = ip[0];
+	 newRange->low[17] = ip[1];
+	 newRange->low[16] = ip[2];
+	 newRange->low[15] = ip[3];
+	 newRange->high[18] = ip[0];
+	 newRange->high[17] = ip[1];
+	 newRange->high[16] = ip[2];
+	 newRange->high[15] = ip[3];
+	 
+	 delete[] ip;
+         if (p->protocol == 'a') {
+            newRange->low[14] = 0;
+	    newRange->high[14] = 2;
+	 }
+         else if (p->protocol == 'i') {
+	    newRange->low[14] = newRange->high[14] = 0;
+	 }
+         else if (p->protocol == 'u') {
+	    newRange->low[14] = newRange->high[14] = 1;
+	 }
+	 else if (p->protocol == 't') {
+	    newRange->low[14] = newRange->high[14] = 2;
+         }
+	 newRange->low[11] = (newRange->ports.port1 / 256) % 256;
+	 newRange->low[10] = newRange->ports.port1 % 256;
+	 newRange->high[11] = (newRange->ports.port2 / 256) % 256;
+         newRange->high[10] = newRange->ports.port2 % 256;
+	 newP2->nat = newRange;
+	 newP2->next = newP;
+	 newP = newP2;
+   }
+   return newP;
+}
+
+processed_nat_rule* ConvertToSNAT(processed_nat_rule * p, Firewall * FW){
+   int* ip;
+   processed_nat_rule *newP;
+   newP = (processed_nat_rule *)p->next;
+   if (p->in == -1){
+      for (int inFace = 0; inFace <FW->T->numIfaces;inFace++){
+         processed_nat_rule *newP2;
+         newP2 = new processed_nat_rule;
+	 newP2->from = new address_range;
+	 newP2->to = new address_range;
+	 newP2->sports = NULL;
+	 newP2->dports = NULL;
+
+         port_range* cur;
+	 cur = p->sports;
+	 while (cur != NULL){
+	    port_range* newPort;
+	    newPort = new port_range;
+	    newPort->port1 = cur->port1;
+	    newPort->port2 = cur->port2;
+	    newPort->next = newP2->sports;
+	    newP2->sports = cur;
+	    cur = cur->next;
+	 }
+	 cur = p->dports;
+	 while (cur != NULL){
+	    port_range* newPort;
+	    newPort = new port_range;
+	    newPort->port1 = cur->port1;
+	    newPort->port2 = cur->port2;
+	    newPort->next = newP2->dports;
+	    newP2->dports = cur;
+	    cur = cur->next;
+	 }
+	 newP2->in = inFace;
+	 newP2->out = p->out;
+	 newP2->id = p->id;
+	 newP2->chain_id = p->chain_id;
+         nat_range* newRange;
+	 newRange = new nat_range;
+	 newRange->next = NULL;
+
+	 //Should test that p->nat->ports.next is always NULL....
+	 newRange->ports.port1 = p->nat->ports.port1;
+	 newRange->ports.port2 = p->nat->ports.port2;
+	 newRange->ports.next = NULL;
+	 for (int i=0;i<23;i++){
+            newRange->low[i] = 0;
+	    newRange->high[i] = FW->FWForest->GetMaxVal(i);
+	 }
+	 char* name;
+	 name = FW->T->LookupInterface(inFace);
+	 if (!name){
+	    printf("Error!  Could not find name for interface %d\n", inFace);
+            return NULL;
+	 }
+         ip = FW->T->GetIP(name);
+	 newRange->low[22] = ip[0];
+	 newRange->low[21] = ip[1];
+	 newRange->low[20] = ip[2];
+	 newRange->low[19] = ip[3];
+	 newRange->high[22] = ip[0];
+	 newRange->high[21] = ip[1];
+	 newRange->high[20] = ip[2];
+	 newRange->high[19] = ip[3];
+	 
+	 delete[] ip;
+         if (p->protocol == 'a') {
+            newRange->low[14] = 0;
+	    newRange->high[14] = 2;
+	 }
+         else if (p->protocol == 'i') {
+	    newRange->low[14] = newRange->high[14] = 0;
+	 }
+         else if (p->protocol == 'u') {
+	    newRange->low[14] = newRange->high[14] = 1;
+	 }
+	 else if (p->protocol == 't') {
+	    newRange->low[14] = newRange->high[14] = 2;
+         }
+	 newRange->low[13] = (newRange->ports.port1 / 256) % 256;
+	 newRange->low[12] = newRange->ports.port1 % 256;
+	 newRange->high[13] = (newRange->ports.port2 / 256) % 256;
+         newRange->high[12] = newRange->ports.port2 % 256;
+	 newP2->nat = newRange;
+	 newP2->next = newP;
+	 newP = newP2;
+      }
+   }
+   else{
+         processed_nat_rule *newP2;
+         newP2 = new processed_nat_rule;
+	 newP2->from = new address_range;
+	 newP2->to = new address_range;
+	 newP2->sports = NULL;
+	 newP2->dports = NULL;
+
+         port_range* cur;
+	 cur = p->sports;
+	 while (cur != NULL){
+	    port_range* newPort;
+	    newPort = new port_range;
+	    newPort->port1 = cur->port1;
+	    newPort->port2 = cur->port2;
+	    newPort->next = newP2->sports;
+	    newP2->sports = cur;
+	    cur = cur->next;
+	 }
+	 cur = p->dports;
+	 while (cur != NULL){
+	    port_range* newPort;
+	    newPort = new port_range;
+	    newPort->port1 = cur->port1;
+	    newPort->port2 = cur->port2;
+	    newPort->next = newP2->dports;
+	    newP2->dports = cur;
+	    cur = cur->next;
+	 }
+	 newP2->in = p->in;
+	 newP2->out = p->out;
+	 newP2->id = p->id;
+	 newP2->chain_id = p->chain_id;
+         nat_range* newRange;
+	 newRange = new nat_range;
+	 newRange->next = NULL;
+
+	 //Should test that p->nat->ports.next is always NULL....
+	 newRange->ports.port1 = p->nat->ports.port1;
+	 newRange->ports.port2 = p->nat->ports.port2;
+	 newRange->ports.next = NULL;
+	 for (int i=0;i<23;i++){
+            newRange->low[i] = 0;
+	    newRange->high[i] = FW->FWForest->GetMaxVal(i);
+	 }
+	 char* name;
+	 name = FW->T->LookupInterface(p->in);
+	 if (!name){
+	    printf("Error!  Could not find name for interface %d\n", p->in);
+            return NULL;
+	 }
+         ip = FW->T->GetIP(name);
+	 newRange->low[22] = ip[0];
+	 newRange->low[21] = ip[1];
+	 newRange->low[20] = ip[2];
+	 newRange->low[19] = ip[3];
+	 newRange->high[22] = ip[0];
+	 newRange->high[21] = ip[1];
+	 newRange->high[20] = ip[2];
+	 newRange->high[19] = ip[3];
+	 
+	 delete[] ip;
+         if (p->protocol == 'a') {
+            newRange->low[14] = 0;
+	    newRange->high[14] = 2;
+	 }
+         else if (p->protocol == 'i') {
+	    newRange->low[14] = newRange->high[14] = 0;
+	 }
+         else if (p->protocol == 'u') {
+	    newRange->low[14] = newRange->high[14] = 1;
+	 }
+	 else if (p->protocol == 't') {
+	    newRange->low[14] = newRange->high[14] = 2;
+         }
+	 newRange->low[13] = (newRange->ports.port1 / 256) % 256;
+	 newRange->low[12] = newRange->ports.port1 % 256;
+	 newRange->high[13] = (newRange->ports.port2 / 256) % 256;
+         newRange->high[12] = newRange->ports.port2 % 256;
+	 newP2->nat = newRange;
+	 newP2->next = newP;
+	 newP = newP2;
+   }
+   return newP;
 }
 
 void ProcessNATInfo(char *info, processed_nat_rule * p, Firewall * FW,
@@ -275,8 +690,8 @@ void ProcessNATInfo(char *info, processed_nat_rule * p, Firewall * FW,
          else if (!strncmp(word1, "flags:", 6)) {
             rp->BreakFlags(word1, flags);
          }
-         else if (!strncmp(word1, "to:", 3)) {  // DNAT
-            BreakNAT(word1, NATRange, p->protocol, FW);
+         else if (!strncmp(word1, "to:", 3)) {  // SNAT or DNAT
+            BreakNAT(word1, NATRange, p->protocol, FW, p->target);
             p->nat = NATRange;
          }
 	 else if (!strncmp(word1, "masq ports:", 11)){ //MASQUERADE
@@ -300,6 +715,18 @@ void ProcessNATInfo(char *info, processed_nat_rule * p, Firewall * FW,
    p->state = state;
    for (i = 0; i < 6; i++) {
       p->flags[i] = flags[i];
+   }
+   if (!strncmp(p->target, "MASQUERADE", 10)){
+      processed_nat_rule * newP;
+      newP = ConvertToSNAT(p,FW);
+      delete p;
+      p = newP;
+   }
+   if (!strncmp(p->target, "REDIRECT",8)){
+      processed_nat_rule * newP;
+      newP = ConvertToDNAT(p,FW);
+      delete p;
+      p = newP;
    }
 }
 
