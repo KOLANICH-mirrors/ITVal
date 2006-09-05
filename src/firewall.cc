@@ -163,17 +163,17 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    BuildChains(input_chain, Input, InputLog, InputHist);
    BuildChains(output_chain, Output, OutputLog, OutputHist);
 
-   //@DEBUG@//
-   //printf("ForwardHist: %d InputHist: %d OutputHist %d\n", ForwardHist.index, InputHist.index, OutputHist.index);
- //  for (level k = 24; k > 0; k--){
-  //    HistoryForest->Compact(k);
-  // }
-  // HistoryForest->PrintMDD();
 
 #ifdef DEBUG
+   printf("Forward:%d Input:%d Output:%d\n", Forward.index, Input.index, Output.index);
    for (level k = 22; k > 0; k--)
       FWForest->Compact(k);
    FWForest->PrintMDD();
+   printf("ForwardHist: %d InputHist: %d OutputHist %d\n", ForwardHist.index, InputHist.index, OutputHist.index);
+   for (level k = 24; k > 0; k--){
+      HistoryForest->Compact(k);
+   }
+   HistoryForest->PrintMDD();
 #endif
    ClassForest = new fw_fddl_forest(5, ranges);
    ClassForest->ToggleSparsity(false);

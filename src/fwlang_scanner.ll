@@ -97,6 +97,7 @@ COMMENT "#".*
 "\." {ECHO; return yy::parser::token::DOT;}
 {NUM} { ECHO; yylval->val = new char[256]; strncpy(yylval->val, yytext, 256); return yy::parser::token::NUM;}
 {ALPHANUM} { ECHO; yylval->name = new char[256]; strncpy(yylval->name,yytext,256); return yy::parser::token::NAME;} 
+"\t" {ECHO;}
 " " {ECHO;}
 "\n" {ECHO; FWLANG_LINE_NO++;}
 ";" { printf(";\n"); return yy::parser::token::SEMI;}

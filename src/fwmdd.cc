@@ -47,12 +47,12 @@ int fw_fddl_forest::FindElement(mdd_handle root, Topology* T){
 
    if (InternalFindElement(K, root.index, vals) != 0){
       if (vals[14]==0)
-	 printf("ICMP");
+	 printf("#ICMP");
       else if (vals[14]==1)
-	 printf("UDP");
+	 printf("#UDP");
       else 
-	 printf("TCP");
-      printf(" packet from %d.%d.%d.%d:%d on interface %s to %d.%d.%d.%d:%d on interface %s in state ",
+	 printf("#TCP");
+      printf(" packet from %d.%d.%d.%d:%d[%s] to %d.%d.%d.%d:%d[%s]\n#\t\t in state ",
 	    vals[22], vals[21],vals[20], vals[19], 
 	    vals[13]*256+vals[12],
 	    T->LookupInterface(vals[9]),
@@ -69,13 +69,14 @@ int fw_fddl_forest::FindElement(mdd_handle root, Topology* T){
       else if (vals[7] == 3)
 	 printf("RELATED");
 
-      printf(" with flags: ");
+      printf(" with flags[");
       for (int i=0;i<6;i++){
          if (vals[i+1] == 1){
             printf("%c", flagString[i]);
 	 }
+	 else printf(" ");
       }
-      printf(".\n");
+      printf("].\n");
 /*
    for (int k=K;k>0;k--){
      printf("[%d] ", vals[k]);
@@ -611,7 +612,8 @@ node_idx fw_fddl_forest::InternalNMAP(level k, node_idx p, node_idx q,
    int psize;
    int qsize;
 
-   if (k < 10) {                //If we're beyond the destination and port
+   if (k < 10) {
+      //If we're beyond the destination and port
       //return the node pointed to by the NATted address.
       result = CheckIn(k, q);
       return result;

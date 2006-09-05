@@ -24,6 +24,7 @@
  */
 
 //#define ASSERT_DEBUG
+//#define EXAMPLE_DEBUG
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -959,150 +960,110 @@ query *PerformQuery(int subject, condition * c)
    return NULL;
 }
 
-/*
-assert* PerformAssertion(condition* left, condition* right, int assert_op, int input_chain){
-   	condition* A;
-	condition* notB;
-	condition* result;
-	A = new condition;
-        if (input_chain == 0) {
-           FW->FWForest->QueryIntersect(FW->Input, left->h, A->h);
-        }
-        if (input_chain == 1) {
-            FW->FWForest->QueryIntersect(FW->Forward, left->h, A->h);
-        }
-        if (input_chain == 2) {
-           FW->FWForest->QueryIntersect(FW->Output, left->h, A->h);
-        }
-	result = new condition;
-	switch (assert_op){
-	   case 0:
-	      if (A->h.index != right->h.index){
-                 printf("Assertion failed.\n");
-	      }
-	      else
-   	         printf("Assertion held.\n");
-	      break;
-	   case 1:
-	      notB = new condition;
-              FW->FWForest->BinaryComplement(right->h, notB->h);
-              FW->FWForest->Min(notB->h, A->h, result->h);
-	      delete notB;
-	      if (result->h.index != 0){
-	         printf("Assertion failed.\n");
-	      }
-	      else 
-		 printf("Assertion held.\n");
-	      break;
-	      default:
-	      printf("Illegal Assertion Operator.\n");
-	      exit(-1);
-	      break;
-	}
-	delete result;
-	return NULL;
-}
-*/
-
-void PrintExample(condition* left, condition* right, int assert_op){
+assert* PerformAssertion(condition* left, condition* right, int assert_op, int example){
+   int cond;
+   condition* notA;
    condition* notB;
-   condition* result;
-   result = new condition;
+   condition* resultA;
+   condition* resultB;
+   condition* resultC;
+
+   resultA = new condition;
+   resultB = new condition;
+   resultC = new condition;
+   notA = new condition;
+   notB = new condition;
+   FW->FWForest->BinaryComplement(left->h, notA->h);
+   FW->FWForest->BinaryComplement(right->h, notB->h);
+   #ifdef EXAMPLE_DEBUG
+   printf("ASSERT_OP: %d\n", assert_op);
+   printf("NotA: %d\n", notA->h.index);
+   printf("NotB: %d\n", notB->h.index);
+   #endif
+
+   FW->FWForest->Min(notA->h, right->h, resultA->h);
+   FW->FWForest->Min(left->h, notB->h, resultB->h);
+   FW->FWForest->Max(resultA->h, resultB->h, resultC->h);
    switch (assert_op){
       case 0:
       case 1:
-         notB = new condition;
-         FW->FWForest->BinaryComplement(right->h, notB->h);
-         FW->FWForest->Min(notB->h, left->h, result->h);
-	 delete notB;
-         if (result->h.index != 0){
-	    printf("Counterexample:\n");
-	    printf("Node %d\n",result->h.index);
-            FW->FWForest->FindElement(result->h,FW->T);
+	 if (assert_op == 0)
+            cond = (resultA->h.index == 0) && (resultB->h.index == 0);
+	 else
+   	    cond = (resultB->h.index == 0);
+         if (cond){
+	    printf("#Assertion held.\n");
+	    if (example){
+	       printf("#Witness:\n");
+               FW->FWForest->FindElement(left->h, FW->T);
+	    }
+#ifdef EXAMPLE_DEBUG
+	    printf("Left: %d Right:%d\n", left->h.index, right->h.index);
+	    printf("ResultA: %d\n", resultA->h.index);
+	    printf("ResultB: %d\n", resultB->h.index);
+	    printf("ResultC: %d\n", resultC->h.index);
+#endif
 	 }
 	 else{
-	    printf("Witness:\n");
-	    FW->FWForest->Min(left->h, right->h, result->h);
-            FW->FWForest->FindElement(result->h, FW->T);
+	    printf("#Assertion failed.\n");
+	    if (example){
+	       printf("#Counterexample:\n");
+	       if (assert_op == 0){
+                  FW->FWForest->FindElement(resultC->h, FW->T);
+	       }
+	       else{
+                  FW->FWForest->FindElement(resultB->h, FW->T);
+	       }
+	    }
+#ifdef EXAMPLE_DEBUG
+	    printf("Left: %d Right:%d\n", left->h.index, right->h.index);
+	    printf("Results: %d %d %d\n", resultA->h.index, resultB->h.index, resultC->h.index);
+#endif
 	 }
       break;
       case 2:
       case 3:
-      if (result->h.index == 0){
-          printf("Counterexample:\n");
-	  FW->FWForest->Min(left->h, right->h, result->h);
-	  printf("Node %d\n",result->h.index);
-          FW->FWForest->FindElement(result->h,FW->T);
+      if (assert_op == 2){
+         cond = resultA->h.index != 0 || resultB->h.index != 0;
       }
       else{
-          printf("Witness:\n");
-          FW->FWForest->FindElement(result->h,FW->T);
+	 cond = resultB->h.index != 0;
+      }
+      if (cond){
+	  printf("#Assertion held.\n");
+	  if (example){
+             printf("#Witness:\n");
+	     if (assert_op == 2){
+                FW->FWForest->FindElement(resultC->h,FW->T);
+	     }
+	     else{
+                  FW->FWForest->FindElement(resultB->h, FW->T);
+	     }
+	  }
+#ifdef EXAMPLE_DEBUG
+	  printf("Left: %d Right:%d\n", left->h.index, right->h.index);
+	  printf("Result: %d\n", resultB->h.index);
+#endif
+      }
+      else{
+	  printf("#Assertion failed.\n");
+	  if (example){
+             printf("#Counterexample:\n");
+             FW->FWForest->FindElement(left->h,FW->T);
+	  }
+#ifdef EXAMPLE_DEBUG
+	  printf("Left: %d Right:%d\n", left->h.index, right->h.index);
+	  printf("Result: %d\n", left->h.index);
+#endif
       }
 
       break;
    }
-   delete result;
-}
-
-assert* PerformAssertion(condition* left, condition* right, int assert_op, int example){
-	condition* notB;
-	condition* result;
-	result = new condition;
-#ifdef ASSERT_DEBUG
-FW->FWForest->PrintMDD();
-printf("Left: %d\n", left->h.index);
-printf("Right: %d\n", right->h.index);
-#endif
-	switch (assert_op){
-	   case 0: //left IS (equal to) right
-	      if (left->h.index != right->h.index){
-                 printf("Assertion failed.\n");
-	      }
-	      else{
-   	         printf("Assertion held.\n");
-	      }
-	      break;
-	   case 1: //left SUBSET OF right (non-strict)
-	      notB = new condition;
-              FW->FWForest->BinaryComplement(right->h, notB->h);
-              FW->FWForest->Min(notB->h, left->h, result->h);
-	      delete notB;
-	      if (result->h.index != 0){
-	         printf("Assertion failed.\n");
-	      }
-	      else {
-		 printf("Assertion held.\n");
-	      }
-	      break;
-	   case 2:  //left ISN'T (equal to) right
-	      if (left->h.index == right->h.index){
-                 printf("Assertion failed.\n");
-	      }
-	      else{
-		 printf("Assertion held.\n");
-	      }
-	      break;
-	   case 3: //left NOT SUBSET OF right (non-strict)
-	      notB = new condition;
-              FW->FWForest->BinaryComplement(right->h, notB->h);
-              FW->FWForest->Min(notB->h, left->h, result->h);
-	      delete notB;
-	      if (result->h.index == 0){
-	         printf("Assertion failed.\n");
-	      }
-	      else{ 
-		 printf("Assertion held.\n");
-	      }
-	      break;
-	      default:
-	      printf("Illegal Assertion Operator.\n");
-	      exit(-1);
-	      break;
-	}
-	delete result;
-	if (example)
-	   PrintExample(left, right, assert_op);
-	return NULL;
+   delete resultA;
+   delete resultB;
+   delete resultC;
+   delete notA;
+   delete notB;
 }
 
 // Add port "newPort" to the port list "list" and return the result.
