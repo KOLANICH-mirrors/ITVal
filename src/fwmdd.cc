@@ -34,6 +34,75 @@ Williamsburg, VA 23185
 #define MAX(a, b) (a>b ? a : b)
 #define MIN(a, b) (a<b ? a : b)
 
+int fw_fddl_forest::FindElement(mdd_handle root, Topology* T){
+   node_idx newresult;
+   int* vals;
+   char flagString[7]="FSRPAU";
+   if (root.index < 0)
+      return INVALID_MDD;
+
+   vals = new int[K+1];
+   for (int k=0;k<K+1;k++)
+      vals[k]=0;
+
+   if (InternalFindElement(K, root.index, vals) != 0){
+      if (vals[14]==0)
+	 printf("ICMP");
+      else if (vals[14]==1)
+	 printf("UDP");
+      else 
+	 printf("TCP");
+      printf(" packet from %d.%d.%d.%d:%d on interface %s to %d.%d.%d.%d:%d on interface %s in state ",
+	    vals[22], vals[21],vals[20], vals[19], 
+	    vals[13]*256+vals[12],
+	    T->LookupInterface(vals[9]),
+	    vals[18], vals[17], vals[16], vals[15], 
+	    vals[11]*256+vals[10],
+	    T->LookupInterface(vals[8]));
+
+      if (vals[7] == 0)
+	 printf("INVALID");
+      else if (vals[7] == 1)
+	 printf("NEW");
+      else if (vals[7] == 2)
+	 printf("ESTABLISHED");
+      else if (vals[7] == 3)
+	 printf("RELATED");
+
+      printf(" with flags: ");
+      for (int i=0;i<6;i++){
+         if (vals[i+1] == 1){
+            printf("%c", flagString[i]);
+	 }
+      }
+      printf(".\n");
+/*
+   for (int k=K;k>0;k--){
+     printf("[%d] ", vals[k]);
+   }
+*/
+      return SUCCESS;
+   }
+   printf("\n");
+   return INVALID_MDD;
+}
+
+node_idx fw_fddl_forest::InternalFindElement(level k, node_idx p, int* vals){
+   node* nodeP;
+   node_idx q;
+   if (k==0)
+      return p != 0;
+   nodeP = &FDDL_NODE(k,p);
+   for (int i=0;i<nodeP->size;i++){
+      q = FDDL_ARC(k,nodeP,i);
+      if (InternalFindElement(k-1, q, vals) != 0){
+	 vals[k] = i;
+         return p;
+      }
+   }
+   return 0;
+}
+
 int fw_fddl_forest::Accepted(mdd_handle root, mdd_handle& result){
    node_idx newresult;
    if (root.index < 0)

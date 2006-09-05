@@ -34,6 +34,7 @@ int yyerror(char* str);
    address* address_rec;
    int prot;
    char* val;
+   int flag;
 };
 
 %token	 TOKEN_EOF   0	"end of file"
@@ -44,6 +45,7 @@ int yyerror(char* str);
 %left <assert_rec> ASSERT	"assert"
 
 %token <input_chain> INPUT FORWARD OUTPUT "selected chain"
+%token <flag> EXAMPLE	"example"
 %token <sub> PACKET SPORT DPORT SADDY DADDY STATE "query subject"
 %token <query_rec> CLASSES "equivalence host classes"
 %token <query_rec> SCLASSES "equivalence service classes"
@@ -111,8 +113,8 @@ query_expression: QUERY CLASSES {$$ = PrintClasses();}
 //          | QUERY input_chain subject condition {$$ = PerformQuery($3, $4, $2);}
 ;
 
-assert_expression: ASSERT condition assert_op condition {$$ = PerformAssertion($2, $4, $3);}
-//		 | ASSERT input_chain condition assert_op condition { $$ = PerformAssertion($3, $5, $4, $2);}
+assert_expression: ASSERT condition assert_op condition {$$ = PerformAssertion($2, $4, $3, 0);}
+	| ASSERT EXAMPLE condition assert_op condition {$$ = PerformAssertion($3, $5, $4, 1);}
 		 ;
 
 assert_op: IS {$$ = 0;} 

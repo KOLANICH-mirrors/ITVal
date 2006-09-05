@@ -93,6 +93,7 @@ COMMENT "#".*
 "ISN'T" {ECHO; return yy::parser::token::ISNT;}
 "IS" {ECHO; return yy::parser::token::IS;}
 "SUBSET OF" {ECHO; return yy::parser::token::SUBSET_OF;}
+"EXAMPLE" {ECHO; return yy::parser::token::EXAMPLE;}
 "\." {ECHO; return yy::parser::token::DOT;}
 {NUM} { ECHO; yylval->val = new char[256]; strncpy(yylval->val, yytext, 256); return yy::parser::token::NUM;}
 {ALPHANUM} { ECHO; yylval->name = new char[256]; strncpy(yylval->name,yytext,256); return yy::parser::token::NAME;} 

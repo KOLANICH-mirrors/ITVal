@@ -22,6 +22,9 @@
  * Robert Marmorstein Department of Computer Science College of William
  * and Mary Williamsburg, VA 23185 
  */
+
+#define DEBUG
+
 #include "chains.h"
 #include "fwmdd.h"
 #include "topology.h"

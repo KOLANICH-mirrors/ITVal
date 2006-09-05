@@ -36,6 +36,7 @@ Williamsburg, VA 23185
 #   include "nat.h"
 #   include <FDDL/structures.h>
 #   include "sets.h"
+#   include "topology.h"
 
 
 /*
@@ -116,6 +117,9 @@ class fw_fddl_forest:public fddl_forest {
       delete[]AcceptCache;
       delete[]DropCache;
    }
+
+   int FindElement(mdd_handle p, Topology* T);
+   node_idx InternalFindElement(level k, node_idx p, int* vals);
 
    int QueryIntersect(mdd_handle p, mdd_handle q, mdd_handle & result);
    node_idx InternalQIntersect(level k, node_idx p, node_idx q);

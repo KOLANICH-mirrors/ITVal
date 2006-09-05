@@ -111,10 +111,8 @@ condition *IntersectConditions(condition * c1, condition * c2);
 
 //Intersect the set of accepted packets with the query filter and
 //display the result.
-//query *PerformQuery(int s, condition * c, int input_chain);
 query *PerformQuery(int s, condition * c);
-//assert *PerformAssertion(condition *left, condition *right, int assertion_operator, int input_chain);
-assert *PerformAssertion(condition *left, condition *right, int assertion_operator);
+assert *PerformAssertion(condition *left, condition *right, int assertion_operator, int example_flag);
 
 //Compute Host Equivalence Classes and print them.
 query *PrintClasses();

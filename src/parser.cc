@@ -1003,7 +1003,48 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int i
 	return NULL;
 }
 */
-assert* PerformAssertion(condition* left, condition* right, int assert_op){
+
+void PrintExample(condition* left, condition* right, int assert_op){
+   condition* notB;
+   condition* result;
+   result = new condition;
+   switch (assert_op){
+      case 0:
+      case 1:
+         notB = new condition;
+         FW->FWForest->BinaryComplement(right->h, notB->h);
+         FW->FWForest->Min(notB->h, left->h, result->h);
+	 delete notB;
+         if (result->h.index != 0){
+	    printf("Counterexample:\n");
+	    printf("Node %d\n",result->h.index);
+            FW->FWForest->FindElement(result->h,FW->T);
+	 }
+	 else{
+	    printf("Witness:\n");
+	    FW->FWForest->Min(left->h, right->h, result->h);
+            FW->FWForest->FindElement(result->h, FW->T);
+	 }
+      break;
+      case 2:
+      case 3:
+      if (result->h.index == 0){
+          printf("Counterexample:\n");
+	  FW->FWForest->Min(left->h, right->h, result->h);
+	  printf("Node %d\n",result->h.index);
+          FW->FWForest->FindElement(result->h,FW->T);
+      }
+      else{
+          printf("Witness:\n");
+          FW->FWForest->FindElement(result->h,FW->T);
+      }
+
+      break;
+   }
+   delete result;
+}
+
+assert* PerformAssertion(condition* left, condition* right, int assert_op, int example){
 	condition* notB;
 	condition* result;
 	result = new condition;
@@ -1017,8 +1058,9 @@ printf("Right: %d\n", right->h.index);
 	      if (left->h.index != right->h.index){
                  printf("Assertion failed.\n");
 	      }
-	      else
+	      else{
    	         printf("Assertion held.\n");
+	      }
 	      break;
 	   case 1: //left SUBSET OF right (non-strict)
 	      notB = new condition;
@@ -1028,15 +1070,17 @@ printf("Right: %d\n", right->h.index);
 	      if (result->h.index != 0){
 	         printf("Assertion failed.\n");
 	      }
-	      else 
+	      else {
 		 printf("Assertion held.\n");
+	      }
 	      break;
 	   case 2:  //left ISN'T (equal to) right
 	      if (left->h.index == right->h.index){
                  printf("Assertion failed.\n");
 	      }
-	      else
+	      else{
 		 printf("Assertion held.\n");
+	      }
 	      break;
 	   case 3: //left NOT SUBSET OF right (non-strict)
 	      notB = new condition;
@@ -1046,8 +1090,9 @@ printf("Right: %d\n", right->h.index);
 	      if (result->h.index == 0){
 	         printf("Assertion failed.\n");
 	      }
-	      else 
+	      else{ 
 		 printf("Assertion held.\n");
+	      }
 	      break;
 	      default:
 	      printf("Illegal Assertion Operator.\n");
@@ -1055,6 +1100,8 @@ printf("Right: %d\n", right->h.index);
 	      break;
 	}
 	delete result;
+	if (example)
+	   PrintExample(left, right, assert_op);
 	return NULL;
 }
 
