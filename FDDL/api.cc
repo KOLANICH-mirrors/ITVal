@@ -1002,7 +1002,6 @@ fddl_forest::DestroyMDD(mdd_handle mdd)
 		return INVALID_MDD;
 	FDDL_NODE(K, mdd.index).in--;
 	if (FDDL_NODE(K, mdd.index).in < 1) {
-	        FDDL_NODE(K,mdd.index).flags |= DELETED;
 		DeleteDownstream(K, mdd.index);
 	}
 	return SUCCESS;

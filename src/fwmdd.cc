@@ -82,9 +82,10 @@ int fw_fddl_forest::FindElement(mdd_handle root, Topology* T){
      printf("[%d] ", vals[k]);
    }
 */
+      delete[] vals;
       return SUCCESS;
    }
-   printf("\n");
+   delete[] vals;
    return INVALID_MDD;
 }
 

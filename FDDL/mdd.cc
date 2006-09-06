@@ -391,8 +391,8 @@ node_idx fddl_forest::InternalMax (level k, node_idx p, node_idx q)
   node_idx
     newresult = CheckIn (k, result);
 
-  if (k > 0 && newresult)
-    FDDL_NODE (k, newresult).flags |= CHECKED_IN;
+//  if (k > 0 && newresult)
+//    FDDL_NODE (k, newresult).flags |= CHECKED_IN;
   MaxCache[k]->Add (p, q, newresult);
   MaxCache[k]->Add (q, p, newresult);
   MaxCache[k]->Add (p, newresult, newresult);
@@ -585,8 +585,8 @@ node_idx fddl_forest::InternalRestrict (level k, node_idx p, node_idx q)
   node_idx
     newresult = CheckIn (k, result);
 
-  if (k > 0 && newresult)
-    FDDL_NODE (k, newresult).flags |= CHECKED_IN;
+//  if (k > 0 && newresult)
+//    FDDL_NODE (k, newresult).flags |= CHECKED_IN;
   RestrictCache[k]->Add (p, q, newresult);
   return newresult;
 }

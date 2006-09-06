@@ -171,12 +171,12 @@ complete_port: protocol port {$$ = BuildPort($1, $2);};
 
 protocol: ICMP {$$ = 0;} | UDP {$$ = 1;} | TCP { $$ = 2;} | BOTH { $$ = -1;};
 
-addr: NUM DOT NUM DOT NUM DOT NUM {$$ = ParseAddr($1,$3,$5,$7);} 
-    | NUM DOT NUM DOT NUM {$$=ParseAddr($1,$3,$5,NULL);} 
-    | NUM DOT NUM{$$=ParseAddr($1,$3,NULL,NULL);} 
-    | NUM {$$=ParseAddr($1,NULL,NULL,NULL);};
+addr: NUM DOT NUM DOT NUM DOT NUM {$$ = ParseAddr($1,$3,$5,$7); delete[] $1; delete[] $3; delete[] $5; delete[] $7;} 
+    | NUM DOT NUM DOT NUM {$$=ParseAddr($1,$3,$5,NULL); delete[] $1; delete[] $3; delete[] $5;} 
+    | NUM DOT NUM{$$=ParseAddr($1,$3,NULL,NULL); delete[] $1; delete[] $3;} 
+    | NUM {$$=ParseAddr($1,NULL,NULL,NULL); delete[] $1;};
 
-port: NUM {$$=ParsePort($1);};
+port: NUM {$$=ParsePort($1); delete[] $1;};
 
 %%
 void

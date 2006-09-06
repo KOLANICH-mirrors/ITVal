@@ -38,7 +38,8 @@ public:
   int low[4];
   int high[4];
   address *next;
-    address ()
+  
+  address ()
   {
     low[0] = (-1);
     low[1] = (-1);

@@ -11,9 +11,11 @@ void parser_interface::parse(const std::string & f)
 {
    file = f;
    scan_begin();
-   yy::parser parser(*this);
-   parser.set_debug_level(trace_parsing);
-   parser.parse();
+   yy::parser *parser;
+   parser = new yy::parser(*this);
+   parser->set_debug_level(trace_parsing);
+   parser->parse();
+   delete parser;
    scan_end();
 }
 

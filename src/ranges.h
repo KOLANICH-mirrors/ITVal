@@ -44,7 +44,13 @@ class address_range {
       next = NULL;
       low = 0;
       high = 0;
-}};
+     }
+     ~address_range(){
+        if (next != NULL)
+	   delete next;
+	next = NULL;
+     }
+};
 
 //A linked list of (low, high) pairs, describing a set of port ranges.
 class port_range {

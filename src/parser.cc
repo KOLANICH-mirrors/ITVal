@@ -150,33 +150,41 @@ port *ParsePort(char *str)
       return NULL;
    }
    newPort->high = newPort->low;
-   delete[]str;
    return newPort;
 }
 
-void ProcessComponent(char *piece, int& low, int& high){
-   if (piece == NULL || piece[0] == '*') {
+void ProcessComponent(char *piece, int length, int& low, int& high){
+   if (piece == NULL || length < 1 || piece[0] == '*') {
       low = -1;
       high = -1;
    }
-   else if (piece[0] =='['){
-      char first[4];
-      char second[4];
+   else if (piece[0] == '['){
+      char* first;
+      char* second;
       int pos;
+      int start;
       pos = 1;
 
-      while (pos<=7 && piece[pos] != '-'){
+      first = new char[length-1];
+      for (int i=0;i<length-1;i++)
+	 first[i] = '\0';
+      while (pos<=length && piece[pos] != '-'){
          first[pos-1] = piece[pos];
          pos++;
       }
+      sscanf(first, "%d", &low);
+      delete[] first;
       if (piece[pos] != '-'){
          printf("Incorrectly formatted range: %s [F%d].\n", piece, pos);
          exit(-1);
       }
-      sscanf(first, "%d", &low);
-      //pos = 1;
-      while (pos<=7 && piece[pos] != ']'){
-         second[pos-1] = piece[pos];
+      
+      start = pos;
+      second = new char[length-1];
+      for (int i=0;i<length-1;i++)
+	 second[i] = '\0';
+      while (pos<=length && piece[pos] != ']'){
+         second[pos-start] = piece[pos];
          pos++;
       }
       if (piece[pos] != ']'){
@@ -184,6 +192,7 @@ void ProcessComponent(char *piece, int& low, int& high){
          exit(-1);
       }
       sscanf(second, "%d", &high);
+      delete[] second;
    }
    else {
       sscanf(piece, "%d", &low);
@@ -203,14 +212,10 @@ address *ParseAddr(char *val1, char *val2, char *val3, char *val4)
              val3 != NULL ? val3 : "*", val4 != NULL ? val4 : "*");
       return NULL;
    }
-   ProcessComponent(val1,newAddr->low[0], newAddr->high[0]);
-   delete[]val1;
-   ProcessComponent(val2,newAddr->low[1], newAddr->high[1]);
-   delete[]val2;
-   ProcessComponent(val3,newAddr->low[2], newAddr->high[2]);
-   delete[]val3;
-   ProcessComponent(val4,newAddr->low[3], newAddr->high[3]);
-   delete[]val4;
+   ProcessComponent(val1,strlen(val1),newAddr->low[0], newAddr->high[0]);
+   ProcessComponent(val2,strlen(val2),newAddr->low[1], newAddr->high[1]);
+   ProcessComponent(val3,strlen(val3),newAddr->low[2], newAddr->high[2]);
+   ProcessComponent(val4,strlen(val4),newAddr->low[3], newAddr->high[3]);
    newAddr->next = NULL;
    return newAddr;
 }
@@ -1064,6 +1069,8 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    delete resultC;
    delete notA;
    delete notB;
+   delete left;
+   delete right;
 }
 
 // Add port "newPort" to the port list "list" and return the result.

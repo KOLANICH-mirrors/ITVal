@@ -361,17 +361,22 @@ void Firewall::BuildRules(processed_rule * head, rule_tuple * &stack)
 void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       inHistMDD, rule_tuple * tup, mdd_handle & outMDD, mdd_handle & logMDD,
       mdd_handle & outHistMDD){
+  
+   //DEBUGGING
+   mdd_handle targetMDD;
+   mdd_handle targetHistMDD;
+   mdd_handle resultMDD;
+   mdd_handle resultHistMDD;
+   //@@@@@@@@@@@@@@@@@@@@@
 
-//   int hlow[25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-//   int hhigh[25] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-   // criteriaMDD represents the set of packets that match tup.
+   // criteriaMDD represents the set of packets that match the tuple.
    mdd_handle criteriaMDD;
 
    //Matches tuples to chain/rule pairs.
    mdd_handle historyMDD;
 
    // We process the rules of the chains in reverse order to preserve IP
-   // tables sematics.
+   // tables semantics.
     
    if (tup == NULL) {
       // If we've gotten past the last chain, we just copy the inputMDD
@@ -380,18 +385,9 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       HistoryForest->Attach(outHistMDD, inHistMDD.index);
       return;
    }
-   ProcessChain(chain_array, inMDD, inHistMDD, tup->next, outMDD, logMDD, outHistMDD);
 
-#ifdef VERBOSE_DEBUG
-   PrintRuleTuple(tup);         // For debugging
-   printf("Before:\n");
-   for (level k = 22; k > 0; k--)
-      FWForest->Compact(k);
-   FWForest->PrintMDD();
-   for (level k = 24; k > 0; k--)
-      HistoryForest->Compact(k);
-   HistoryForest->PrintMDD();
-#endif
+   ProcessChain(chain_array, inMDD, inHistMDD, tup->next, 
+	 outMDD, logMDD, outHistMDD);
 
    // If it's a log rule, insert it into the Log MDD and return.
    if (tup->high[0] == -1) {
@@ -405,7 +401,6 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
       tup->low[0] = tup->high[0] = -1;
       tup->hlow[0] = tup->hhigh[0] = -1;
-
       return;
    }
 
@@ -420,32 +415,19 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    HistoryForest->DestroyMDD(outHistMDD);
 
    // Create the intermediate MDD
-   FWForest->MakeMDDFromTuple(tup->low, tup->high, criteriaMDD);
    for (int k=22;k>=0;k--){
       tup->hlow[k+2] = tup->low[k];
       tup->hhigh[k+2] = tup->high[k];
    } 
    tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
    tup->hlow[1] = tup->hhigh[1] = tup->id;  
-//   tup->hlow[0] = tup->hhigh[0] = 1;
 
    assert(tup->low[0] >= 0);
    assert(tup->high[0] >= 0);
 
    tup->hlow[0] = tup->low[0];
    tup->hhigh[0] = tup->high[0];
-   HistoryForest->MakeMDDFromTuple(tup->hlow, tup->hhigh, historyMDD);
-
-#ifdef VERBOSE_DEBUG
-   printf("Make Criteria MDD: %d\n", criteriaMDD.index);
-   for (level k = 22; k > 0; k--)
-      FWForest->Compact(k);
-   FWForest->PrintMDD();
-   for (level k = 24; k > 0; k--)
-      HistoryForest->Compact(k);
-   HistoryForest->PrintMDD();
-#endif
-
+   
    // If the rule is a terminating rule (ACCEPT, DROP, OR REJECT)
    // We simply insert it into the MDD.
    if (tup->low[0] < 4) {
@@ -473,28 +455,9 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       FWForest->Assign(inMDD, tup->low, tup->high, outMDD);
 
       //Union the input MDD with the intermediate and store in "outHistMDD".
-      HistoryForest->Max(inHistMDD, historyMDD, outHistMDD);
-
-      // Clean up the intermediary MDDs, since we don't need 'em anymore.
-      FWForest->DestroyMDD(criteriaMDD);
-      HistoryForest->DestroyMDD(historyMDD);
-
-      for (level k = 22; k > 0; k--)
-         FWForest->Compact(k);
-      for (level k = 24; k > 0; k--)
-         HistoryForest->Compact(k);
-
-#ifdef VERBOSE_DEBUG
-      printf("Assign Target: %d\n", outMDD.index);
-      PrintRuleTuple(tup);      // For debugging
-      for (level k = 22; k > 0; k--)
-         FWForest->Compact(k);
-      FWForest->PrintMDD();
-      printf("Assign Target History: %d\n", outHistMDD.index);
-      for (level k = 24; k > 0; k--)
-         HistoryForest->Compact(k);
-      HistoryForest->PrintMDD();
-#endif
+      
+      //HistoryForest->Max(inHistMDD, historyMDD, outHistMDD);
+      HistoryForest->Assign(inHistMDD, tup->hlow, tup->hhigh, outHistMDD);
 
       // Since we are doing things in reverse order, it's possible
       // that a packet that matches a log rule later in the chain 
@@ -504,8 +467,9 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
       tup->low[0] = tup->high[0] = 0;
       FWForest->Assign(logMDD, tup->low, tup->high, logMDD);
-      tup->low[0] = tup->high[0] = -1;  // In case a later query
-      // needs it.
+
+      // Restore the tuple in case it is reachable through another chain.
+      tup->low[0] = tup->high[0] = -1;  
 
    }
    else {
@@ -513,81 +477,50 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       // chain first.  But only that PART of the chain which matches
       // the tuple we're working on (otherwise, loops are an issue).  So . . .
 
-      chain *nextChain;                   // The chain this rule targets.
+      chain *nextChain;  // The target chain of the current rule.
 
       nextChain = chain_array[tup->low[0] - 4];
 
-      // Build the other chain, passing interMDD as the input and
-      // output.
-      // FWForest->Attach(interMDD,interMDD.index); //Artificially
-      // inflate the incoming arc counter.
+//      mdd_handle targetMDD;
+//      mdd_handle targetHistMDD;
 
-      mdd_handle targetMDD;
-      mdd_handle targetHistMDD;
-      mdd_handle resultMDD;
-      mdd_handle resultHistMDD;
+      ProcessChain(chain_array, inMDD, inHistMDD, nextChain->tup, targetMDD,
+	    logMDD, targetHistMDD);
 
-      ProcessChain(chain_array, inMDD, inHistMDD, nextChain->tup, targetMDD, logMDD, targetHistMDD);
+      //mdd_handle resultMDD;
+      //mdd_handle resultHistMDD;
+   
+      FWForest->MakeMDDFromTuple(tup->low, tup->high, criteriaMDD);
+      HistoryForest->MakeMDDFromTuple(tup->hlow, tup->hhigh, historyMDD);
+
       FWForest->ProjectOnto(targetMDD, criteriaMDD, resultMDD);
       HistoryForest->ProjectOnto(targetHistMDD, historyMDD, resultHistMDD);
-
-#ifdef VERBOSE_DEBUG
-      printf("Restrict: %d\n", resultMDD.index);
-      PrintRuleTuple(tup);      // For debugging
-      for (level k = 22; k > 0; k--)
-         FWForest->Compact(k);
-      FWForest->PrintMDD();
-#endif
-
 
       // Clean up criteriaMDD.
       FWForest->DestroyMDD(criteriaMDD);
       HistoryForest->DestroyMDD(historyMDD);
 
-#ifdef VERBOSE_DEBUG
-      printf("Clean Up Criteria MDD\n");
-      PrintRuleTuple(tup);      // For debugging
-      for (level k = 22; k > 0; k--)
-         FWForest->Compact(k);
-      FWForest->PrintMDD();
-#endif
-
-
       FWForest->Replace(inMDD, resultMDD, true, outMDD);
-      //Any rule in the new chain that affects the packet needs to be counted now.
-      HistoryForest->Max(inHistMDD, resultHistMDD, outHistMDD); //Is this correct?@@@@
 
-      // Clean up inMDD, resultMDD, and targetMDD, 
-      // since they have served their purposes.
-//      FWForest->DestroyMDD(inMDD);
+      //Any rule in the new chain that affects the packet needs to be counted
+      //now.  
 
-#ifdef VERBOSE_DEBUG
-      printf("Replace: %d\n", targetMDD.index);
-      PrintRuleTuple(tup);      // For debugging
-      for (level k = 22; k > 0; k--)
-         FWForest->Compact(k);
-      FWForest->PrintMDD();
-#endif
+      //HistoryForest->Max(inHistMDD, resultHistMDD, outHistMDD); 
+      //Is this correct?@@@@
+
+      HistoryForest->Replace(inHistMDD, resultHistMDD, true, outHistMDD); //Is this correct?@@@@
 
       FWForest->DestroyMDD(resultMDD);
       HistoryForest->DestroyMDD(resultHistMDD);
-#ifdef VERBOSE_DEBUG
-      printf("Clean Result MDD:\n");
-      PrintRuleTuple(tup);      // For debugging
-      for (level k = 22; k > 0; k--)
-         FWForest->Compact(k);
-      FWForest->PrintMDD();
-#endif
       FWForest->DestroyMDD(targetMDD);
       HistoryForest->DestroyMDD(targetHistMDD);
-#ifdef VERBOSE_DEBUG
-      printf("Clean Target MDD:\n");
-      PrintRuleTuple(tup);      // For debugging
-      for (level k = 22; k > 0; k--)
-         FWForest->Compact(k);
-      FWForest->PrintMDD();
-#endif
    }
+
+   for (level k = 24; k > 0; k--)
+      HistoryForest->Compact(k);
+
+   for (level k = 22; k > 0; k--)
+      FWForest->Compact(k);
 }
 
 // Initiate construction of outMDD and logMDD.

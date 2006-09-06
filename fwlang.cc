@@ -685,27 +685,27 @@ namespace yy
 
   case 69:
 #line 174 "fwlang.yy"
-    {(yyval.address_rec) = ParseAddr((yysemantic_stack_[(7) - (1)].val),(yysemantic_stack_[(7) - (3)].val),(yysemantic_stack_[(7) - (5)].val),(yysemantic_stack_[(7) - (7)].val));}
+    {(yyval.address_rec) = ParseAddr((yysemantic_stack_[(7) - (1)].val),(yysemantic_stack_[(7) - (3)].val),(yysemantic_stack_[(7) - (5)].val),(yysemantic_stack_[(7) - (7)].val)); delete[] (yysemantic_stack_[(7) - (1)].val); delete[] (yysemantic_stack_[(7) - (3)].val); delete[] (yysemantic_stack_[(7) - (5)].val); delete[] (yysemantic_stack_[(7) - (7)].val);}
     break;
 
   case 70:
 #line 175 "fwlang.yy"
-    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(5) - (1)].val),(yysemantic_stack_[(5) - (3)].val),(yysemantic_stack_[(5) - (5)].val),NULL);}
+    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(5) - (1)].val),(yysemantic_stack_[(5) - (3)].val),(yysemantic_stack_[(5) - (5)].val),NULL); delete[] (yysemantic_stack_[(5) - (1)].val); delete[] (yysemantic_stack_[(5) - (3)].val); delete[] (yysemantic_stack_[(5) - (5)].val);}
     break;
 
   case 71:
 #line 176 "fwlang.yy"
-    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(3) - (1)].val),(yysemantic_stack_[(3) - (3)].val),NULL,NULL);}
+    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(3) - (1)].val),(yysemantic_stack_[(3) - (3)].val),NULL,NULL); delete[] (yysemantic_stack_[(3) - (1)].val); delete[] (yysemantic_stack_[(3) - (3)].val);}
     break;
 
   case 72:
 #line 177 "fwlang.yy"
-    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(1) - (1)].val),NULL,NULL,NULL);}
+    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(1) - (1)].val),NULL,NULL,NULL); delete[] (yysemantic_stack_[(1) - (1)].val);}
     break;
 
   case 73:
 #line 179 "fwlang.yy"
-    {(yyval.port_rec)=ParsePort((yysemantic_stack_[(1) - (1)].val));}
+    {(yyval.port_rec)=ParsePort((yysemantic_stack_[(1) - (1)].val)); delete[] (yysemantic_stack_[(1) - (1)].val);}
     break;
 
 
