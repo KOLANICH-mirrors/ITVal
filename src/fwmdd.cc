@@ -167,7 +167,7 @@ node_idx fw_fddl_forest::InternalDropped(level k, node_idx p){
    if (p==0)
       return 0;
    if (k==0)
-      return p == 2;
+      return (p == 2) || (p==1);
    r = DropCache[k]->Hit(k,p);
    if (r>=0)
       return r;

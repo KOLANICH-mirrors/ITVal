@@ -88,13 +88,13 @@ void rule_parser::BreakState(char *word, int *state)
       curword[ch - word] = '\0';
 
       // Now, "or in" the value for the state it matches.
-      if (!strncmp(curword, "INVALID", 1024))
+      if (!strncmp(curword, "INVALID", 7))
          *state |= INVALID;
-      else if (!strncmp(curword, "ESTABLISHED", 1024))
+      else if (!strncmp(curword, "ESTABLISHED", 11))
          *state |= ESTABLISHED;
-      else if (!strncmp(curword, "NEW", 1024))
+      else if (!strncmp(curword, "NEW", 3))
          *state |= NEW;
-      else if (!strncmp(curword, "RELATED", 1024))
+      else if (!strncmp(curword, "RELATED", 7))
          *state |= RELATED;
       ch++;                     // Advance past comma
       word = ch;

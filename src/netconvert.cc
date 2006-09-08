@@ -83,7 +83,7 @@ void create_range(unsigned int *addy, unsigned int mask, address_range * ar,
          ar->next->low = high + 1;
          ar->next->high = UINT_MAX;
       }
-      //printf("low: %u high:%u %u-%u %u-%u ", low, high, ar->low, ar->high, ar->next->low, ar->next->high);
+      //printf("low: %u high:%u %u-%u %u-%u \n", low, high, ar->low, ar->high, ar->next->low, ar->next->high);
    }
 }
 
@@ -123,7 +123,6 @@ void ConvertARange(char *range, address_range * ar)
    invert = 0;
 
    ch = range;
-   num = 0;
    start = range;
 
    if (*ch == '!') {
@@ -131,6 +130,7 @@ void ConvertARange(char *range, address_range * ar)
       ch++;
       start++;
    }
+   num = 0;
    // Grab the four elements
    while (num < 4) {
       while (ch - range < length && *ch != '.' && *ch != ' ' && *ch != '/') {

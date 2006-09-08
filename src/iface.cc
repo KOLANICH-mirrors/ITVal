@@ -28,6 +28,9 @@
 
 #include "debug.h"
 
+#define MAX(x,y) ((x)>(y) ? (x) : (y))
+#define MIN(x,y) ((x)<(y) ? (x) : (y))
+
 /*
  * The following functions, taken together, turn a processed_rule, pr, into
  * a set of rule_tuples suitable for insertion into an MDD.  The
@@ -269,6 +272,52 @@ void Firewall::ProcessProt(processed_rule * pr, rule_tuple * tup,
    ProcessSport(pr, tup, stack);
 }
 
+
+/* HELPER FUNCTIONS */
+
+void Firewall::DoDestLeft(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int *H){
+   int left = MIN(L[i], H[i]);
+   int right = MAX(L[i], H[i]);
+   if (i==3){
+      tup->low[18-i] = left;
+      tup->high[18-i] = FWForest->GetMaxVal(18-i);
+      ProcessProt(pr,tup,stack);
+      return;
+   }
+
+   tup->low[18-i] = left+1;
+   tup->high[18-i] = FWForest->GetMaxVal(18-i);
+   DoDestMiddle(pr,tup,stack, i+1);
+
+   tup->low[18-i] = tup->high[18-i] = left;
+   DoDestLeft(pr,tup,stack,i+1,L,H);
+}
+
+void Firewall::DoDestRight(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int *H){
+   int left = MIN(L[i], H[i]);
+   int right = MAX(L[i],H[i]);
+   if (i==3){
+      tup->low[18-i] = 0;
+      tup->high[18-i] = right;
+      return;
+   }
+
+   tup->low[18-i] = 0;
+   tup->high[18-i] = right-1;
+   DoDestMiddle(pr,tup,stack, i+1);
+
+   tup->low[18-i] = tup->high[18-i] = right;
+   DoDestRight(pr,tup,stack,i+1,L,H);
+}
+
+void Firewall::DoDestMiddle(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i){
+   for (int j=i;j<4;j++){
+      tup->low[18-j] = 0;
+      tup->high[18-j] = FWForest->GetMaxVal(18-j);
+   }
+   ProcessProt(pr, tup, stack);
+}
+
 /*
  * Store the destination address information in the tuple.  IP addresses
  * are partitioned into four bytes to improve performance of the MDD.  
@@ -278,50 +327,140 @@ void Firewall::ProcessProt(processed_rule * pr, rule_tuple * tup,
 void Firewall::ProcessDest(processed_rule * pr, rule_tuple * tup,
                            rule_tuple * &stack)
 {
-   tup->low[15] = pr->to->low % 256;
-   tup->low[16] = pr->to->low / 256 % 256;
-   tup->low[17] = ((pr->to->low / 256) / 256) % 256;
-   tup->low[18] = ((signed int) (((pr->to->low / 256) / 256) / 256)) % 256;
-   tup->high[15] = pr->to->high % 256;
-   tup->high[16] = (pr->to->high / 256) % 256;
-   tup->high[17] = ((pr->to->high / 256) / 256) % 256;
-   tup->high[18] = ((signed int) (((pr->to->high / 256) / 256) / 256)) % 256;
-   ProcessProt(pr, tup, stack);
+   int L[4];
+   int H[4];
+   address_range * cur;
+   cur = pr->to;
+   while (cur != NULL){
+      for (int j=0;j<4;j++){
+         L[j] = (cur->low >> (8*(3-j))) % 256;
+         H[j] = (cur->high >> (8*(3-j))) % 256;
+      }
+
+      int i;
+      for (i=0;i<4;i++){
+	 int left = MIN(L[i],H[i]);
+	 int right = MAX(L[i],H[i]);
+         if (L[i] != H[i]){
+	    tup->low[18-i] = left;
+	    tup->high[18-i] = left;
+	    DoDestLeft(pr,tup,stack, i, L, H);
+
+	    tup->low[18-i] = right;
+	    tup->high[18-i] = right;
+	    DoDestRight(pr,tup,stack, i, L, H);
+
+	    tup->low[18-i] = left + 1;
+	    tup->high[18-i] = right - 1;
+	    DoDestMiddle(pr,tup,stack,i);
+            break;
+	 }
+	 else{
+            tup->low[18-i] = left;
+            tup->high[18-i] = right;
+	 }
+      }
+      if (i==4){
+         ProcessProt(pr, tup, stack);
+      }
+
+      cur = cur->next;
+   }
+}
+
+/* HELPER FUNCTIONS */
+/* All this work to do something simple: 
+ * Convert a range of ip addresses (x.x.x.x to y.y.y.y) to a list of tuple ranges ([X-Y].[X-Y].[X-Y].[X-Y], ... ) */
+
+void Firewall::DoSrcLeft(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int *H){
+   int left = MIN(L[i], H[i]);
+   int right = MAX(L[i],H[i]);
+   if (i==3){
+      tup->low[22-i] = left;
+      tup->high[22-i] = FWForest->GetMaxVal(22-i);
+      ProcessDest(pr,tup,stack);
+      return;
+   }
+
+   tup->low[22-i] = left+1;
+   tup->high[22-i] = FWForest->GetMaxVal(22-i);
+   DoSrcMiddle(pr,tup,stack, i+1);
+
+   tup->low[22-i] = tup->high[22-i] = left;
+   DoSrcLeft(pr,tup,stack,i+1,L,H);
+}
+
+void Firewall::DoSrcRight(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int *H){
+   int left = MIN(L[i], H[i]);
+   int right = MAX(L[i],H[i]);
+   if (i==3){
+      tup->low[22-i] = 0;
+      tup->high[22-i] = right;
+      ProcessDest(pr,tup,stack);
+      return;
+   }
+
+   tup->low[22-i] = 0;
+   tup->high[22-i] = right-1;
+   DoSrcMiddle(pr,tup,stack, i+1);
+
+   tup->low[22-i] = tup->high[22-i] = right;
+   DoSrcRight(pr,tup,stack,i+1,L,H);
+}
+
+void Firewall::DoSrcMiddle(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i){
+   for (int j=i;j<4;j++){
+      tup->low[22-j] = 0;
+      tup->high[22-j] = FWForest->GetMaxVal(22-j);
+   }
+   ProcessDest(pr, tup, stack);
 }
 
 /*
- * Store the source address information in the tuple.  As in ProcessDest,
- * IP addresses are partitioned into four bytes.
+ * Store the destination address information in the tuple.  IP addresses
+ * are partitioned into four bytes to improve performance of the MDD.  
+ * (Partitioning also helps readability when debugging).
  */
 
 void Firewall::ProcessSource(processed_rule * pr, rule_tuple * tup,
-                             rule_tuple * &stack)
+                           rule_tuple * &stack)
 {
-   tup->low[19] = pr->from->low % 256;
-   tup->low[20] = (pr->from->low / 256) % 256;
-   tup->low[21] = ((pr->from->low / 256) / 256) % 256;
-   tup->low[22] = ((signed int) (((pr->from->low / 256) / 256) / 256)) % 256;
-   tup->high[19] = pr->from->high % 256;
-   tup->high[20] = (pr->from->high / 256) % 256;
-   tup->high[21] = ((pr->from->high / 256) / 256) % 256;
-   tup->high[22] =
-      ((signed int) (((pr->from->high / 256) / 256) / 256)) % 256;
-   ProcessDest(pr, tup, stack);
+   int L[4];
+   int H[4];
+   address_range * cur;
+   cur = pr->to;
+   while (cur != NULL){
+      for (int j=0;j<4;j++){
+         L[j] = (cur->low >> (8*(3-j))) % 256;
+         H[j] = (cur->high >> (8*(3-j))) % 256;
+      }
+      int i;
+      for (i=0;i<4;i++){
+	 int left = MIN(L[i],H[i]);
+	 int right = MAX(L[i],H[i]);
+         if (L[i] != H[i]){
+	    tup->low[22-i] = left;
+	    tup->high[22-i] = left;
+	    DoSrcLeft(pr, tup, stack, i, L, H);
 
-   if (pr->from->next != NULL) {
+	    tup->low[22-i] = right;
+	    tup->high[22-i] = right;
+	    DoSrcRight(pr, tup, stack, i, L, H);
 
-      tup->low[19] = pr->from->next->low % 256;
-      tup->low[20] = (pr->from->next->low / 256) % 256;
-      tup->low[21] = ((pr->from->next->low / 256) / 256) % 256;
-      tup->low[22] =
-         ((signed int) (((pr->from->next->low / 256) / 256) / 256)) % 256;
-      tup->high[19] = pr->from->next->high % 256;
-      tup->high[20] = (pr->from->next->high / 256) % 256;
-      tup->high[21] = ((pr->from->next->high / 256) / 256) % 256;
-      tup->high[22] =
-         ((signed int) (((pr->from->next->high / 256) / 256) / 256)) % 256;
+	    tup->low[22-i] = left + 1;
+	    tup->high[22-i] = right - 1;
+	    DoSrcMiddle(pr, tup, stack,i);
+            break;
+	 }
+	 else{
+            tup->low[22-i] = left;
+            tup->high[22-i] = right;
+	 }
+      }
+      if (i==4)
+         ProcessDest(pr, tup, stack);
 
-      ProcessDest(pr, tup, stack);
+      cur = cur->next;
    }
 }
 
@@ -406,9 +545,11 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
    // Otherwise, take the output of the previous function off the stack
    // and make it the input MDD.
+   FWForest->DestroyMDD(inMDD); //bad?
+   HistoryForest->DestroyMDD(inHistMDD); //bad?
 
    FWForest->Attach(inMDD, outMDD.index);
-   HistoryForest->Attach(inHistMDD, outHistMDD.index);
+   HistoryForest->Attach(inHistMDD, outHistMDD.index); 
 
    // The old output MDD can be cleaned.
    FWForest->DestroyMDD(outMDD);
@@ -431,6 +572,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    // If the rule is a terminating rule (ACCEPT, DROP, OR REJECT)
    // We simply insert it into the MDD.
    if (tup->low[0] < 4) {
+
 
       // Insert it into the MDD.  Replace takes a flag
       // parameter that indicates whether to insert new
@@ -521,6 +663,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
    for (level k = 22; k > 0; k--)
       FWForest->Compact(k);
+   
 }
 
 // Initiate construction of outMDD and logMDD.

@@ -55,6 +55,13 @@ class Firewall {
 
    void BuildRules(processed_rule * pr, rule_tuple * &tup);
 
+   void DoDestLeft(processed_rule * pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int* H);
+   void DoDestRight(processed_rule * pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int* H);
+   void DoSrcLeft(processed_rule * pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int* H);
+   void DoSrcRight(processed_rule * pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int* H);
+   void DoSrcMiddle(processed_rule * pr, rule_tuple * tup, rule_tuple * &stack, int i);
+   void DoDestMiddle(processed_rule * pr, rule_tuple * tup, rule_tuple * &stack, int i);
+
    void ProcessSource(processed_rule * pr, rule_tuple * tup,
                       rule_tuple * &stack);
    void ProcessDest(processed_rule * pr, rule_tuple * tup,

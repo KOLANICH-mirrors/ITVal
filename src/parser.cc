@@ -300,6 +300,12 @@ condition* BuildDropCondition(int input_chain)
 	 printf("Illegal input chain to Logged.\n");
 	 break;
    }
+   /*
+   for (int k=22;k>0;k--)
+      FW->FWForest->Compact(k);
+   printf("Dropped(%d):%d\n",input_chain, sc->h.index);
+   FW->FWForest->PrintMDD();
+   */
    return sc;
 }
 
@@ -789,104 +795,6 @@ condition *IntersectConditions(condition * c1, condition * c2)
    return newCond;
 }
 
-// Perform the query described by condition object "c" by intersecting
-// "c" with the set of accepted packets.  Then, display the appropriate 
-// information, as determined by the value of "subject".
-/*
-query *PerformQuery(int subject, condition * c, int input_chain)
-{
-   mdd_handle result;
-   mdd_handle hresult;
-   int mask[23];
-
-   for (int i = 0; i < 23; i++)
-      mask[i] = 0;
-   
-
-   // Intersect the set of accepted packets with the set of packets
-   // relevant to the query (stored in condition "c").
-   if (input_chain == 0) {
-      FW->FWForest->QueryIntersect(FW->Input, c->h, result);
-      FW->HistoryForest->HistoryIntersect(FW->InputHist, c->history, hresult);
-   }
-   if (input_chain == 1) {
-      FW->FWForest->QueryIntersect(FW->Forward, c->h, result);
-      FW->HistoryForest->HistoryIntersect(FW->ForwardHist, c->history, hresult);
-   }
-   if (input_chain == 2) {
-      FW->FWForest->QueryIntersect(FW->Output, c->h, result);
-      FW->HistoryForest->HistoryIntersect(FW->OutputHist, c->history, hresult);
-   }
-     FW->HistoryForest->PrintHistory(hresult);
-#ifdef DEBUG
-   printf("Rules: %d Query: %d\n", FW->Forward.index, c->h.index);
-//   FW->FWForest->PruneMDD(result);
-   for (level k = 22; k > 0; k--)
-      FW->FWForest->Compact(k);
-   FW->FWForest->PrintMDD();
-#endif
-
-   // "Project" the results to Display the requested information
-   switch (subject) {
-      case 0:
-         FW->FWForest->PruneMDD(result);
-         for (level k = 22; k > 0; k--)
-            FW->FWForest->Compact(k);
-         FW->FWForest->PrintMDD();
-         // FW->FWForest->PrintStates(result.index);
-         break;
-      case 1:
-         printf("# Ports: ");
-         // Source port starts at level 13
-         mask[14] = 1;
-         mask[13] = 1;
-         mask[12] = 1;
-         FW->FWForest->PrintRanges(result, mask);
-         break;
-      case 2:
-         printf("# Ports: ");
-         // Destination port starts at level 11
-         mask[14] = 1;
-         mask[11] = 1;
-         mask[10] = 1;
-         FW->FWForest->PrintRanges(result, mask);
-//         FW->FWForest->PrintPort(result, 8);
-         break;
-      case 3:
-         printf("# Addresses: ");
-         // Source addresses start at level 22
-         mask[22] = 1;
-         mask[21] = 1;
-         mask[20] = 1;
-         mask[19] = 1;
-         FW->FWForest->PrintRanges(result, mask);
-         //FW->FWForest->PrintAddy(result, 22);
-         break;
-      case 4:
-         printf("# Addresses: ");
-         // Destination addresses start at level 18
-         mask[18] = 1;
-         mask[17] = 1;
-         mask[16] = 1;
-         mask[15] = 1;
-         FW->FWForest->PrintRanges(result, mask);
-         break;
-      case 5:
-         printf("# States: ");
-         // The state value is stored at level 7
-         mask[7] = 1;
-         FW->FWForest->PrintRanges(result, mask);
-         break;
-   }
-   // Now that the query is done, free the query condition.
-   FW->FWForest->DestroyMDD(c->h);
-   FW->HistoryForest->DestroyMDD(c->history);
-   FW->HistoryForest->DestroyMDD(hresult);
-   delete c;
-
-   return NULL;
-}
-*/
 query *PerformQuery(int subject, condition * c)
 {
    int mask[23];
@@ -965,7 +873,7 @@ query *PerformQuery(int subject, condition * c)
    return NULL;
 }
 
-assert* PerformAssertion(condition* left, condition* right, int assert_op, int example){
+assert* PerformAssertion(condition* left, condition* right, int assert_op, int example, int history){
    int cond;
    condition* notA;
    condition* notB;

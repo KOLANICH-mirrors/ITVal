@@ -435,282 +435,302 @@ namespace yy
 
   case 19:
 #line 116 "fwlang.yy"
-    {(yyval.assert_rec) = PerformAssertion((yysemantic_stack_[(4) - (2)].condition_rec), (yysemantic_stack_[(4) - (4)].condition_rec), (yysemantic_stack_[(4) - (3)].assert_op), 0);}
+    {(yyval.assert_rec) = PerformAssertion((yysemantic_stack_[(4) - (2)].condition_rec), (yysemantic_stack_[(4) - (4)].condition_rec), (yysemantic_stack_[(4) - (3)].assert_op), 0, 0);}
     break;
 
   case 20:
 #line 117 "fwlang.yy"
-    {(yyval.assert_rec) = PerformAssertion((yysemantic_stack_[(5) - (3)].condition_rec), (yysemantic_stack_[(5) - (5)].condition_rec), (yysemantic_stack_[(5) - (4)].assert_op), 1);}
+    {(yyval.assert_rec) = PerformAssertion((yysemantic_stack_[(5) - (3)].condition_rec), (yysemantic_stack_[(5) - (5)].condition_rec), (yysemantic_stack_[(5) - (4)].assert_op), 1, 0);}
     break;
 
   case 21:
-#line 120 "fwlang.yy"
-    {(yyval.assert_op) = 0;}
+#line 118 "fwlang.yy"
+    {(yyval.assert_rec) = PerformAssertion((yysemantic_stack_[(5) - (3)].condition_rec), (yysemantic_stack_[(5) - (5)].condition_rec), (yysemantic_stack_[(5) - (4)].assert_op), 0, 1);}
     break;
 
   case 22:
-#line 121 "fwlang.yy"
-    {(yyval.assert_op)=1;}
+#line 119 "fwlang.yy"
+    {(yyval.assert_rec) = PerformAssertion((yysemantic_stack_[(6) - (4)].condition_rec), (yysemantic_stack_[(6) - (6)].condition_rec), (yysemantic_stack_[(6) - (5)].assert_op), 1,1);}
     break;
 
   case 23:
 #line 122 "fwlang.yy"
-    {(yyval.assert_op) = 2;}
+    {(yyval.assert_op) = 0;}
     break;
 
   case 24:
 #line 123 "fwlang.yy"
-    {(yyval.assert_op) = 3;}
+    {(yyval.assert_op)=1;}
     break;
 
   case 25:
-#line 126 "fwlang.yy"
-    {(yyval.input_chain) = 0;}
+#line 124 "fwlang.yy"
+    {(yyval.assert_op) = 2;}
     break;
 
   case 26:
-#line 127 "fwlang.yy"
-    {(yyval.input_chain) = 1;}
+#line 125 "fwlang.yy"
+    {(yyval.assert_op) = 3;}
     break;
 
   case 27:
 #line 128 "fwlang.yy"
-    {(yyval.input_chain) = 2;}
+    {(yyval.input_chain) = 0;}
     break;
 
   case 28:
-#line 131 "fwlang.yy"
-    {(yyval.sub)=0;}
+#line 129 "fwlang.yy"
+    {(yyval.input_chain) = 1;}
     break;
 
   case 29:
-#line 132 "fwlang.yy"
-    {(yyval.sub)=1;}
+#line 130 "fwlang.yy"
+    {(yyval.input_chain) = 2;}
     break;
 
   case 30:
 #line 133 "fwlang.yy"
-    {(yyval.sub)=2;}
+    {(yyval.sub)=0;}
     break;
 
   case 31:
 #line 134 "fwlang.yy"
-    {(yyval.sub)=3;}
+    {(yyval.sub)=1;}
     break;
 
   case 32:
 #line 135 "fwlang.yy"
-    {(yyval.sub)=4;}
+    {(yyval.sub)=2;}
     break;
 
   case 33:
 #line 136 "fwlang.yy"
-    {(yyval.sub)=5;}
+    {(yyval.sub)=3;}
     break;
 
   case 34:
-#line 140 "fwlang.yy"
-    {(yyval.condition_rec) = (yysemantic_stack_[(1) - (1)].condition_rec);}
+#line 137 "fwlang.yy"
+    {(yyval.sub)=4;}
     break;
 
   case 35:
-#line 141 "fwlang.yy"
-    {(yyval.condition_rec) = IntersectConditions((yysemantic_stack_[(3) - (1)].condition_rec),(yysemantic_stack_[(3) - (3)].condition_rec));}
+#line 138 "fwlang.yy"
+    {(yyval.sub)=5;}
     break;
 
   case 36:
 #line 142 "fwlang.yy"
-    {(yyval.condition_rec) = UnionConditions((yysemantic_stack_[(3) - (1)].condition_rec),(yysemantic_stack_[(3) - (3)].condition_rec));}
+    {(yyval.condition_rec) = (yysemantic_stack_[(1) - (1)].condition_rec);}
     break;
 
   case 37:
 #line 143 "fwlang.yy"
-    {(yyval.condition_rec) = NegateCondition((yysemantic_stack_[(2) - (2)].condition_rec));}
+    {(yyval.condition_rec) = IntersectConditions((yysemantic_stack_[(3) - (1)].condition_rec),(yysemantic_stack_[(3) - (3)].condition_rec));}
     break;
 
   case 38:
 #line 144 "fwlang.yy"
-    {(yyval.condition_rec) = (yysemantic_stack_[(3) - (2)].condition_rec);}
+    {(yyval.condition_rec) = UnionConditions((yysemantic_stack_[(3) - (1)].condition_rec),(yysemantic_stack_[(3) - (3)].condition_rec));}
     break;
 
   case 39:
 #line 145 "fwlang.yy"
-    { (yyval.condition_rec) = GetLoggedCondition((yysemantic_stack_[(2) - (2)].input_chain));}
+    {(yyval.condition_rec) = NegateCondition((yysemantic_stack_[(2) - (2)].condition_rec));}
     break;
 
   case 40:
-#line 148 "fwlang.yy"
-    {(yyval.condition_rec)=BuildConditionFromGroup((yysemantic_stack_[(2) - (2)].group_rec), 0);}
+#line 146 "fwlang.yy"
+    {(yyval.condition_rec) = (yysemantic_stack_[(3) - (2)].condition_rec);}
     break;
 
   case 41:
-#line 149 "fwlang.yy"
-    {(yyval.condition_rec)=BuildConditionFromGroup((yysemantic_stack_[(2) - (2)].group_rec),1);}
+#line 147 "fwlang.yy"
+    { (yyval.condition_rec) = GetLoggedCondition((yysemantic_stack_[(2) - (2)].input_chain));}
     break;
 
   case 42:
 #line 150 "fwlang.yy"
-    {(yyval.condition_rec)=BuildConditionFromService((yysemantic_stack_[(2) - (2)].service_rec), 0);}
+    {(yyval.condition_rec)=BuildConditionFromGroup((yysemantic_stack_[(2) - (2)].group_rec), 0);}
     break;
 
   case 43:
 #line 151 "fwlang.yy"
-    {(yyval.condition_rec)=BuildConditionFromService((yysemantic_stack_[(2) - (2)].service_rec), 1);}
+    {(yyval.condition_rec)=BuildConditionFromGroup((yysemantic_stack_[(2) - (2)].group_rec),1);}
     break;
 
   case 44:
 #line 152 "fwlang.yy"
-    {(yyval.condition_rec)=BuildConditionFromState((yysemantic_stack_[(2) - (2)].sv));}
+    {(yyval.condition_rec)=BuildConditionFromService((yysemantic_stack_[(2) - (2)].service_rec), 0);}
     break;
 
   case 45:
 #line 153 "fwlang.yy"
-    {(yyval.condition_rec)=BuildConditionFromFlag((yysemantic_stack_[(2) - (2)].fv));}
+    {(yyval.condition_rec)=BuildConditionFromService((yysemantic_stack_[(2) - (2)].service_rec), 1);}
     break;
 
   case 46:
 #line 154 "fwlang.yy"
-    {(yyval.condition_rec)=BuildConditionFromIface((yysemantic_stack_[(2) - (2)].name), 0); delete[] (yysemantic_stack_[(2) - (2)].name);}
+    {(yyval.condition_rec)=BuildConditionFromState((yysemantic_stack_[(2) - (2)].sv));}
     break;
 
   case 47:
 #line 155 "fwlang.yy"
-    {(yyval.condition_rec)=BuildConditionFromIface((yysemantic_stack_[(2) - (2)].name), 1); delete[] (yysemantic_stack_[(2) - (2)].name);}
+    {(yyval.condition_rec)=BuildConditionFromFlag((yysemantic_stack_[(2) - (2)].fv));}
     break;
 
   case 48:
 #line 156 "fwlang.yy"
-    {(yyval.condition_rec)=BuildAcceptCondition((yysemantic_stack_[(2) - (2)].input_chain));}
+    {(yyval.condition_rec)=BuildConditionFromIface((yysemantic_stack_[(2) - (2)].name), 0); delete[] (yysemantic_stack_[(2) - (2)].name);}
     break;
 
   case 49:
 #line 157 "fwlang.yy"
-    {(yyval.condition_rec)=BuildDropCondition((yysemantic_stack_[(2) - (2)].input_chain));}
+    {(yyval.condition_rec)=BuildConditionFromIface((yysemantic_stack_[(2) - (2)].name), 1); delete[] (yysemantic_stack_[(2) - (2)].name);}
     break;
 
   case 50:
-#line 160 "fwlang.yy"
-    {(yyval.group_rec) = GroupLookup((yysemantic_stack_[(1) - (1)].name)); delete[] (yysemantic_stack_[(1) - (1)].name);}
+#line 158 "fwlang.yy"
+    {(yyval.condition_rec)=BuildAcceptCondition((yysemantic_stack_[(2) - (2)].input_chain));}
     break;
 
   case 51:
-#line 161 "fwlang.yy"
-    {(yyval.group_rec) = BuildGroupFromAddress((yysemantic_stack_[(1) - (1)].address_rec));}
+#line 159 "fwlang.yy"
+    {(yyval.condition_rec)=BuildDropCondition((yysemantic_stack_[(2) - (2)].input_chain));}
     break;
 
   case 52:
-#line 163 "fwlang.yy"
-    {(yyval.service_rec) = ServiceLookup((yysemantic_stack_[(1) - (1)].name)); delete[] (yysemantic_stack_[(1) - (1)].name);}
+#line 160 "fwlang.yy"
+    {(yyval.condition_rec)=BuildAcceptCondition(1);}
     break;
 
   case 53:
-#line 164 "fwlang.yy"
-    {(yyval.service_rec) = BuildServiceFromPort((yysemantic_stack_[(1) - (1)].port_rec));}
+#line 161 "fwlang.yy"
+    {(yyval.condition_rec)=BuildDropCondition(1);}
     break;
 
   case 54:
-#line 166 "fwlang.yy"
-    {(yyval.sv)=0;}
+#line 164 "fwlang.yy"
+    {(yyval.group_rec) = GroupLookup((yysemantic_stack_[(1) - (1)].name)); delete[] (yysemantic_stack_[(1) - (1)].name);}
     break;
 
   case 55:
-#line 166 "fwlang.yy"
-    {(yyval.sv)=1;}
+#line 165 "fwlang.yy"
+    {(yyval.group_rec) = BuildGroupFromAddress((yysemantic_stack_[(1) - (1)].address_rec));}
     break;
 
   case 56:
-#line 166 "fwlang.yy"
-    {(yyval.sv)=2;}
+#line 167 "fwlang.yy"
+    {(yyval.service_rec) = ServiceLookup((yysemantic_stack_[(1) - (1)].name)); delete[] (yysemantic_stack_[(1) - (1)].name);}
     break;
 
   case 57:
-#line 166 "fwlang.yy"
-    {(yyval.sv)=3;}
+#line 168 "fwlang.yy"
+    {(yyval.service_rec) = BuildServiceFromPort((yysemantic_stack_[(1) - (1)].port_rec));}
     break;
 
   case 58:
-#line 168 "fwlang.yy"
-    {(yyval.fv)=0;}
+#line 170 "fwlang.yy"
+    {(yyval.sv)=0;}
     break;
 
   case 59:
-#line 168 "fwlang.yy"
-    {(yyval.fv)=1;}
+#line 170 "fwlang.yy"
+    {(yyval.sv)=1;}
     break;
 
   case 60:
-#line 168 "fwlang.yy"
-    {(yyval.fv)=2;}
+#line 170 "fwlang.yy"
+    {(yyval.sv)=2;}
     break;
 
   case 61:
-#line 168 "fwlang.yy"
-    {(yyval.fv)=3;}
+#line 170 "fwlang.yy"
+    {(yyval.sv)=3;}
     break;
 
   case 62:
-#line 168 "fwlang.yy"
-    {(yyval.fv)=4;}
+#line 172 "fwlang.yy"
+    {(yyval.fv)=0;}
     break;
 
   case 63:
-#line 168 "fwlang.yy"
-    {(yyval.fv)=5;}
+#line 172 "fwlang.yy"
+    {(yyval.fv)=1;}
     break;
 
   case 64:
-#line 170 "fwlang.yy"
-    {(yyval.port_rec) = BuildPort((yysemantic_stack_[(2) - (1)].prot), (yysemantic_stack_[(2) - (2)].port_rec));}
+#line 172 "fwlang.yy"
+    {(yyval.fv)=2;}
     break;
 
   case 65:
 #line 172 "fwlang.yy"
-    {(yyval.prot) = 0;}
+    {(yyval.fv)=3;}
     break;
 
   case 66:
 #line 172 "fwlang.yy"
-    {(yyval.prot) = 1;}
+    {(yyval.fv)=4;}
     break;
 
   case 67:
 #line 172 "fwlang.yy"
-    { (yyval.prot) = 2;}
+    {(yyval.fv)=5;}
     break;
 
   case 68:
-#line 172 "fwlang.yy"
-    { (yyval.prot) = -1;}
+#line 174 "fwlang.yy"
+    {(yyval.port_rec) = BuildPort((yysemantic_stack_[(2) - (1)].prot), (yysemantic_stack_[(2) - (2)].port_rec));}
     break;
 
   case 69:
-#line 174 "fwlang.yy"
-    {(yyval.address_rec) = ParseAddr((yysemantic_stack_[(7) - (1)].val),(yysemantic_stack_[(7) - (3)].val),(yysemantic_stack_[(7) - (5)].val),(yysemantic_stack_[(7) - (7)].val)); delete[] (yysemantic_stack_[(7) - (1)].val); delete[] (yysemantic_stack_[(7) - (3)].val); delete[] (yysemantic_stack_[(7) - (5)].val); delete[] (yysemantic_stack_[(7) - (7)].val);}
+#line 176 "fwlang.yy"
+    {(yyval.prot) = 0;}
     break;
 
   case 70:
-#line 175 "fwlang.yy"
-    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(5) - (1)].val),(yysemantic_stack_[(5) - (3)].val),(yysemantic_stack_[(5) - (5)].val),NULL); delete[] (yysemantic_stack_[(5) - (1)].val); delete[] (yysemantic_stack_[(5) - (3)].val); delete[] (yysemantic_stack_[(5) - (5)].val);}
+#line 176 "fwlang.yy"
+    {(yyval.prot) = 1;}
     break;
 
   case 71:
 #line 176 "fwlang.yy"
-    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(3) - (1)].val),(yysemantic_stack_[(3) - (3)].val),NULL,NULL); delete[] (yysemantic_stack_[(3) - (1)].val); delete[] (yysemantic_stack_[(3) - (3)].val);}
+    { (yyval.prot) = 2;}
     break;
 
   case 72:
-#line 177 "fwlang.yy"
-    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(1) - (1)].val),NULL,NULL,NULL); delete[] (yysemantic_stack_[(1) - (1)].val);}
+#line 176 "fwlang.yy"
+    { (yyval.prot) = -1;}
     break;
 
   case 73:
+#line 178 "fwlang.yy"
+    {(yyval.address_rec) = ParseAddr((yysemantic_stack_[(7) - (1)].val),(yysemantic_stack_[(7) - (3)].val),(yysemantic_stack_[(7) - (5)].val),(yysemantic_stack_[(7) - (7)].val)); delete[] (yysemantic_stack_[(7) - (1)].val); delete[] (yysemantic_stack_[(7) - (3)].val); delete[] (yysemantic_stack_[(7) - (5)].val); delete[] (yysemantic_stack_[(7) - (7)].val);}
+    break;
+
+  case 74:
 #line 179 "fwlang.yy"
+    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(5) - (1)].val),(yysemantic_stack_[(5) - (3)].val),(yysemantic_stack_[(5) - (5)].val),NULL); delete[] (yysemantic_stack_[(5) - (1)].val); delete[] (yysemantic_stack_[(5) - (3)].val); delete[] (yysemantic_stack_[(5) - (5)].val);}
+    break;
+
+  case 75:
+#line 180 "fwlang.yy"
+    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(3) - (1)].val),(yysemantic_stack_[(3) - (3)].val),NULL,NULL); delete[] (yysemantic_stack_[(3) - (1)].val); delete[] (yysemantic_stack_[(3) - (3)].val);}
+    break;
+
+  case 76:
+#line 181 "fwlang.yy"
+    {(yyval.address_rec)=ParseAddr((yysemantic_stack_[(1) - (1)].val),NULL,NULL,NULL); delete[] (yysemantic_stack_[(1) - (1)].val);}
+    break;
+
+  case 77:
+#line 183 "fwlang.yy"
     {(yyval.port_rec)=ParsePort((yysemantic_stack_[(1) - (1)].val)); delete[] (yysemantic_stack_[(1) - (1)].val);}
     break;
 
 
     /* Line 675 of lalr1.cc.  */
-#line 714 "fwlang.cc"
+#line 734 "fwlang.cc"
 	default: break;
       }
     YY_SYMBOL_PRINT ("-> $$ =", yyr1_[yyn], &yyval, &yyloc);
@@ -917,22 +937,22 @@ namespace yy
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
-  const signed char parser::yypact_ninf_ = -60;
+  const signed char parser::yypact_ninf_ = -51;
   const signed char
   parser::yypact_[] =
   {
-         5,   -38,   -30,    77,     3,   -60,    31,     5,   -35,   -29,
-     -28,   -25,    28,    36,   -60,   -60,   -60,   -60,   -60,   -60,
-     -60,   -60,   -60,   -32,   -32,    23,   -32,   -32,    23,    23,
-      12,    27,   -14,    29,    64,    64,   -22,   -22,   -12,   -60,
-     -60,   -60,   -60,   -60,   -60,   -60,    45,    28,   -60,   -60,
-     -60,   -60,   -60,    36,   -60,    47,   -16,   -12,   -60,   -60,
-     -60,   -60,   -59,   -60,   -60,   -60,   -60,   -60,   -60,   -60,
-     -60,   -60,   -60,   -60,   -60,   -60,   -60,   -60,   -60,   -60,
-     -60,   -60,   -60,   -60,   -60,   -60,   -60,   -60,   -60,   -60,
-     -60,   -60,   -32,   -32,   -32,    73,   -60,   -60,   -60,   -60,
-     -32,   -60,    32,   -60,   -16,    75,   -16,    74,    76,    78,
-     -60
+         2,   -38,   -26,   104,    13,   -51,    29,     2,   -28,   -27,
+     -22,   -21,    22,    58,   -51,   -51,   -51,   -51,   -51,   -51,
+     -51,   -51,   -51,   -24,    34,   -24,     3,   -24,   -24,     3,
+       3,    24,    31,    23,    65,    -2,    -2,   -16,   -16,     5,
+     -51,   -51,   -51,   -51,   -51,   -51,   -51,    46,    22,   -51,
+     -51,   -51,   -51,   -51,    58,   -51,    51,   -40,   -24,     5,
+       5,   -51,   -51,   -51,   -51,   -50,   -51,   -51,   -51,   -51,
+     -51,   -51,   -51,   -51,   -51,   -51,   -51,   -51,   -51,   -51,
+     -51,   -51,   -51,   -51,   -51,   -51,   -51,   -51,   -51,   -51,
+     -51,   -51,   -51,   -51,   -51,   -24,   -24,   -24,    70,   -51,
+     -51,   -51,   -51,     5,   -24,   -24,   -51,    33,   -51,   -40,
+      76,   -24,   -40,   -40,    78,   -40,    79,   100,   -51
   };
 
   /* YYDEFACT[S] -- default rule to reduce with in state S when YYTABLE
@@ -942,35 +962,35 @@ namespace yy
   parser::yydefact_[] =
   {
          0,     0,     0,     0,     0,     8,     0,     2,     0,     0,
-       0,     0,     0,     0,    28,    29,    30,    31,    32,    33,
-      15,    16,    17,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,    34,
-       1,     3,     4,     5,     6,     7,    72,     9,    12,    66,
-      67,    65,    68,    10,    14,     0,    18,     0,    25,    26,
-      27,    39,     0,    37,    49,    48,    47,    46,    58,    59,
-      60,    61,    62,    63,    45,    54,    55,    56,    57,    44,
-      52,    42,    53,    43,    50,    41,    51,    40,    21,    23,
-      22,    24,     0,     0,     0,     0,    11,    13,    73,    64,
-       0,    38,    35,    36,    19,    71,    20,     0,    70,     0,
-      69
+       0,     0,     0,     0,    30,    31,    32,    33,    34,    35,
+      15,    16,    17,     0,     0,     0,     0,     0,     0,    53,
+      52,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+      36,     1,     3,     4,     5,     6,     7,    76,     9,    12,
+      70,    71,    69,    72,    10,    14,     0,    18,     0,     0,
+       0,    27,    28,    29,    41,     0,    39,    51,    50,    49,
+      48,    62,    63,    64,    65,    66,    67,    47,    58,    59,
+      60,    61,    46,    56,    44,    57,    45,    54,    43,    55,
+      42,    23,    25,    24,    26,     0,     0,     0,     0,    11,
+      13,    77,    68,     0,     0,     0,    40,    37,    38,    19,
+      75,     0,    20,    21,     0,    22,    74,     0,    73
   };
 
   /* YYPGOTO[NTERM-NUM].  */
   const signed char
   parser::yypgoto_[] =
   {
-       -60,   100,   -60,   -60,   -60,   -60,   -60,   -60,   -60,    51,
-      -6,   -60,   -23,   -60,    72,    79,   -60,   -60,     1,   -60,
-      -7,   -60
+       -51,   123,   -51,   -51,   -51,   -51,   -51,   -51,   -51,   -41,
+       4,   -51,   -23,   -51,    93,    96,   -51,   -51,   -10,   -51,
+      -5,   -51
   };
 
   /* YYDEFGOTO[NTERM-NUM].  */
   const signed char
   parser::yydefgoto_[] =
   {
-        -1,     6,     7,     8,     9,    47,    53,    10,    11,    94,
-      61,    23,    38,    39,    85,    81,    79,    74,    82,    55,
-      86,    99
+        -1,     6,     7,     8,     9,    48,    54,    10,    11,    97,
+      64,    23,    39,    40,    88,    84,    82,    77,    85,    56,
+      89,   102
   };
 
   /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -980,36 +1000,40 @@ namespace yy
   const unsigned char
   parser::yytable_[] =
   {
-        56,    57,    25,    62,    63,    48,    46,   101,    12,     1,
-      92,     2,    93,     3,    54,     4,    13,    24,    88,    89,
-      90,    91,    64,    65,    84,    68,    69,    70,    71,    72,
-      73,    40,    42,    26,    58,    59,    60,    25,    43,    44,
-      96,    27,    45,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    92,    97,    93,    46,    92,    66,    93,
-      49,    50,    51,    52,    75,    76,    77,    78,    26,   102,
-     103,   104,     5,    67,    95,    98,    27,   106,    28,    29,
-      30,    31,    32,    33,    34,    35,    36,    37,    49,    50,
-      51,    52,    14,    15,    16,    17,    18,    19,    20,    21,
-      22,   105,   108,    93,   107,   109,   110,    41,   100,    87,
-      80,     0,     0,     0,    83
+        57,    59,    60,    55,    65,    66,     1,    49,     2,    12,
+       3,    26,     4,    47,    61,    62,    63,   106,   104,   105,
+      95,    13,    96,    50,    51,    52,    53,    24,    25,    41,
+      95,    87,    96,    67,    68,   103,    91,    92,    93,    94,
+      43,    44,    27,    99,   100,    83,    45,    46,    26,    58,
+      28,    47,    29,    30,    31,    32,    33,    34,    35,    36,
+      37,    38,   111,    71,    72,    73,    74,    75,    76,    26,
+       5,    69,   107,   108,   109,    95,    98,    96,    70,    27,
+     101,   112,   113,    50,    51,    52,    53,    28,   115,    29,
+      30,    31,    32,    33,    34,    35,    36,    37,    38,   110,
+      27,    78,    79,    80,    81,    96,   114,   116,    28,   117,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
+      14,    15,    16,    17,    18,    19,    20,    21,    22,   118,
+      42,    90,    86
   };
 
   /* YYCHECK.  */
-  const signed char
+  const unsigned char
   parser::yycheck_[] =
   {
-        23,    24,    34,    26,    27,    12,    28,    66,    46,     4,
-      69,     6,    71,     8,    13,    10,    46,    14,    30,    31,
-      32,    33,    28,    29,    46,    39,    40,    41,    42,    43,
-      44,     0,    67,    65,    11,    12,    13,    34,    67,    67,
-      47,    73,    67,    75,    76,    77,    78,    79,    80,    81,
-      82,    83,    84,    69,    53,    71,    28,    69,    46,    71,
-      24,    25,    26,    27,    35,    36,    37,    38,    65,    92,
-      93,    94,    67,    46,    29,    28,    73,   100,    75,    76,
-      77,    78,    79,    80,    81,    82,    83,    84,    24,    25,
-      26,    27,    15,    16,    17,    18,    19,    20,    21,    22,
-      23,    28,    28,    71,    29,    29,    28,     7,    57,    37,
-      46,    -1,    -1,    -1,    35
+        23,    24,    25,    13,    27,    28,     4,    12,     6,    47,
+       8,    35,    10,    29,    11,    12,    13,    67,    59,    60,
+      70,    47,    72,    25,    26,    27,    28,    14,    15,     0,
+      70,    47,    72,    29,    30,    58,    31,    32,    33,    34,
+      68,    68,    66,    48,    54,    47,    68,    68,    35,    15,
+      74,    29,    76,    77,    78,    79,    80,    81,    82,    83,
+      84,    85,   103,    40,    41,    42,    43,    44,    45,    35,
+      68,    47,    95,    96,    97,    70,    30,    72,    47,    66,
+      29,   104,   105,    25,    26,    27,    28,    74,   111,    76,
+      77,    78,    79,    80,    81,    82,    83,    84,    85,    29,
+      66,    36,    37,    38,    39,    72,    30,    29,    74,    30,
+      76,    77,    78,    79,    80,    81,    82,    83,    84,    85,
+      16,    17,    18,    19,    20,    21,    22,    23,    24,    29,
+       7,    38,    36
   };
 
   /* STOS_[STATE-NUM] -- The (internal number of the) accessing
@@ -1017,18 +1041,18 @@ namespace yy
   const unsigned char
   parser::yystos_[] =
   {
-         0,     4,     6,     8,    10,    67,    86,    87,    88,    89,
-      92,    93,    46,    46,    15,    16,    17,    18,    19,    20,
-      21,    22,    23,    96,    14,    34,    65,    73,    75,    76,
-      77,    78,    79,    80,    81,    82,    83,    84,    97,    98,
-       0,    86,    67,    67,    67,    67,    28,    90,   105,    24,
-      25,    26,    27,    91,   103,   104,    97,    97,    11,    12,
-      13,    95,    97,    97,    95,    95,    46,    46,    39,    40,
-      41,    42,    43,    44,   102,    35,    36,    37,    38,   101,
-      46,   100,   103,   100,    46,    99,   105,    99,    30,    31,
-      32,    33,    69,    71,    94,    29,   105,   103,    28,   106,
-      94,    66,    97,    97,    97,    28,    97,    29,    28,    29,
-      28
+         0,     4,     6,     8,    10,    68,    87,    88,    89,    90,
+      93,    94,    47,    47,    16,    17,    18,    19,    20,    21,
+      22,    23,    24,    97,    14,    15,    35,    66,    74,    76,
+      77,    78,    79,    80,    81,    82,    83,    84,    85,    98,
+      99,     0,    87,    68,    68,    68,    68,    29,    91,   106,
+      25,    26,    27,    28,    92,   104,   105,    98,    15,    98,
+      98,    11,    12,    13,    96,    98,    98,    96,    96,    47,
+      47,    40,    41,    42,    43,    44,    45,   103,    36,    37,
+      38,    39,   102,    47,   101,   104,   101,    47,   100,   106,
+     100,    31,    32,    33,    34,    70,    72,    95,    30,   106,
+     104,    29,   107,    98,    95,    95,    67,    98,    98,    98,
+      29,    95,    98,    98,    30,    98,    29,    30,    29
   };
 
 #if YYDEBUG
@@ -1045,7 +1069,7 @@ namespace yy
      305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
      315,   316,   317,   318,   319,   320,   321,   322,   323,   324,
      325,   326,   327,   328,   329,   330,   331,   332,   333,   334,
-     335,   336,   337,   338,   339
+     335,   336,   337,   338,   339,   340
   };
 #endif
 
@@ -1053,14 +1077,14 @@ namespace yy
   const unsigned char
   parser::yyr1_[] =
   {
-         0,    85,    86,    86,    87,    87,    87,    87,    87,    88,
-      89,    90,    90,    91,    91,    92,    92,    92,    92,    93,
-      93,    94,    94,    94,    94,    95,    95,    95,    96,    96,
-      96,    96,    96,    96,    97,    97,    97,    97,    97,    97,
-      98,    98,    98,    98,    98,    98,    98,    98,    98,    98,
-      99,    99,   100,   100,   101,   101,   101,   101,   102,   102,
-     102,   102,   102,   102,   103,   104,   104,   104,   104,   105,
-     105,   105,   105,   106
+         0,    86,    87,    87,    88,    88,    88,    88,    88,    89,
+      90,    91,    91,    92,    92,    93,    93,    93,    93,    94,
+      94,    94,    94,    95,    95,    95,    95,    96,    96,    96,
+      97,    97,    97,    97,    97,    97,    98,    98,    98,    98,
+      98,    98,    99,    99,    99,    99,    99,    99,    99,    99,
+      99,    99,    99,    99,   100,   100,   101,   101,   102,   102,
+     102,   102,   103,   103,   103,   103,   103,   103,   104,   105,
+     105,   105,   105,   106,   106,   106,   106,   107
   };
 
   /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -1069,12 +1093,12 @@ namespace yy
   {
          0,     2,     1,     2,     2,     2,     2,     2,     1,     3,
        3,     2,     1,     2,     1,     2,     2,     2,     3,     4,
-       5,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     3,     3,     2,     3,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     2,     1,     1,     1,     1,     7,
-       5,     3,     1,     1
+       5,     5,     6,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     3,     3,     2,
+       3,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     1,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     2,     1,
+       1,     1,     1,     7,     5,     3,     1,     1
   };
 
 #if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
@@ -1085,28 +1109,28 @@ namespace yy
   {
     "\"end of file\"", "error", "$undefined", "\"group\"", "GROUP",
   "\"service\"", "SERVICE", "\"query\"", "QUERY", "\"assert\"", "ASSERT",
-  "INPUT", "FORWARD", "\"selected chain\"", "\"example\"", "PACKET",
-  "SPORT", "DPORT", "SADDY", "DADDY", "\"query subject\"",
-  "\"equivalence host classes\"", "\"equivalence service classes\"",
-  "\"equivalence class graph\"", "UDP", "TCP", "ICMP", "\"protocol\"",
-  "\"number\"", "\".\"", "IS", "ISNT", "SUBSET_OF",
-  "\"assertion operators\"", "\"logged condition\"", "T_INVALID", "T_NEW",
-  "T_ESTABLISHED", "\"connection state\"", "FIN", "SYN", "RST", "PSH",
-  "ACK", "\"tcp flag\"", "\"address\"", "\"name\"", "\"port number\"",
-  "\"compound port\"", "\"complete port\"", "\"compound address\"",
-  "\"simple condition\"", "\"state value\"", "\"flag name\"",
-  "\"query condition\"", "\"subject keyword\"", "\"input chain\"",
-  "\"protocol keyword\"", "\"assert expression\"", "\"query expression\"",
-  "\"service declaration\"", "\"address group declaration\"",
-  "\"address list\"", "\"port list\"", "\"assertion operator\"", "LPAREN",
-  "RPAREN", "SEMI", "\"AND\"", "AND", "\"OR\"", "OR", "\"NOT\"", "NOT",
-  "\"query primitive\"", "DROPPED", "ACCEPTED", "OUTFACE", "INFACE",
-  "WITH", "IN", "ON", "FOR", "TO", "FROM", "$accept", "statement",
-  "expression", "group_expression", "service_expression", "addy_list",
-  "port_list", "query_expression", "assert_expression", "assert_op",
-  "input_chain", "subject", "condition", "simple_condition",
-  "compound_addy", "compound_port", "state_value", "flag_name",
-  "complete_port", "protocol", "addr", "port", 0
+  "INPUT", "FORWARD", "\"selected chain\"", "EXAMPLE",
+  "\"ASSERTION flag\"", "PACKET", "SPORT", "DPORT", "SADDY", "DADDY",
+  "\"query subject\"", "\"equivalence host classes\"",
+  "\"equivalence service classes\"", "\"equivalence class graph\"", "UDP",
+  "TCP", "ICMP", "\"protocol\"", "\"number\"", "\".\"", "IS", "ISNT",
+  "SUBSET_OF", "\"assertion operators\"", "\"logged condition\"",
+  "T_INVALID", "T_NEW", "T_ESTABLISHED", "\"connection state\"", "FIN",
+  "SYN", "RST", "PSH", "ACK", "\"tcp flag\"", "\"address\"", "\"name\"",
+  "\"port number\"", "\"compound port\"", "\"complete port\"",
+  "\"compound address\"", "\"simple condition\"", "\"state value\"",
+  "\"flag name\"", "\"query condition\"", "\"subject keyword\"",
+  "\"input chain\"", "\"protocol keyword\"", "\"assert expression\"",
+  "\"query expression\"", "\"service declaration\"",
+  "\"address group declaration\"", "\"address list\"", "\"port list\"",
+  "\"assertion operator\"", "LPAREN", "RPAREN", "SEMI", "\"AND\"", "AND",
+  "\"OR\"", "OR", "\"NOT\"", "NOT", "\"query primitive\"", "DROPPED",
+  "ACCEPTED", "OUTFACE", "INFACE", "WITH", "IN", "ON", "FOR", "TO", "FROM",
+  "$accept", "statement", "expression", "group_expression",
+  "service_expression", "addy_list", "port_list", "query_expression",
+  "assert_expression", "assert_op", "input_chain", "subject", "condition",
+  "simple_condition", "compound_addy", "compound_port", "state_value",
+  "flag_name", "complete_port", "protocol", "addr", "port", 0
   };
 #endif
 
@@ -1115,27 +1139,28 @@ namespace yy
   const parser::rhs_number_type
   parser::yyrhs_[] =
   {
-        86,     0,    -1,    87,    -1,    87,    86,    -1,    88,    67,
-      -1,    89,    67,    -1,    92,    67,    -1,    93,    67,    -1,
-      67,    -1,     4,    46,    90,    -1,     6,    46,    91,    -1,
-      90,   105,    -1,   105,    -1,    91,   103,    -1,   103,    -1,
-       8,    21,    -1,     8,    22,    -1,     8,    23,    -1,     8,
-      96,    97,    -1,    10,    97,    94,    97,    -1,    10,    14,
-      97,    94,    97,    -1,    30,    -1,    32,    -1,    31,    -1,
-      33,    -1,    11,    -1,    12,    -1,    13,    -1,    15,    -1,
-      16,    -1,    17,    -1,    18,    -1,    19,    -1,    20,    -1,
-      98,    -1,    97,    69,    97,    -1,    97,    71,    97,    -1,
-      73,    97,    -1,    65,    97,    66,    -1,    34,    95,    -1,
-      84,    99,    -1,    83,    99,    -1,    81,   100,    -1,    82,
-     100,    -1,    80,   101,    -1,    79,   102,    -1,    78,    46,
-      -1,    77,    46,    -1,    76,    95,    -1,    75,    95,    -1,
-      46,    -1,   105,    -1,    46,    -1,   103,    -1,    35,    -1,
-      36,    -1,    37,    -1,    38,    -1,    39,    -1,    40,    -1,
-      41,    -1,    42,    -1,    43,    -1,    44,    -1,   104,   106,
-      -1,    26,    -1,    24,    -1,    25,    -1,    27,    -1,    28,
-      29,    28,    29,    28,    29,    28,    -1,    28,    29,    28,
-      29,    28,    -1,    28,    29,    28,    -1,    28,    -1,    28,
-      -1
+        87,     0,    -1,    88,    -1,    88,    87,    -1,    89,    68,
+      -1,    90,    68,    -1,    93,    68,    -1,    94,    68,    -1,
+      68,    -1,     4,    47,    91,    -1,     6,    47,    92,    -1,
+      91,   106,    -1,   106,    -1,    92,   104,    -1,   104,    -1,
+       8,    22,    -1,     8,    23,    -1,     8,    24,    -1,     8,
+      97,    98,    -1,    10,    98,    95,    98,    -1,    10,    14,
+      98,    95,    98,    -1,    10,    15,    98,    95,    98,    -1,
+      10,    14,    15,    98,    95,    98,    -1,    31,    -1,    33,
+      -1,    32,    -1,    34,    -1,    11,    -1,    12,    -1,    13,
+      -1,    16,    -1,    17,    -1,    18,    -1,    19,    -1,    20,
+      -1,    21,    -1,    99,    -1,    98,    70,    98,    -1,    98,
+      72,    98,    -1,    74,    98,    -1,    66,    98,    67,    -1,
+      35,    96,    -1,    85,   100,    -1,    84,   100,    -1,    82,
+     101,    -1,    83,   101,    -1,    81,   102,    -1,    80,   103,
+      -1,    79,    47,    -1,    78,    47,    -1,    77,    96,    -1,
+      76,    96,    -1,    77,    -1,    76,    -1,    47,    -1,   106,
+      -1,    47,    -1,   104,    -1,    36,    -1,    37,    -1,    38,
+      -1,    39,    -1,    40,    -1,    41,    -1,    42,    -1,    43,
+      -1,    44,    -1,    45,    -1,   105,   107,    -1,    27,    -1,
+      25,    -1,    26,    -1,    28,    -1,    29,    30,    29,    30,
+      29,    30,    29,    -1,    29,    30,    29,    30,    29,    -1,
+      29,    30,    29,    -1,    29,    -1,    29,    -1
   };
 
   /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
@@ -1145,12 +1170,12 @@ namespace yy
   {
          0,     0,     3,     5,     8,    11,    14,    17,    20,    22,
       26,    30,    33,    35,    38,    40,    43,    46,    49,    53,
-      58,    64,    66,    68,    70,    72,    74,    76,    78,    80,
-      82,    84,    86,    88,    90,    92,    96,   100,   103,   107,
-     110,   113,   116,   119,   122,   125,   128,   131,   134,   137,
-     140,   142,   144,   146,   148,   150,   152,   154,   156,   158,
-     160,   162,   164,   166,   168,   171,   173,   175,   177,   179,
-     187,   193,   197,   199
+      58,    64,    70,    77,    79,    81,    83,    85,    87,    89,
+      91,    93,    95,    97,    99,   101,   103,   105,   109,   113,
+     116,   120,   123,   126,   129,   132,   135,   138,   141,   144,
+     147,   150,   153,   155,   157,   159,   161,   163,   165,   167,
+     169,   171,   173,   175,   177,   179,   181,   183,   185,   188,
+     190,   192,   194,   196,   204,   210,   214,   216
   };
 
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
@@ -1159,12 +1184,12 @@ namespace yy
   {
          0,    89,    89,    89,    90,    91,    92,    93,    94,    97,
       99,   101,   102,   104,   105,   107,   108,   109,   110,   116,
-     117,   120,   121,   122,   123,   126,   127,   128,   131,   132,
-     133,   134,   135,   136,   140,   141,   142,   143,   144,   145,
-     148,   149,   150,   151,   152,   153,   154,   155,   156,   157,
-     160,   161,   163,   164,   166,   166,   166,   166,   168,   168,
-     168,   168,   168,   168,   170,   172,   172,   172,   172,   174,
-     175,   176,   177,   179
+     117,   118,   119,   122,   123,   124,   125,   128,   129,   130,
+     133,   134,   135,   136,   137,   138,   142,   143,   144,   145,
+     146,   147,   150,   151,   152,   153,   154,   155,   156,   157,
+     158,   159,   160,   161,   164,   165,   167,   168,   170,   170,
+     170,   170,   172,   172,   172,   172,   172,   172,   174,   176,
+     176,   176,   176,   178,   179,   180,   181,   183
   };
 
   // Print the state stack on the debug stream.
@@ -1237,7 +1262,8 @@ namespace yy
       45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
       55,    56,    57,    58,    59,    60,    61,    62,    63,    64,
       65,    66,    67,    68,    69,    70,    71,    72,    73,    74,
-      75,    76,    77,    78,    79,    80,    81,    82,    83,    84
+      75,    76,    77,    78,    79,    80,    81,    82,    83,    84,
+      85
     };
     if ((unsigned int) t <= yyuser_token_number_max_)
       return translate_table[t];
@@ -1246,20 +1272,20 @@ namespace yy
   }
 
   const int parser::yyeof_ = 0;
-  const int parser::yylast_ = 114;
+  const int parser::yylast_ = 132;
   const int parser::yynnts_ = 22;
   const int parser::yyempty_ = -2;
-  const int parser::yyfinal_ = 40;
+  const int parser::yyfinal_ = 41;
   const int parser::yyterror_ = 1;
   const int parser::yyerrcode_ = 256;
-  const int parser::yyntokens_ = 85;
+  const int parser::yyntokens_ = 86;
 
-  const unsigned int parser::yyuser_token_number_max_ = 339;
+  const unsigned int parser::yyuser_token_number_max_ = 340;
   const parser::token_number_type parser::yyundef_token_ = 2;
 
 } // namespace yy
 
-#line 181 "fwlang.yy"
+#line 185 "fwlang.yy"
 
 void
 yy::parser::error (const yy::parser::location_type& l, const std::string& m)
