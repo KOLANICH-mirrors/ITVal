@@ -76,9 +76,9 @@ void
       tup->low[0] = tup->high[0] = DROP;
    }
    else {
-      // If it's not LOG, ACCEPT, DROP, or REJECT, it must be a 
-      // user-defined chain.  We add 4 to distinguish it from the
-      // builtin targets.
+      // If it's not LOG, ACCEPT, DROP, REJECT, NETMAP, MASQUERADE, or REDIRECT, 
+      // it must be a user-defined chain.  We add NUM_DEFAULT_TARGETS
+      // to distinguish it from the builtin targets.
       val = FindChain(pr->target);
 
       //If it's a special target not handle by ITVal (TCPMSS, i.e.)
@@ -89,7 +89,7 @@ void
          printf("Could not find target: %s\n", pr->target);
          assert(0);
       }
-      tup->low[0] = tup->high[0] = val + 4;
+      tup->low[0] = tup->high[0] = val + NUM_DEFAULT_TARGETS;
    }
 
    // Now push the tuple onto the stack.
@@ -102,6 +102,9 @@ void
    }
    newTup->next = stack;
    stack = newTup;
+
+   //printf("Rule:\n");
+   //PrintRuleTuple(stack);
 }
 
 /*
@@ -497,6 +500,7 @@ void Firewall::BuildRules(processed_rule * head, rule_tuple * &stack)
 // "tup" is the tuple to be inserted.  outMDD and logMDD are the outputs
 // of the function.
 
+
 void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       inHistMDD, rule_tuple * tup, mdd_handle & outMDD, mdd_handle & logMDD,
       mdd_handle & outHistMDD){
@@ -571,9 +575,8 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    
    // If the rule is a terminating rule (ACCEPT, DROP, OR REJECT)
    // We simply insert it into the MDD.
-   if (tup->low[0] < 4) {
 
-
+   if (tup->low[0] < NUM_DEFAULT_TARGETS) {
       // Insert it into the MDD.  Replace takes a flag
       // parameter that indicates whether to insert new
       // tuples.  When passed "true" it copies the tuples in
@@ -606,13 +609,13 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       // has already been inserted into logMDD, but can't get there
       // because we dropped or accepted it.  So, we erase it from the
       // log right here.
-
+      int oldTarget;
+      oldTarget = tup->low[0];
       tup->low[0] = tup->high[0] = 0;
       FWForest->Assign(logMDD, tup->low, tup->high, logMDD);
 
       // Restore the tuple in case it is reachable through another chain.
-      tup->low[0] = tup->high[0] = -1;  
-
+      tup->low[0] = tup->high[0] = oldTarget;  
    }
    else {
       // If the target is another chain, we have to construct the other
@@ -621,7 +624,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
       chain *nextChain;  // The target chain of the current rule.
 
-      nextChain = chain_array[tup->low[0] - 4];
+      nextChain = chain_array[tup->low[0] - NUM_DEFAULT_TARGETS];
 
 //      mdd_handle targetMDD;
 //      mdd_handle targetHistMDD;
@@ -657,7 +660,6 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       FWForest->DestroyMDD(targetMDD);
       HistoryForest->DestroyMDD(targetHistMDD);
    }
-
    for (level k = 24; k > 0; k--)
       HistoryForest->Compact(k);
 

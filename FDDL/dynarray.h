@@ -26,30 +26,34 @@
 #   define FDDL_DYNARRAY_H 1
 #   include <stdlib.h>
 
+//Default was 2, but why not do 4 and spend less time allocating?
+
 template < typename T > class dynarray {
 	T     **data;
 	int     size;
 	T      *defValue;
+        int mag;
 
 private:
     void 
     extend()
     {
         T     **newData;
-        newData = new T *[size * 2];
+        newData = new T *[size * mag];
         assert(newData);
         for (int i = 0; i < size; i++) {
             newData[i] = data[i];  //Pointer assignment, not value assignment!
         }
         delete[]data;
-        for (int i = size; i < size * 2; i++) {
+        for (int i = size; i < size * mag; i++) {
             newData[i] = new T;
             if (defValue)
                 (*newData[i]) = *defValue;
         }
         data = newData;
-        size *= 2;
+        size *= mag;
         newData = NULL;
+	mag++;
     }
 
 public:
@@ -63,10 +67,12 @@ public:
             data[i] = new T;
             *(data[i]) = def;
         }
+	mag = 2;
     }
 
     dynarray()
     {
+	mag = 2;
         data = new T *[256];
         size = 256;
         for (int i = 0; i < size; i++)

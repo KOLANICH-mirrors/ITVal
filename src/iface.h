@@ -29,8 +29,9 @@ Williamsburg, VA 23185
 #include "rules.h"
 #include "chains.h"
 
+#define NUM_DEFAULT_TARGETS 4
 enum targets { SNAT = -3, DNAT = -2, LOG = -1, UNDEFINED = 0, RETURN = 0, DROP
-   = 1, REJECT = 2, ACCEPT = 3, REDIRECT = 4, MASQUERADE = 5, NETMAP = 5 };
+   = 1, REJECT = 2, ACCEPT = 3, REDIRECT = -4, MASQUERADE = -5, NETMAP = -6 };
 
 enum protocols { ICMP = 0, UDP = 1, TCP = 2 };
 

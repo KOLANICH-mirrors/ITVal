@@ -516,7 +516,6 @@ void Firewall::BuildVerboseFWRules(char *fname)
          pcur = newChain->newRules;
          newChain->newRules = newChain->newRules->next;
          delete pcur;
-
          pcur = NULL;
       }
    }
