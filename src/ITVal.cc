@@ -103,12 +103,16 @@ int main(int argc, char **argv)
 
    if (argc < 2) {
       printf(SYNTAX);
+         delete FWForest;
+         delete HistoryForest;
       return 1;
    }
 
    for (i = 1; i < argc; i += 2) {
       if (strlen(argv[i]) < 2) {
          printf(SYNTAX);
+         delete FWForest;
+         delete HistoryForest;
          return 1;
       }
       flag = argv[i][1];

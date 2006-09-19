@@ -111,7 +111,7 @@ int fw_fddl_forest::Accepted(mdd_handle root, mdd_handle& result){
       return INVALID_MDD;
 
    for (level k=K;k>0;k--){
-      AcceptCache[k]->Clear();
+      TerminalCache[k]->Clear();
    }
    newresult = InternalAccepted(K, root.index);
    //PrintMDD();
@@ -129,7 +129,7 @@ int fw_fddl_forest::Dropped(mdd_handle root, mdd_handle& result){
       return INVALID_MDD;
 
    for (level k=K;k>0;k--){
-      DropCache[k]->Clear();
+      TerminalCache[k]->Clear();
    }
    newresult = InternalDropped(K, root.index);
    if (result.index != newresult){
@@ -146,7 +146,7 @@ node_idx fw_fddl_forest::InternalAccepted(level k, node_idx p){
       return 0;
    if (k==0)
       return (p == 3);
-   r = AcceptCache[k]->Hit(k,p);
+   r = TerminalCache[k]->Hit(k,p);
    if (r>=0)
       return r;
    r = NewNode(k);
@@ -157,7 +157,7 @@ node_idx fw_fddl_forest::InternalAccepted(level k, node_idx p){
       SetArc(k,r,i, InternalAccepted(k-1, FDDL_ARC(k,nodeP, i)));
    }
    r = CheckIn(k,r);
-   AcceptCache[k]->Add(k,p,r);
+   TerminalCache[k]->Add(k,p,r);
    return r;
 }
 
@@ -168,7 +168,7 @@ node_idx fw_fddl_forest::InternalDropped(level k, node_idx p){
       return 0;
    if (k==0)
       return (p == 2) || (p==1);
-   r = DropCache[k]->Hit(k,p);
+   r = TerminalCache[k]->Hit(k,p);
    if (r>=0)
       return r;
    r = NewNode(k);
@@ -179,7 +179,7 @@ node_idx fw_fddl_forest::InternalDropped(level k, node_idx p){
       SetArc(k,r,i, InternalDropped(k-1, FDDL_ARC(k,nodeP, i)));
    }
    r = CheckIn(k,r);
-   DropCache[k]->Add(k,p,r);
+   TerminalCache[k]->Add(k,p,r);
    return r;
 }
 
@@ -319,7 +319,7 @@ int fw_fddl_forest::SNAT(mdd_handle root, nat_tuple * pnr,
    node_idx newresult;
 
    for (level k = K; k > 0; k--) {
-      SNATCache[k]->Clear();
+      NATCache[k]->Clear();
    }
    newresult = InternalSNAT(K, root.index, root.index, pnr);
    if (result.index != newresult) {
@@ -339,7 +339,7 @@ int fw_fddl_forest::DNAT(mdd_handle root, nat_tuple * pnr,
    node_idx newresult;
 
    for (level k = K; k > 0; k--) {
-      DNATCache[k]->Clear();
+      NATCache[k]->Clear();
    }
    newresult = InternalDNAT(K, root.index, root.index, pnr);
    if (result.index != newresult) {
@@ -359,7 +359,7 @@ int fw_fddl_forest::NETMAP(mdd_handle root, nat_tuple * pnr,
    node_idx newresult;
 
    for (level k = K; k > 0; k--) {
-      NMAPCache[k]->Clear();
+      NATCache[k]->Clear();
    }
    newresult = InternalNMAP(K, root.index, root.index, pnr);
    if (result.index != newresult) {
@@ -389,7 +389,7 @@ node_idx fw_fddl_forest::InternalSNAT(level k, node_idx p, node_idx q,
    }
 
    //If cached, return the cached result.
-   result = SNATCache[k]->Hit(p, q);
+   result = NATCache[k]->Hit(p, q);
    if (result >= 0)
       return result;
 
@@ -480,7 +480,7 @@ node_idx fw_fddl_forest::InternalSNAT(level k, node_idx p, node_idx q,
       }
    }
    result = CheckIn(k, result);
-   SNATCache[k]->Add(p, q, result);
+   NATCache[k]->Add(p, q, result);
    return result;
 }
 
@@ -504,7 +504,7 @@ node_idx fw_fddl_forest::InternalDNAT(level k, node_idx p, node_idx q,
    }
 
    //If cached, return the cached result.
-   result = DNATCache[k]->Hit(p, q);
+   result = NATCache[k]->Hit(p, q);
    if (result >= 0)
       return result;
 
@@ -595,7 +595,7 @@ node_idx fw_fddl_forest::InternalDNAT(level k, node_idx p, node_idx q,
       }
    }
    result = CheckIn(k, result);
-   DNATCache[k]->Add(p, q, result);
+   NATCache[k]->Add(p, q, result);
    return result;
 }
 
@@ -621,7 +621,7 @@ node_idx fw_fddl_forest::InternalNMAP(level k, node_idx p, node_idx q,
    }
 
    //If cached, return the cached result.
-   result = NMAPCache[k]->Hit(p, q);
+   result = NATCache[k]->Hit(p, q);
    if (result >= 0)
       return result;
 
@@ -712,7 +712,7 @@ node_idx fw_fddl_forest::InternalNMAP(level k, node_idx p, node_idx q,
       }
    }
    result = CheckIn(k, result);
-   NMAPCache[k]->Add(p, q, result);
+   NATCache[k]->Add(p, q, result);
    return result;
 }
 
