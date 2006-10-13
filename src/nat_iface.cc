@@ -303,14 +303,14 @@ void Firewall::ProcessNATProt(processed_nat_rule * pr, nat_tuple * tup,
 void Firewall::ProcessNATDest(processed_nat_rule * pr, nat_tuple * tup,
                               nat_tuple * &stack)
 {
-   tup->low[13] = pr->to->low % 256;
-   tup->low[14] = pr->to->low / 256 % 256;
-   tup->low[15] = ((pr->to->low / 256) / 256) % 256;
-   tup->low[16] = ((signed int) (((pr->to->low / 256) / 256) / 256)) % 256;
-   tup->high[13] = pr->to->high % 256;
-   tup->high[14] = (pr->to->high / 256) % 256;
-   tup->high[15] = ((pr->to->high / 256) / 256) % 256;
-   tup->high[16] = ((signed int) (((pr->to->high / 256) / 256) / 256)) % 256;
+   tup->low[13] = pr->to->low[3];
+   tup->low[14] = pr->to->low[2];
+   tup->low[15] = pr->to->low[1];
+   tup->low[16] = pr->to->low[0];
+   tup->high[13] = pr->to->high[3];
+   tup->high[14] = pr->to->high[2];
+   tup->high[15] = pr->to->high[1];
+   tup->high[16] = pr->to->high[0];
    ProcessNATProt(pr, tup, stack);
 }
 
@@ -320,15 +320,15 @@ void Firewall::ProcessNATDest(processed_nat_rule * pr, nat_tuple * tup,
 void Firewall::ProcessNATSource(processed_nat_rule * pr, nat_tuple * tup,
                                 nat_tuple * &stack)
 {
-   tup->low[17] = pr->from->low % 256;
-   tup->low[18] = (pr->from->low / 256) % 256;
-   tup->low[19] = ((pr->from->low / 256) / 256) % 256;
-   tup->low[20] = ((signed int) (((pr->from->low / 256) / 256) / 256)) % 256;
-   tup->high[17] = pr->from->high % 256;
-   tup->high[18] = (pr->from->high / 256) % 256;
-   tup->high[19] = ((pr->from->high / 256) / 256) % 256;
-   tup->high[20] =
-      ((signed int) (((pr->from->high / 256) / 256) / 256)) % 256;
+   tup->low[17] = pr->from->low[3];
+   tup->low[18] = pr->from->low[2]; 
+   tup->low[19] = pr->from->low[1]; 
+   tup->low[20] = pr->from->low[0]; 
+   tup->high[17] = pr->from->high[3];
+   tup->high[18] = pr->from->high[2];
+   tup->high[19] = pr->from->high[1];
+   tup->high[20] = pr->from->high[0];
+     
    ProcessNATDest(pr, tup, stack);
 }
 

@@ -111,7 +111,7 @@ int fw_fddl_forest::Accepted(mdd_handle root, mdd_handle& result){
       return INVALID_MDD;
 
    for (level k=K;k>0;k--){
-      TerminalCache[k]->Clear();
+      FWCache[k]->Clear();
    }
    newresult = InternalAccepted(K, root.index);
    //PrintMDD();
@@ -129,7 +129,7 @@ int fw_fddl_forest::Dropped(mdd_handle root, mdd_handle& result){
       return INVALID_MDD;
 
    for (level k=K;k>0;k--){
-      TerminalCache[k]->Clear();
+      FWCache[k]->Clear();
    }
    newresult = InternalDropped(K, root.index);
    if (result.index != newresult){
@@ -146,7 +146,7 @@ node_idx fw_fddl_forest::InternalAccepted(level k, node_idx p){
       return 0;
    if (k==0)
       return (p == 3);
-   r = TerminalCache[k]->Hit(k,p);
+   r = FWCache[k]->Hit(k,p);
    if (r>=0)
       return r;
    r = NewNode(k);
@@ -157,7 +157,7 @@ node_idx fw_fddl_forest::InternalAccepted(level k, node_idx p){
       SetArc(k,r,i, InternalAccepted(k-1, FDDL_ARC(k,nodeP, i)));
    }
    r = CheckIn(k,r);
-   TerminalCache[k]->Add(k,p,r);
+   FWCache[k]->Add(k,p,r);
    return r;
 }
 
@@ -168,7 +168,7 @@ node_idx fw_fddl_forest::InternalDropped(level k, node_idx p){
       return 0;
    if (k==0)
       return (p == 2) || (p==1);
-   r = TerminalCache[k]->Hit(k,p);
+   r = FWCache[k]->Hit(k,p);
    if (r>=0)
       return r;
    r = NewNode(k);
@@ -179,7 +179,7 @@ node_idx fw_fddl_forest::InternalDropped(level k, node_idx p){
       SetArc(k,r,i, InternalDropped(k-1, FDDL_ARC(k,nodeP, i)));
    }
    r = CheckIn(k,r);
-   TerminalCache[k]->Add(k,p,r);
+   FWCache[k]->Add(k,p,r);
    return r;
 }
 
@@ -191,7 +191,7 @@ int fw_fddl_forest::QueryIntersect(mdd_handle root, mdd_handle root2, mdd_handle
    node_idx newresult;
 
    for (level k = K; k > 0; k--) {
-      QIntersectCache[k]->Clear();
+      FWCache[k]->Clear();
    }
 #ifdef DEBUG
    PrintMDD();
@@ -213,13 +213,13 @@ int fw_fddl_forest::QueryIntersect(mdd_handle root, mdd_handle root2, mdd_handle
 int fw_fddl_forest::PrintHistory(mdd_handle root){
    if (root.index < 0)
       return INVALID_MDD;
-   QIntersectCache[0] = new cache;
+   FWCache[0] = new cache;
    for (level k = K; k >= 0; k--) {
-      QIntersectCache[k]->Clear();
+      FWCache[k]->Clear();
    }
    InternalPrintHistory(K, root.index, 0,0);
-   delete QIntersectCache[0];
-   QIntersectCache[0]=NULL;
+   delete FWCache[0];
+   FWCache[0]=NULL;
    return SUCCESS;
 }
 
@@ -232,15 +232,15 @@ void fw_fddl_forest::InternalPrintHistory(level k, node_idx p, int chain_num, in
       return;
    
    if (k==0){
-      result = QIntersectCache[0]->Hit(chain_num, rule_num);
+      result = FWCache[0]->Hit(chain_num, rule_num);
       if (result >=0)
 	 return;
       printf("Chain %d Rule %d\n", chain_num, rule_num);
-      QIntersectCache[0]->Add(chain_num, rule_num, 1);
+      FWCache[0]->Add(chain_num, rule_num, 1);
       return;
    }
 
-   result = QIntersectCache[k]->Hit(p, 1);
+   result = FWCache[k]->Hit(p, 1);
    if (result >= 0)
       return;
    
@@ -260,7 +260,7 @@ void fw_fddl_forest::InternalPrintHistory(level k, node_idx p, int chain_num, in
          InternalPrintHistory(k-1, FDDL_ARC(k,nodeP, i), 0, 0);
       }
    }
-   QIntersectCache[k]->Add(p, 1, 1);
+   FWCache[k]->Add(p, 1, 1);
 }
 
 int fw_fddl_forest::HistoryIntersect(mdd_handle root, mdd_handle root2, mdd_handle & result) {
@@ -271,7 +271,7 @@ int fw_fddl_forest::HistoryIntersect(mdd_handle root, mdd_handle root2, mdd_hand
    node_idx newresult;
 
    for (level k = K; k > 0; k--) {
-      QIntersectCache[k]->Clear();
+      FWCache[k]->Clear();
    }
    newresult = InternalHIntersect(K, root.index, root2.index);
    if (result.index != newresult) {
@@ -296,7 +296,7 @@ int fw_fddl_forest::JoinClasses(mdd_handle root, mdd_handle root2,
    node_idx newresult;
 
    for (level k = K; k >= 0; k--) {
-      JoinCache[k]->Clear();
+      FWCache[k]->Clear();
    }
 
    numClasses = 1;              // Class0 is automatic.
@@ -319,7 +319,7 @@ int fw_fddl_forest::SNAT(mdd_handle root, nat_tuple * pnr,
    node_idx newresult;
 
    for (level k = K; k > 0; k--) {
-      NATCache[k]->Clear();
+      FWCache[k]->Clear();
    }
    newresult = InternalSNAT(K, root.index, root.index, pnr);
    if (result.index != newresult) {
@@ -339,7 +339,7 @@ int fw_fddl_forest::DNAT(mdd_handle root, nat_tuple * pnr,
    node_idx newresult;
 
    for (level k = K; k > 0; k--) {
-      NATCache[k]->Clear();
+      FWCache[k]->Clear();
    }
    newresult = InternalDNAT(K, root.index, root.index, pnr);
    if (result.index != newresult) {
@@ -359,7 +359,7 @@ int fw_fddl_forest::NETMAP(mdd_handle root, nat_tuple * pnr,
    node_idx newresult;
 
    for (level k = K; k > 0; k--) {
-      NATCache[k]->Clear();
+      FWCache[k]->Clear();
    }
    newresult = InternalNMAP(K, root.index, root.index, pnr);
    if (result.index != newresult) {
@@ -389,7 +389,7 @@ node_idx fw_fddl_forest::InternalSNAT(level k, node_idx p, node_idx q,
    }
 
    //If cached, return the cached result.
-   result = NATCache[k]->Hit(p, q);
+   result = FWCache[k]->Hit(p, q);
    if (result >= 0)
       return result;
 
@@ -480,7 +480,7 @@ node_idx fw_fddl_forest::InternalSNAT(level k, node_idx p, node_idx q,
       }
    }
    result = CheckIn(k, result);
-   NATCache[k]->Add(p, q, result);
+   FWCache[k]->Add(p, q, result);
    return result;
 }
 
@@ -504,7 +504,7 @@ node_idx fw_fddl_forest::InternalDNAT(level k, node_idx p, node_idx q,
    }
 
    //If cached, return the cached result.
-   result = NATCache[k]->Hit(p, q);
+   result = FWCache[k]->Hit(p, q);
    if (result >= 0)
       return result;
 
@@ -595,7 +595,7 @@ node_idx fw_fddl_forest::InternalDNAT(level k, node_idx p, node_idx q,
       }
    }
    result = CheckIn(k, result);
-   NATCache[k]->Add(p, q, result);
+   FWCache[k]->Add(p, q, result);
    return result;
 }
 
@@ -621,7 +621,7 @@ node_idx fw_fddl_forest::InternalNMAP(level k, node_idx p, node_idx q,
    }
 
    //If cached, return the cached result.
-   result = NATCache[k]->Hit(p, q);
+   result = FWCache[k]->Hit(p, q);
    if (result >= 0)
       return result;
 
@@ -712,7 +712,7 @@ node_idx fw_fddl_forest::InternalNMAP(level k, node_idx p, node_idx q,
       }
    }
    result = CheckIn(k, result);
-   NATCache[k]->Add(p, q, result);
+   FWCache[k]->Add(p, q, result);
    return result;
 }
 
@@ -742,7 +742,7 @@ node_idx fw_fddl_forest::InternalQIntersect(level k, node_idx p, node_idx q)
 
       return 0;	
    }
-   result = QIntersectCache[k]->Hit(p, q);
+   result = FWCache[k]->Hit(p, q);
    if (result >= 0)
       return result;
 
@@ -778,7 +778,7 @@ node_idx fw_fddl_forest::InternalQIntersect(level k, node_idx p, node_idx q)
    delete[]qtemp;
    delete[]ptemp;
    result = CheckIn(k, result);
-   QIntersectCache[k]->Add(p, q, result);
+   FWCache[k]->Add(p, q, result);
    return result;
 }
 
@@ -804,7 +804,7 @@ node_idx fw_fddl_forest::InternalHIntersect(level k, node_idx p, node_idx q)
       }
       return 0;
    }
-   result = QIntersectCache[k]->Hit(p, q);
+   result = FWCache[k]->Hit(p, q);
    if (result >= 0)
       return result;
 
@@ -840,7 +840,7 @@ node_idx fw_fddl_forest::InternalHIntersect(level k, node_idx p, node_idx q)
    delete[]qtemp;
    delete[]ptemp;
    result = CheckIn(k, result);
-   QIntersectCache[k]->Add(p, q, result);
+   FWCache[k]->Add(p, q, result);
    return result;
 }
 
@@ -861,7 +861,7 @@ int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest * forest,
       return INVALID_MDD;
 
    for (level k = K; k > 0; k--) {
-      BuildCache[k]->Clear();
+      FWCache[k]->Clear();
    }
 
    numClasses = 0;
@@ -887,7 +887,7 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
    if (services == 1)
       newK = k - 19;
 
-   r = BuildCache[k]->Hit(k, p);
+   r = FWCache[k]->Hit(k, p);
    if (r >= 0)
       return r;
 
@@ -897,7 +897,7 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
    }
 
    if (newK == 0) {
-      BuildCache[k]->Add(k, p, numClasses);
+      FWCache[k]->Add(k, p, numClasses);
       numClasses++;
       return numClasses - 1;
    }
@@ -912,7 +912,7 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
                                            services));
    }
    r = forest->CheckIn(newK, r);
-   BuildCache[k]->Add(k, p, r);
+   FWCache[k]->Add(k, p, r);
    return r;
 }
 
@@ -932,7 +932,7 @@ int fw_fddl_forest::BuildServiceGraphMDD(mdd_handle p, fddl_forest * forest,
       return INVALID_MDD;
 
    for (level k = K; k >= 0; k--) {
-      BuildCache[k]->Clear();
+      FWCache[k]->Clear();
    }
 
    numArcs = 0;
@@ -953,18 +953,18 @@ node_idx fw_fddl_forest::InternalBuildServiceGraphMDD(fddl_forest * forest, leve
 
    newK = k - 11;
 
-   r = BuildCache[k]->Hit(k, p);
+   r = FWCache[k]->Hit(k, p);
    if (r >= 0)
       return r;
 
    if (p == 0) {
-      BuildCache[k]->Add(k, p, numArcs); //Is this a good idea?  I don't know.
+      FWCache[k]->Add(k, p, numArcs); //Is this a good idea?  I don't know.
       numArcs++;
       return numArcs - 1;
    }
 
    if (newK == 0) {
-      BuildCache[k]->Add(k, p, numArcs);
+      FWCache[k]->Add(k, p, numArcs);
       numArcs++;
       return numArcs - 1;
    }
@@ -978,7 +978,7 @@ node_idx fw_fddl_forest::InternalBuildServiceGraphMDD(fddl_forest * forest, leve
                                            FDDL_ARC(k, nodeP, i), numArcs));
    }
    r = forest->CheckIn(newK, r);
-   BuildCache[k]->Add(k, p, r);
+   FWCache[k]->Add(k, p, r);
    return r;
 }
 
@@ -992,13 +992,13 @@ node_idx fw_fddl_forest::InternalJoinClasses(level k, node_idx p, node_idx q,
    if (p == 0 && q == 0)
       return 0;
 
-   r = JoinCache[k]->Hit(p, q);
+   r = FWCache[k]->Hit(p, q);
    if (r >= 0)
       return r;
 
    if (k == 0) {
       numClasses++;
-      JoinCache[k]->Add(p, q, numClasses - 1);
+      FWCache[k]->Add(p, q, numClasses - 1);
       return numClasses - 1;
    }
 
@@ -1012,7 +1012,7 @@ node_idx fw_fddl_forest::InternalJoinClasses(level k, node_idx p, node_idx q,
                                     numClasses));
       }
       r = CheckIn(k, r);
-      JoinCache[k]->Add(p, q, r);
+      FWCache[k]->Add(p, q, r);
       return r;
    }
 
@@ -1024,7 +1024,7 @@ node_idx fw_fddl_forest::InternalJoinClasses(level k, node_idx p, node_idx q,
                                     numClasses));
       }
       r = CheckIn(k, r);
-      JoinCache[k]->Add(p, q, r);
+      FWCache[k]->Add(p, q, r);
       return r;
    }
    nodeP = &FDDL_NODE(k, p);
@@ -1037,7 +1037,7 @@ node_idx fw_fddl_forest::InternalJoinClasses(level k, node_idx p, node_idx q,
                                  numClasses));
    }
    r = CheckIn(k, r);
-   JoinCache[k]->Add(p, q, r);
+   FWCache[k]->Add(p, q, r);
    return r;
 }
 
@@ -1271,7 +1271,7 @@ int fw_fddl_forest::GetServiceArcs(mdd_handle p, int* src, int* dst, service * &
       low[i] = high[i] = -1;
    }
    for (level k=K;k>=0;k--)
-      JoinCache[k]->Clear();
+      FWCache[k]->Clear();
    numArcs = 0;
    InternalGetServiceArcs(K, p.index, src, dst, low, high, output, numArcs);
    delete[]low;
@@ -1325,7 +1325,7 @@ int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
    }
    if (k<9){
       node_idx r;
-      r = JoinCache[k]->Hit(p,p);
+      r = FWCache[k]->Hit(p,p);
       if (r >= 0){
          return r;
       }
@@ -1339,11 +1339,11 @@ int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
             continue;
          r = InternalGetServiceArcs(k-1, q, src, dst, low, high, output, numArcs);
          if (r == 3){
-            JoinCache[k]->Add(p,p,r);
+            FWCache[k]->Add(p,p,r);
             return r;
          }
       }
-      JoinCache[k]->Add(p,p,0);
+      FWCache[k]->Add(p,p,0);
       return 0;
    }
    

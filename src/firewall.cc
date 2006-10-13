@@ -30,8 +30,9 @@ Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H)
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
    FWForest = F;
+#ifndef NO_HISTORY   
    HistoryForest = H;
-   
+#endif
    num_nat_chains = -1;
    num_chains = -1;
    for (int i = 0; i < 256; i++) {
@@ -56,7 +57,9 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    int output_chain;
 
    FWForest = F;
+#ifndef NO_HISTORY
    HistoryForest = H;
+#endif   
    T = top;
    
    num_nat_chains = -1;
@@ -77,6 +80,7 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    FWForest->MakeMDDFromTuple(low, high, ForwardLog);
 
    BuildFWRules(filterName);
+
    if (strncmp(natName, "NONAT", 5)) {
       BuildNATRules(natName);
    }
@@ -120,8 +124,9 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    FWForest = F;
    T = top;
 
+#ifndef NO_HISTORY
    HistoryForest = H;
-
+#endif
    num_nat_chains = -1;
    num_chains = -1;
    for (int i = 0; i < 256; i++) {
@@ -163,7 +168,6 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    BuildChains(input_chain, Input, InputLog, InputHist);
    BuildChains(output_chain, Output, OutputLog, OutputHist);
 
-
 #ifdef DEBUG
    printf("Forward:%d Input:%d Output:%d\n", Forward.index, Input.index, Output.index);
    for (level k = 22; k > 0; k--)
@@ -197,13 +201,15 @@ Firewall::~Firewall() {
             delete nat_chains[i];
 
       FWForest->DestroyMDD(Input);
-      HistoryForest->DestroyMDD(InputHist);
-      FWForest->DestroyMDD(InputLog);
       FWForest->DestroyMDD(Output);
-      HistoryForest->DestroyMDD(OutputHist);
-      FWForest->DestroyMDD(OutputLog);
       FWForest->DestroyMDD(Forward);
+#ifndef NO_HISTORY
+      HistoryForest->DestroyMDD(InputHist);
+      HistoryForest->DestroyMDD(OutputHist);
       HistoryForest->DestroyMDD(ForwardHist);
+#endif
+      FWForest->DestroyMDD(InputLog);
+      FWForest->DestroyMDD(OutputLog);
       FWForest->DestroyMDD(ForwardLog);
 
       delete ClassForest;
@@ -653,15 +659,21 @@ Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n, fw_fddl_fo
    }
    else {
       FWForest->Attach(f->Forward, fws[0]->Forward.index);
+#ifndef NO_HISTORY
       HistoryForest->Attach(f->ForwardHist, fws[0]->ForwardHist.index);
+#endif
       FWForest->Attach(f->ForwardLog, fws[0]->ForwardLog.index);
 
       FWForest->Attach(f->Input, fws[0]->Input.index);
+#ifndef NO_HISTORY
       HistoryForest->Attach(f->InputHist, fws[0]->InputHist.index);
+#endif
       FWForest->Attach(f->InputLog, fws[0]->InputLog.index);
 
       FWForest->Attach(f->Output, fws[n - 1]->Output.index);
+#ifndef NO_HISTORY
       HistoryForest->Attach(f->OutputHist, fws[n - 1]->OutputHist.index);
+#endif
       FWForest->Attach(f->OutputLog, fws[n - 1]->OutputLog.index);
    }
 
@@ -670,9 +682,11 @@ Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n, fw_fddl_fo
       FWForest->Min(f->Input, fws[i]->Forward, f->Forward);
       FWForest->Min(f->Output, fws[(n - 1) - i]->Forward, f->Forward);
 
+#ifndef NO_HISTORY
       HistoryForest->Min(f->ForwardHist, fws[i]->ForwardHist, f->ForwardHist);
       HistoryForest->Min(f->InputHist, fws[i]->ForwardHist, f->ForwardHist);
       HistoryForest->Min(f->OutputHist, fws[(n - 1) - i]->ForwardHist, f->ForwardHist);
+#endif
 
       prerouting = fws[i]->FindNATChain("Prerouting");
       postrouting = fws[i - 1]->FindNATChain("Postrouting");

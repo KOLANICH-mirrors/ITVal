@@ -61,6 +61,7 @@ ExternalCompare (level k, node_idx p, node_idx q)
 
 fddl_forest::fddl_forest (int numlevels, int *maxvals)
 {
+  CompactCounter = 0;
   node_remap_array = NULL;
   sparseEnabled = true;
   K = numlevels - 1;
@@ -763,6 +764,10 @@ fddl_forest::CompactTopLevel ()
   tail[K] = 0;			//Clear the arc array
   int numvalidnodes = 1;	//Start at 1, because 0 is valid
 
+#ifdef BRIEF_DEBUG
+   printf("Compact Top Level\n");
+#endif
+
   //node_remap_array[K] = new dynarray <node_idx> (0);
   thisForest = this;
   for (i = 1; i < last[K]; i++)
@@ -812,6 +817,9 @@ fddl_forest::CompactTopLevel ()
 void
 fddl_forest::Compact (level k)
 {
+#ifdef BRIEF_DEBUG
+   printf("Compact Level %d\n", k);
+#endif
   compactions++;
 
 #ifdef NOCOMPACT

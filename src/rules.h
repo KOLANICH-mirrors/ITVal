@@ -41,7 +41,7 @@ class processed_rule {
  public:
    int id;
    int chain_id;
-   address_range * from;
+   address_range *from;
    address_range *to;
 
    char protocol;

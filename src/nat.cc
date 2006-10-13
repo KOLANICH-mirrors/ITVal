@@ -91,9 +91,6 @@ void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW, char* 
    int length;
    int offset;
 
-   address_range low;
-   address_range high;
-
    NATRange = new nat_range;
    NATRange->next = NULL;
    NATRange->ports.port1 = 0;
@@ -128,24 +125,28 @@ void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW, char* 
       word2[ch - str] = '\0';
    }
    // Break Addresses into octets
+   address_range low, high;
    ConvertARange(word1, &low);
    ConvertARange(word2, &high);
-   NATRange->addys.low = low.low;
-   NATRange->addys.high = high.high;
+   
+   for (int i=0; i<4; i++){
+      NATRange->addys.low[i] = low.low[i];
+      NATRange->addys.high[i] = high.high[i];
+   }
 
    offset = 0;
    if (!strncmp(target, "SNAT",4)){
       offset = 4;
    }
-   NATRange->low[18+offset] = (((NATRange->addys.low / 256) / 256) / 256) % 256;
-   NATRange->low[17+offset] = ((NATRange->addys.low / 256) / 256) % 256;
-   NATRange->low[16+offset] = (NATRange->addys.low / 256) % 256;
-   NATRange->low[15+offset] = NATRange->addys.low % 256;
+   NATRange->low[18+offset] = NATRange->addys.low[0];
+   NATRange->low[17+offset] = NATRange->addys.low[1];
+   NATRange->low[16+offset] = NATRange->addys.low[2];
+   NATRange->low[15+offset] = NATRange->addys.low[3];
 
-   NATRange->high[18+offset] = (((NATRange->addys.high / 256) / 256) / 256) % 256;
-   NATRange->high[17+offset] = ((NATRange->addys.high / 256) / 256) % 256;
-   NATRange->high[16+offset] = (NATRange->addys.high / 256) % 256;
-   NATRange->high[15+offset] = NATRange->addys.high % 256;
+   NATRange->high[18+offset] = NATRange->addys.high[0];
+   NATRange->high[17+offset] = NATRange->addys.high[1];
+   NATRange->high[16+offset] = NATRange->addys.high[2];
+   NATRange->high[15+offset] = NATRange->addys.high[3];
 
    if (prot == 'a') {
       NATRange->low[14] = 0;
@@ -240,15 +241,10 @@ void BreakNMAP(char *str, nat_range * &NATRange, Firewall * FW)
    word1[ch - str] = '\0';
    ConvertARange(word1, &NATRange->addys);
 
-   NATRange->low[0] = (((NATRange->addys.low / 256) / 256) / 256) % 256;
-   NATRange->low[1] = ((NATRange->addys.low / 256) / 256) % 256;
-   NATRange->low[2] = (NATRange->addys.low / 256) % 256;
-   NATRange->low[3] = NATRange->addys.low % 256;
-
-   NATRange->high[0] = (((NATRange->addys.high / 256) / 256) / 256) % 256;
-   NATRange->high[1] = ((NATRange->addys.high / 256) / 256) % 256;
-   NATRange->high[2] = (NATRange->addys.high / 256) % 256;
-   NATRange->high[3] = NATRange->addys.high % 256;
+   for (int i = 0; i < 4 ; i++){
+      NATRange->low[i] = NATRange->addys.low[i];
+      NATRange->high[i] = NATRange->addys.high[i];
+   }
 }
 
 processed_nat_rule* ConvertToDNAT(processed_nat_rule * p, Firewall * FW){

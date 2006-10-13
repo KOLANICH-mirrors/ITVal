@@ -146,7 +146,7 @@ void ProcessRule(rule * r, processed_rule * p, rule_parser * rp,
    strncpy(p->target, r->target, 256);
 
    // Interfaces:
-   if (top != NULL) {
+   if (top != NULL){
       if (r->in[0] != '\0') {
          if (r->in[0] == '*')
             p->in = -1;

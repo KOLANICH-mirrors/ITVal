@@ -66,6 +66,10 @@ class Firewall {
                       rule_tuple * &stack);
    void ProcessDest(processed_rule * pr, rule_tuple * tup,
                     rule_tuple * &stack);
+   void ProcessInverseSource(address_range * cur, processed_rule * pr, rule_tuple * tup,
+                      rule_tuple * &stack);
+   void ProcessInverseDest(address_range * cur, processed_rule * pr, rule_tuple * tup,
+                    rule_tuple * &stack);
    void ProcessProt(processed_rule * pr, rule_tuple * tup,
                     rule_tuple * &stack);
    void ProcessSport(processed_rule * pr, rule_tuple * tup,

@@ -26,6 +26,8 @@ College of William and Mary
 Williamsburg, VA 23185
 */
 
+#define NO_HISTORY
+
 #ifndef SRC_FWMDD_H
 #   define SRC_FWMDD_H 1
 
@@ -49,86 +51,26 @@ Williamsburg, VA 23185
 
 class fw_fddl_forest:public fddl_forest {
  private:
-   cache **NATCache;                      //Cache for all NAT operations
-//   cache ** NMAPCache;                    //Caches for embedded operations 
-//   cache **DNATCache;                     //Caches for embedded operations 
-//   cache **SNATCache;                     //Caches for embedded operations 
-   cache **QIntersectCache;
-   cache **BuildCache;
-   cache **JoinCache;
-
-//   cache **AcceptCache;
-//   cache **DropCache;
-cache **TerminalCache;     //Cache for "DROP" and "ACCEPT" operations.
+   cache **FWCache;        //Cache for all firewall specific operations.
 
  public:
 
     fw_fddl_forest(int numlevels, int *maxvals):fddl_forest(numlevels, maxvals){
 
-      NATCache = new cache *[K + 1];
-//      NMAPCache = new cache *[K + 1];
-//      DNATCache = new cache *[K + 1];
-//      SNATCache = new cache *[K + 1];
-      QIntersectCache = new cache *[K + 1];
-      BuildCache = new cache *[K + 1];
-      JoinCache = new cache *[K + 1];
-      //AcceptCache = new cache *[K + 1];
-      //DropCache = new cache *[K + 1];
-      TerminalCache = new cache *[K + 1];
+      FWCache = new cache *[K + 1];
 
-      for (int k = 1; k <= K; k++) {
-         //NMAPCache[k] = new cache;
-         //DNATCache[k] = new cache;
-         //SNATCache[k] = new cache;
-         NATCache[k] = new cache;
-         QIntersectCache[k] = new cache;
-         JoinCache[k] = new cache;
-         BuildCache[k] = new cache;
-	 //AcceptCache[k] = new cache;
-	 //DropCache[k] = new cache;
-         TerminalCache[k] = new cache;
+      for (int k = 0; k <= K; k++) {
+         FWCache[k] = new cache;
       } 
-
-      JoinCache[0] = new cache;
    }
 
    //Clean up data structures used by the forest
    ~fw_fddl_forest() {
-      for (level k = K; k > 0; k--) {
-         if (NATCache[k])
-            delete NATCache[k];
-//         if (NMAPCache[k])
-//            delete NMAPCache[k];
-//         if (DNATCache[k])
-//            delete DNATCache[k];
-//         if (SNATCache[k])
-//            delete SNATCache[k];
-         if (QIntersectCache[k])
-            delete QIntersectCache[k];
-         if (JoinCache[k])
-            delete JoinCache[k];
-         if (BuildCache[k])
-            delete BuildCache[k];
-         if (TerminalCache[k])
-            delete TerminalCache[k];
-//         if (AcceptCache[k])
-//            delete AcceptCache[k];
-//         if (DropCache[k])
-//            delete DropCache[k];
+      for (level k = K; k >= 0; k--) {
+         if (FWCache[k])
+            delete FWCache[k];
       }
-      if (JoinCache[0])
-         delete JoinCache[0];
-
-//      delete[]NMAPCache;
-//      delete[]DNATCache;
-//      delete[]SNATCache;
-      delete[]NATCache;
-      delete[]BuildCache;
-      delete[]JoinCache;
-      delete[]QIntersectCache;
-//      delete[]AcceptCache;
-//      delete[]DropCache;
-      delete[]TerminalCache;
+      delete[]FWCache;
    }
 
    int FindElement(mdd_handle p, Topology* T);

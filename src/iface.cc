@@ -22,6 +22,7 @@
  * Robert Marmorstein Department of Computer Science College of William
  * and Mary Williamsburg, VA 23185 
  */
+//#define STACK_DEBUG
 
 #include "iface.h"
 #include "firewall.h"
@@ -81,7 +82,7 @@ void
       // to distinguish it from the builtin targets.
       val = FindChain(pr->target);
 
-      //If it's a special target not handle by ITVal (TCPMSS, i.e.)
+      //If it's a special target not handled by ITVal (TCPMSS, i.e.)
       if (val == -2)
          return;
 
@@ -96,6 +97,13 @@ void
    newTup = new rule_tuple;
    newTup->id = pr->id;
    newTup->chain_id = pr->chain_id;
+#ifdef STACK_DEBUG
+printf("On Stack:\n");
+for (int i=22;i>=0;i--){
+   printf("%d-%d ", tup->low[i], tup->high[i]);
+}
+printf("\n");
+#endif
    for (int i = 0; i < 23; i++) {
       newTup->low[i] = tup->low[i];
       newTup->high[i] = tup->high[i];
@@ -275,50 +283,92 @@ void Firewall::ProcessProt(processed_rule * pr, rule_tuple * tup,
    ProcessSport(pr, tup, stack);
 }
 
-
-/* HELPER FUNCTIONS */
-
-void Firewall::DoDestLeft(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int *H){
-   int left = MIN(L[i], H[i]);
-   int right = MAX(L[i], H[i]);
-   if (i==3){
-      tup->low[18-i] = left;
-      tup->high[18-i] = FWForest->GetMaxVal(18-i);
-      ProcessProt(pr,tup,stack);
+void Firewall::ProcessInverseSource(address_range * cur, processed_rule * pr, rule_tuple *
+tup, rule_tuple * &stack){
+   int i;
+   if (cur->mask == 0)  //Inverse of everything is nothing!
+      return;
+   if (cur->mask == 32){
+      for (i=0;i<4;i++){
+         int j;
+         for (j=i+1;j<4;j++){
+            tup->low[22-j] = 0;
+            tup->high[22-j] = 255;
+         }
+         tup->low[22-i] = 0;
+         tup->high[22-i] = cur->low[i]-1;
+         if (tup->low[22-i]<=tup->high[22-i])
+            ProcessDest(pr,tup,stack);
+         tup->low[22-i] = cur->high[i]+1;
+         tup->high[22-i] = 255;
+         if (tup->low[22-i]<=tup->high[22-i])
+            ProcessDest(pr,tup,stack);
+         tup->low[22-i] = cur->low[i];
+         tup->high[22-i] = cur->high[i];
+      }
       return;
    }
-
-   tup->low[18-i] = left+1;
-   tup->high[18-i] = FWForest->GetMaxVal(18-i);
-   DoDestMiddle(pr,tup,stack, i+1);
-
-   tup->low[18-i] = tup->high[18-i] = left;
-   DoDestLeft(pr,tup,stack,i+1,L,H);
+   for (i=0;i<=cur->mask/8;i++){
+      int j;
+      for (j=i+1;j<4;j++){
+         tup->low[22-j] = 0;
+         tup->high[22-j] = 255;
+      }
+      tup->low[22-i] = 0;
+      tup->high[22-i] = cur->low[i]-1;
+      if (tup->low[22-i]<=tup->high[22-i])
+         ProcessDest(pr,tup,stack);
+      tup->low[22-i] = cur->high[i]+1;
+      tup->high[22-i] = 255;
+      if (tup->low[22-i]<=tup->high[22-i])
+         ProcessDest(pr,tup,stack);
+      tup->low[22-i] = cur->low[i];
+      tup->high[22-i] = cur->high[i];
+   }
 }
 
-void Firewall::DoDestRight(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int *H){
-   int left = MIN(L[i], H[i]);
-   int right = MAX(L[i],H[i]);
-   if (i==3){
+void Firewall::ProcessInverseDest(address_range * cur, processed_rule * pr, rule_tuple *
+tup, rule_tuple * &stack){
+   int i;
+   if (cur->mask == 0)  //Inverse of everything is nothing!
+      return;
+   if (cur->mask == 32){
+      for (i=0;i<4;i++){
+         int j;
+         for (j=i+1;j<4;j++){
+            tup->low[18-j] = 0;
+            tup->high[18-j] = 255;
+         }
+         tup->low[18-i] = 0;
+         tup->high[18-i] = cur->low[i]-1;
+         if (tup->low[18-i]<=tup->high[18-i])
+            ProcessProt(pr,tup,stack);
+         tup->low[18-i] = cur->high[i]+1;
+         tup->high[18-i] = 255;
+         if (tup->low[18-i]<=tup->high[18-i])
+            ProcessProt(pr,tup,stack);
+         tup->low[18-i] = cur->low[i];
+         tup->high[18-i] = cur->high[i];
+      }
+      return;
+   }
+   for (i=0;i<=cur->mask/8;i++){
+      int j;
+      for (j=i+1;j<4;j++){
+         tup->low[18-j] = 0;
+         tup->high[18-j] = 255;
+      }
       tup->low[18-i] = 0;
-      tup->high[18-i] = right;
-      return;
+      tup->high[18-i] = cur->low[i]-1;
+      if (tup->low[18-i]<=tup->high[18-i])
+         ProcessProt(pr,tup,stack);
+      tup->low[18-i] = cur->high[i]+1;
+      tup->high[18-i] = 255;
+      if (tup->low[18-i]<=tup->high[18-i])
+         ProcessProt(pr,tup,stack);
+      tup->low[18-i] = cur->low[i];
+      tup->high[18-i] = cur->high[i];
    }
-
-   tup->low[18-i] = 0;
-   tup->high[18-i] = right-1;
-   DoDestMiddle(pr,tup,stack, i+1);
-
-   tup->low[18-i] = tup->high[18-i] = right;
-   DoDestRight(pr,tup,stack,i+1,L,H);
-}
-
-void Firewall::DoDestMiddle(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i){
-   for (int j=i;j<4;j++){
-      tup->low[18-j] = 0;
-      tup->high[18-j] = FWForest->GetMaxVal(18-j);
-   }
-   ProcessProt(pr, tup, stack);
 }
 
 /*
@@ -330,93 +380,22 @@ void Firewall::DoDestMiddle(processed_rule *pr, rule_tuple * tup, rule_tuple * &
 void Firewall::ProcessDest(processed_rule * pr, rule_tuple * tup,
                            rule_tuple * &stack)
 {
-   int L[4];
-   int H[4];
    address_range * cur;
    cur = pr->to;
    while (cur != NULL){
-      for (int j=0;j<4;j++){
-         L[j] = (cur->low >> (8*(3-j))) % 256;
-         H[j] = (cur->high >> (8*(3-j))) % 256;
-      }
-
       int i;
-      for (i=0;i<4;i++){
-	 int left = MIN(L[i],H[i]);
-	 int right = MAX(L[i],H[i]);
-         if (L[i] != H[i]){
-	    tup->low[18-i] = left;
-	    tup->high[18-i] = left;
-	    DoDestLeft(pr,tup,stack, i, L, H);
-
-	    tup->low[18-i] = right;
-	    tup->high[18-i] = right;
-	    DoDestRight(pr,tup,stack, i, L, H);
-
-	    tup->low[18-i] = left + 1;
-	    tup->high[18-i] = right - 1;
-	    DoDestMiddle(pr,tup,stack,i);
-            break;
-	 }
-	 else{
-            tup->low[18-i] = left;
-            tup->high[18-i] = right;
-	 }
-      }
-      if (i==4){
+      if (!cur->invert){
+         for (i=0;i<4;i++){
+            tup->low[18-i] = cur->low[i];
+            tup->high[18-i] = cur->high[i];
+         }
          ProcessProt(pr, tup, stack);
       }
-
+      else{
+         ProcessInverseDest(cur,pr, tup, stack);
+      }
       cur = cur->next;
    }
-}
-
-/* HELPER FUNCTIONS */
-/* All this work to do something simple: 
- * Convert a range of ip addresses (x.x.x.x to y.y.y.y) to a list of tuple ranges ([X-Y].[X-Y].[X-Y].[X-Y], ... ) */
-
-void Firewall::DoSrcLeft(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int *H){
-   int left = MIN(L[i], H[i]);
-   int right = MAX(L[i],H[i]);
-   if (i==3){
-      tup->low[22-i] = left;
-      tup->high[22-i] = FWForest->GetMaxVal(22-i);
-      ProcessDest(pr,tup,stack);
-      return;
-   }
-
-   tup->low[22-i] = left+1;
-   tup->high[22-i] = FWForest->GetMaxVal(22-i);
-   DoSrcMiddle(pr,tup,stack, i+1);
-
-   tup->low[22-i] = tup->high[22-i] = left;
-   DoSrcLeft(pr,tup,stack,i+1,L,H);
-}
-
-void Firewall::DoSrcRight(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i, int* L, int *H){
-   int left = MIN(L[i], H[i]);
-   int right = MAX(L[i],H[i]);
-   if (i==3){
-      tup->low[22-i] = 0;
-      tup->high[22-i] = right;
-      ProcessDest(pr,tup,stack);
-      return;
-   }
-
-   tup->low[22-i] = 0;
-   tup->high[22-i] = right-1;
-   DoSrcMiddle(pr,tup,stack, i+1);
-
-   tup->low[22-i] = tup->high[22-i] = right;
-   DoSrcRight(pr,tup,stack,i+1,L,H);
-}
-
-void Firewall::DoSrcMiddle(processed_rule *pr, rule_tuple * tup, rule_tuple * &stack, int i){
-   for (int j=i;j<4;j++){
-      tup->low[22-j] = 0;
-      tup->high[22-j] = FWForest->GetMaxVal(22-j);
-   }
-   ProcessDest(pr, tup, stack);
 }
 
 /*
@@ -428,41 +407,20 @@ void Firewall::DoSrcMiddle(processed_rule *pr, rule_tuple * tup, rule_tuple * &s
 void Firewall::ProcessSource(processed_rule * pr, rule_tuple * tup,
                            rule_tuple * &stack)
 {
-   int L[4];
-   int H[4];
    address_range * cur;
-   cur = pr->to;
+   cur = pr->from;
    while (cur != NULL){
-      for (int j=0;j<4;j++){
-         L[j] = (cur->low >> (8*(3-j))) % 256;
-         H[j] = (cur->high >> (8*(3-j))) % 256;
-      }
       int i;
-      for (i=0;i<4;i++){
-	 int left = MIN(L[i],H[i]);
-	 int right = MAX(L[i],H[i]);
-         if (L[i] != H[i]){
-	    tup->low[22-i] = left;
-	    tup->high[22-i] = left;
-	    DoSrcLeft(pr, tup, stack, i, L, H);
-
-	    tup->low[22-i] = right;
-	    tup->high[22-i] = right;
-	    DoSrcRight(pr, tup, stack, i, L, H);
-
-	    tup->low[22-i] = left + 1;
-	    tup->high[22-i] = right - 1;
-	    DoSrcMiddle(pr, tup, stack,i);
-            break;
-	 }
-	 else{
-            tup->low[22-i] = left;
-            tup->high[22-i] = right;
-	 }
-      }
-      if (i==4)
+      if (!cur->invert){
+         for (i=0;i<4;i++){
+            tup->low[22-i] = cur->low[i];
+            tup->high[22-i] = cur->high[i];
+         }
          ProcessDest(pr, tup, stack);
-
+      }
+      else{
+         ProcessInverseSource(cur, pr, tup , stack);
+      }
       cur = cur->next;
    }
 }
@@ -482,6 +440,9 @@ void Firewall::BuildRules(processed_rule * head, rule_tuple * &stack)
 
    tup = new rule_tuple;
    BuildRules(head->next, stack);       // In Reverse order.
+#ifdef STACK_DEBUG
+   printf("Processing Chain: %d Rule: %d\n", head->chain_id, head->id); 
+#endif
    if (head->pktcond <=1)               // Temporarily, ignore PKTTYPE flags.
       ProcessSource(head, tup, stack);     // Initiate the processing chain.
    delete tup;
@@ -504,62 +465,63 @@ void Firewall::BuildRules(processed_rule * head, rule_tuple * &stack)
 void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       inHistMDD, rule_tuple * tup, mdd_handle & outMDD, mdd_handle & logMDD,
       mdd_handle & outHistMDD){
-  
-   //DEBUGGING
-   mdd_handle targetMDD;
-   mdd_handle targetHistMDD;
-   mdd_handle resultMDD;
-   mdd_handle resultHistMDD;
-   //@@@@@@@@@@@@@@@@@@@@@
-
+ 
    // criteriaMDD represents the set of packets that match the tuple.
    mdd_handle criteriaMDD;
 
-   //Matches tuples to chain/rule pairs.
+   //Matches tuples to the chain/rule pairs that match each tuple.
    mdd_handle historyMDD;
 
-   // We process the rules of the chains in reverse order to preserve IP
+   // We process the rules of the chain in reverse order to preserve IP
    // tables semantics.
     
    if (tup == NULL) {
       // If we've gotten past the last chain, we just copy the inputMDD
       // and return.
       FWForest->Attach(outMDD, inMDD.index);
+#ifndef NO_HISTORY
       HistoryForest->Attach(outHistMDD, inHistMDD.index);
+#endif
       return;
    }
 
+   //Recurse down the stack (To reverse the order)
    ProcessChain(chain_array, inMDD, inHistMDD, tup->next, 
 	 outMDD, logMDD, outHistMDD);
 
-   // If it's a log rule, insert it into the Log MDD and return.
+   // If it's a log rule, insert it into the Log MDD and continue processing.
+
    if (tup->high[0] == -1) {
       tup->low[0] = tup->high[0] = 1;
-      tup->hlow[0] = tup->hhigh[0] = 1;
       FWForest->Assign(logMDD, tup->low, tup->high, logMDD);
-
-      tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
-      tup->hlow[1] = tup->hhigh[1] = tup->id;  
-      HistoryForest->Assign(outHistMDD, tup->hlow, tup->hhigh, outHistMDD);
-
       tup->low[0] = tup->high[0] = -1;
-      tup->hlow[0] = tup->hhigh[0] = -1;
+
+//      tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
+//      tup->hlow[1] = tup->hhigh[1] = tup->id;  
+//      tup->hlow[0] = tup->hhigh[0] = 1;
+//      HistoryForest->Assign(outHistMDD, tup->hlow, tup->hhigh, outHistMDD);
+
       return;
    }
 
    // Otherwise, take the output of the previous function off the stack
    // and make it the input MDD.
-   FWForest->DestroyMDD(inMDD); //bad?
-   HistoryForest->DestroyMDD(inHistMDD); //bad?
 
-   FWForest->Attach(inMDD, outMDD.index);
-   HistoryForest->Attach(inHistMDD, outHistMDD.index); 
+//   FWForest->DestroyMDD(inMDD); //bad?
+//   HistoryForest->DestroyMDD(inHistMDD); //bad?
 
-   // The old output MDD can be cleaned.
-   FWForest->DestroyMDD(outMDD);
-   HistoryForest->DestroyMDD(outHistMDD);
+   if (inMDD.index != outMDD.index){
+      FWForest->Attach(inMDD, outMDD.index);
+   }
 
-   // Create the intermediate MDD
+#ifndef NO_HISTORY
+   if (inHistMDD.index != outHistMDD.index){
+      HistoryForest->ReallocHandle(inHistMDD);
+      HistoryForest->Attach(inHistMDD, outHistMDD.index);
+   }
+#endif
+
+   // Create the intermediate MDDs
    for (int k=22;k>=0;k--){
       tup->hlow[k+2] = tup->low[k];
       tup->hhigh[k+2] = tup->high[k];
@@ -567,8 +529,8 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
    tup->hlow[1] = tup->hhigh[1] = tup->id;  
 
-   assert(tup->low[0] >= 0);
-   assert(tup->high[0] >= 0);
+   //assert(tup->low[0] >= 0);
+   //assert(tup->high[0] >= 0);
 
    tup->hlow[0] = tup->low[0];
    tup->hhigh[0] = tup->high[0];
@@ -590,20 +552,28 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       } 
       tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
       tup->hlow[1] = tup->hhigh[1] = tup->id;  
-//      tup->hlow[0] = tup->hhigh[0] = 1;
 
-      assert(tup->low[0] >= 0);
-      assert(tup->high[0] >= 0);
+//      assert(tup->low[0] >= 0);
+//      assert(tup->high[0] >= 0);
 
       tup->hlow[0] = tup->low[0];
       tup->hhigh[0] = tup->high[0];
+#ifdef STACK_DEBUG
+      printf("B: Chain %d, Rule %d: MDD %d\n", tup->chain_id, tup->id, outMDD.index);
+      FWForest->PrintMDD();
+#endif
       FWForest->Assign(inMDD, tup->low, tup->high, outMDD);
-
+#ifdef STACK_DEBUG
+      printf("A: Chain %d, Rule %d: MDD %d\n", tup->chain_id, tup->id, outMDD.index);
+      FWForest->PrintMDD();
+#endif
       //Union the input MDD with the intermediate and store in "outHistMDD".
-      
       //HistoryForest->Max(inHistMDD, historyMDD, outHistMDD);
-      HistoryForest->Assign(inHistMDD, tup->hlow, tup->hhigh, outHistMDD);
 
+#ifndef NO_HISTORY
+      //Actually, just assign, since we're interested in the 'critical rule'.
+      HistoryForest->Assign(inHistMDD, tup->hlow, tup->hhigh, outHistMDD);
+#endif
       // Since we are doing things in reverse order, it's possible
       // that a packet that matches a log rule later in the chain 
       // has already been inserted into logMDD, but can't get there
@@ -626,46 +596,60 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
       nextChain = chain_array[tup->low[0] - NUM_DEFAULT_TARGETS];
 
-//      mdd_handle targetMDD;
-//      mdd_handle targetHistMDD;
+      mdd_handle targetMDD;
+      mdd_handle targetHistMDD;
 
       ProcessChain(chain_array, inMDD, inHistMDD, nextChain->tup, targetMDD,
 	    logMDD, targetHistMDD);
 
-      //mdd_handle resultMDD;
-      //mdd_handle resultHistMDD;
+      mdd_handle resultMDD;
+      mdd_handle resultHistMDD;
    
       FWForest->MakeMDDFromTuple(tup->low, tup->high, criteriaMDD);
+      
+#ifndef NO_HISTORY
       HistoryForest->MakeMDDFromTuple(tup->hlow, tup->hhigh, historyMDD);
+#endif
 
       FWForest->ProjectOnto(targetMDD, criteriaMDD, resultMDD);
+      
+#ifndef NO_HISTORY
       HistoryForest->ProjectOnto(targetHistMDD, historyMDD, resultHistMDD);
+#endif
 
       // Clean up criteriaMDD.
       FWForest->DestroyMDD(criteriaMDD);
+      
+#ifndef NO_HISTORY
       HistoryForest->DestroyMDD(historyMDD);
-
-      FWForest->Replace(inMDD, resultMDD, true, outMDD);
+#endif
 
       //Any rule in the new chain that affects the packet needs to be counted
       //now.  
 
+      FWForest->Replace(inMDD, resultMDD, true, outMDD);
       //HistoryForest->Max(inHistMDD, resultHistMDD, outHistMDD); 
       //Is this correct?@@@@
-
+      
+#ifndef NO_HISTORY
       HistoryForest->Replace(inHistMDD, resultHistMDD, true, outHistMDD); //Is this correct?@@@@
-
+#endif
       FWForest->DestroyMDD(resultMDD);
+#ifndef NO_HISTORY
       HistoryForest->DestroyMDD(resultHistMDD);
+#endif
       FWForest->DestroyMDD(targetMDD);
+#ifndef NO_HISTORY
       HistoryForest->DestroyMDD(targetHistMDD);
+#endif
    }
+   /*
    for (level k = 24; k > 0; k--)
       HistoryForest->Compact(k);
 
    for (level k = 22; k > 0; k--)
       FWForest->Compact(k);
-   
+   */
 }
 
 // Initiate construction of outMDD and logMDD.
@@ -749,16 +733,22 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
 
    // Create an MDD representing the default policy
    FWForest->MakeMDDFromTuple(low, high, initMDD);
+#ifndef NO_HISTORY
    HistoryForest->MakeMDDFromTuple(hlow, hhigh, initHistMDD);
+#endif
 
    // It becomes the initial "inMDD" to ProcessChain.
    if (chain->tup != NULL) {
       ProcessChain(chain_array, initMDD, initHistMDD, chain->tup, outMDD, logMDD, outHistMDD);
       FWForest->DestroyMDD(initMDD);
+#ifndef NO_HISTORY
       HistoryForest->DestroyMDD(initHistMDD);
+#endif
    }
    else {
       FWForest->Attach(outMDD, initMDD.index);
+#ifndef NO_HISTORY
       HistoryForest->Attach(outHistMDD, initHistMDD.index);
+#endif
    }
 }

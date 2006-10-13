@@ -36,14 +36,22 @@ enum states { INVALID = 1, ESTABLISHED = 2, NEW = 4, RELATED = 8 };
 //A (low, high) pair describing an IP address range.
 class address_range {
  public:
-   unsigned int low;
-   unsigned int high;
+   int low[4];
+   int high[4];
+   int invert;
+   int mask;
+   //unsigned int low;
+   //unsigned int high;
    address_range *next;
 
      address_range() {
       next = NULL;
-      low = 0;
-      high = 0;
+      invert = 0;
+      mask = 32;
+      for (int i=0;i<4;i++)
+         low[i] = high[i] =0;
+//      low = 0;
+//      high = 0;
      }
      ~address_range(){
         if (next != NULL)

@@ -26,6 +26,8 @@ College of William and Mary
 Williamsburg, VA 23185
 */
 
+//#define BRIEF_DEBUG
+
 #ifndef FDDL_MDD_H
 #   define FDDL_MDD_H 1
 
@@ -247,6 +249,8 @@ protected:
   node_idx *last;		//Array [1..K] which records number of nodes per level.
   int *maxVals;			//Array [0..K] of maximum values for each level.
 
+  int CompactCounter;
+
   cache **ProjectCache;		//Caches for embedded operations 
   cache **PruneCache;		//Caches for embedded operations 
   cache **RestrictCache;
@@ -270,11 +274,14 @@ protected:
 public:
 
   void ReallocHandle (mdd_handle & ref);
+
   void Attach (mdd_handle & ref, node_idx i)
   {
     ref.index = i;
     (*(*nodes[K])[i]).in++;
-  } dynarray < node_idx > **node_remap_array;
+  } 
+  
+  dynarray < node_idx > **node_remap_array;
 
   dynarray < node > **nodes;	//An array [1..K] of heaps of MDD nodes.
   dynarray < node_idx > **arcs;	//An array [1..K] of heaps of MDD arcs.

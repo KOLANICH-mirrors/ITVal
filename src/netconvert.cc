@@ -23,11 +23,14 @@
  * and Mary Williamsburg, VA 23185 
  */
 
+
 #include "ranges.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+
+//#define RANGE_DEBUG
 
 // Turn a address/mask pair into a (low, high) pair of integers.  
 // Store them in the address_range struct "ar".
@@ -35,56 +38,45 @@
 void create_range(unsigned int *addy, unsigned int mask, address_range * ar,
                   int invert)
 {
-   unsigned int low;
-   unsigned int high;
-   unsigned int mval;
-
-   if (mask == 0) {
-      if (invert) {
-         ar->low = 1;
-         ar->high = 0;
-         return;
-      }
-      ar->low = 0;
-      ar->high = UINT_MAX;
-      return;
-   }
-   mval = 0xFFFFFFFF << (32 - mask);
-
-   low = addy[0] * 256 * 256 * 256;
-   low += addy[1] * 256 * 256;
-   low += addy[2] * 256;
-   low += addy[3];
-
-   low = low & mval;
-   high = low | ~mval;
-
-   if (!invert) {
-      ar->low = low;
-      ar->high = high;
-   }
-   else {
-      ar->next = new address_range;
-
-      if (low == 0) {
-         ar->low = 1;
-         ar->high = 0;
-      }
-      else {
-         ar->low = 0;
-         ar->high = low - 1;
-      }
-
-      if (high == UINT_MAX) {
-         ar->next->low = 1;
-         ar->next->high = 0;
-      }
-      else {
-         ar->next->low = high + 1;
-         ar->next->high = UINT_MAX;
-      }
-      //printf("low: %u high:%u %u-%u %u-%u \n", low, high, ar->low, ar->high, ar->next->low, ar->next->high);
-   }
+  ar->invert = invert;
+#ifdef RANGE_DEBUG
+   if (invert)
+      printf("!");
+#endif
+  ar->mask = mask;
+  for (int i=0;i<4;i++){
+     if (8*i+1 > mask){
+        ar->low[i] = 0;
+        ar->high[i] = 255;
+     }
+     else if (8*(i+1) <= mask){
+        ar->low[i] = addy[i];
+        ar->high[i] = addy[i];
+     }
+     else{
+        int spoint;
+        spoint = (i*8)-mask;
+        ar->low[i] = addy[i];
+        ar->high[i] = addy[i];
+        int power;
+        power = 1;
+        for (int j=0;j<8;j++){
+           if (j>=spoint && (ar->low[i] & power)){
+              ar->low[i] -= power;
+           }
+           if (j>=spoint && !(ar->high[i] & power)){
+              ar->high[i] += power;
+           }
+           power *= 2;
+        }
+     }
+  }
+#ifdef RANGE_DEBUG
+   for (int i=0;i<3;i++)
+     printf("[%d-%d].", ar->low[i], ar->high[i]);
+   printf("[%d-%d]", ar->low[3], ar->high[3]);
+   printf("\n");
+#endif
 }
 
 // Convert a net/mask string into a (low, high) pair describing

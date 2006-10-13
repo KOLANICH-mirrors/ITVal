@@ -43,6 +43,15 @@ fddl_forest::MakeMDDFromTuple(int *low, int *high, mdd_handle & ref)
 	arc_idx s;
 	level k;
 
+#ifdef BRIEF_DEBUG
+printf("MakeMDDFromTuple:\n");
+printf("\t");
+for (k=K;k>=0;k--){
+   printf("%d-%d ", low[k], high[k]);
+}
+printf("\n");
+#endif
+
 	child = high[0];
 	if (child > maxVals[0]) {
 		printf("%d out of range at level %d\n", high[k], k);
@@ -66,6 +75,10 @@ fddl_forest::MakeMDDFromTuple(int *low, int *high, mdd_handle & ref)
 		ReallocHandle(ref);
 		Attach(ref, child);
 	}
+#ifdef BRIEF_DEBUG
+printf("MakeMDDFromTuple:\n");
+printf("\tIndex: %d\n", ref.index);
+#endif
 	return SUCCESS;
 }
 
@@ -75,6 +88,15 @@ fddl_forest::Assign(mdd_handle root, int *low, int *high, mdd_handle & result)
 	level   k;
 	node_idx child, newNode;
 	arc_idx s;
+
+#ifdef BRIEF_DEBUG
+printf("MDD Assign: %d\n", root.index);
+printf("\t");
+for (k=K;k>=0;k--){
+   printf("%d-%d ", low[k], high[k]);
+}
+printf("\n");
+#endif
 
 	child = high[0];
 	if (child > maxVals[0]) {
@@ -108,6 +130,9 @@ fddl_forest::Assign(mdd_handle root, int *low, int *high, mdd_handle & result)
 		ReallocHandle(result);
 		Attach(result, newNode);
 	}
+#ifdef BRIEF_DEBUG
+printf("Assign Result: %d\n", result.index);
+#endif
 	return SUCCESS;
 }
 
@@ -998,12 +1023,22 @@ fddl_forest::InternalBComplement(level k, node_idx p)
 int
 fddl_forest::DestroyMDD(mdd_handle mdd)
 {
+#ifdef BRIEF_DEBUG
+printf("Destroy MDD: %d\n", mdd.index);
+#endif
 	if (mdd.index <= 0)
 		return INVALID_MDD;
 	FDDL_NODE(K, mdd.index).in--;
 	if (FDDL_NODE(K, mdd.index).in < 1) {
 		DeleteDownstream(K, mdd.index);
 	}
+        CompactCounter++;
+        if (CompactCounter>100){
+           for (level k=K;k>0;k--){
+              Compact(k);
+              CompactCounter=0;
+           }
+        }
 	return SUCCESS;
 }
 
@@ -1119,7 +1154,7 @@ int fddl_forest::Shift(mdd_handle h, level kold, mdd_handle& result){
 		ShiftCache[k]->Clear();
 
 	level current=kold;
-   newresult = h.index;
+        newresult = h.index;
 	while (current < K){
       //Swap level "current" with level "current+1".
 	   newresult = InternalShift(K, newresult, current+1);
