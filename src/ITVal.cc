@@ -34,9 +34,7 @@ topology file.\n      -F or -f <rulefile> : Append a filter rule set file. \
 #include "rule_parser.h"
 #include "firewall.h"
 #include <FDDL/mdd.h>
-#include "parser_interface.hh"
 #include "topology.h"
-
 
 typedef struct filename_node {
    int verbose_input;
@@ -56,7 +54,6 @@ int main(int argc, char **argv)
 {
    int i;
    char queryName[256];
-   parser_interface pi;
    Firewall **fws;                        /* Array of independent firewalls   */
    int num_fws = 0;                       /* Number of firewalls in the array */
    Topology *top = NULL;
@@ -240,7 +237,7 @@ int main(int argc, char **argv)
    InitializeStructures(metaFirewall);
 
    /* Parse and Analyze query file */
-   pi.parse(queryName);
+   ParseQueryFile(queryName);
 
    DoCleanup();
 //   if (top != NULL)

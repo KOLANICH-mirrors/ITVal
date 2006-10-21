@@ -26,7 +26,7 @@
 #include "chains.h"
 #include "fwmdd.h"
 #include "topology.h"
-#include <FDDL/structures.h>
+#include "structures.h"
 
 class Firewall {
    int num_chains;

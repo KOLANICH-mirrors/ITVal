@@ -32,6 +32,8 @@
 #include "fwlang.tab.hh"
 #include "firewall.h"
 
+extern FILE* yyin;
+
 // Limit of 256 address groups
 group *groups[256];
 int num_groups = 0;
@@ -178,6 +180,8 @@ void ProcessComponent(char *piece, int length, int& low, int& high){
          printf("Incorrectly formatted range: %s [F%d].\n", piece, pos);
          exit(-1);
       }
+
+      pos++; // Advance past the - sign
       
       start = pos;
       second = new char[length-1];
@@ -331,8 +335,6 @@ condition* BuildDropCondition(int input_chain)
    FW->FWForest->PrintMDD();
    */
 #ifdef ASSERT_DEBUG
-   for (int k=22;k>0;k--)
-      FW->FWForest->Compact(k);
    printf("DROPPED Condition: %d\n", sc->h.index);
 #endif
    return sc;
@@ -454,9 +456,6 @@ condition *BuildConditionFromGroup(group * g, int op)
       delete g;
 #ifdef ASSERT_DEBUG
    printf("\nGroup: %d\n", sc->h.index);
-   for (level k = 22; k > 0; k--)
-      FW->FWForest->Compact(k);
-   FW->FWForest->PrintMDD();
 #endif
    return sc;
 }
@@ -965,9 +964,6 @@ condition *IntersectConditions(condition * c1, condition * c2)
 
 #ifdef DEBUG
    printf("Intersect\n");
-   for (level k = 22; k > 0; k--)
-      FW->FWForest->Compact(k);
-   FW->FWForest->PrintMDD();
 #endif
 #ifdef ASSERT_DEBUG
    printf("Intersect: %d\n", newCond->h.index);
@@ -1060,6 +1056,7 @@ query *PerformQuery(int subject, condition * c)
 
 assert* PerformAssertion(condition* left, condition* right, int assert_op, int example, int history){
    int cond;
+   int* tup;
    condition* notA;
    condition* notB;
    condition* resultA;
@@ -1073,6 +1070,8 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    notB = new condition;
    FW->FWForest->BinaryComplement(left->h, notA->h);
    FW->FWForest->BinaryComplement(right->h, notB->h);
+   FW->HistoryForest->BinaryComplement(left->history, notA->history);
+   FW->HistoryForest->BinaryComplement(right->history, notB->history);
    #ifdef EXAMPLE_DEBUG
    printf("ASSERT_OP: %d\n", assert_op);
    printf("NotA: %d\n", notA->h.index);
@@ -1082,19 +1081,30 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    FW->FWForest->Min(notA->h, right->h, resultA->h);
    FW->FWForest->Min(left->h, notB->h, resultB->h);
    FW->FWForest->Max(resultA->h, resultB->h, resultC->h);
+   
    switch (assert_op){
-      case 0:
-      case 1:
-	 if (assert_op == 0)
+      case OP_IS:
+      case OP_SUBSET:
+	 if (assert_op == OP_IS)
             cond = (resultA->h.index == 0) && (resultB->h.index == 0);
 	 else
    	    cond = (resultB->h.index == 0);
          if (cond){
 	    printf("#Assertion held.\n");
+            FW->FWForest->FindElement(left->h, FW->T,tup);
 	    if (example){
 	       printf("#Witness:\n");
-               FW->FWForest->FindElement(left->h, FW->T);
+               if (tup != NULL)
+                  FW->FWForest->PrintElement(FW->T,tup);
 	    }
+#ifndef NO_HISTORY
+            if (history){
+               printf("Critical Rules:\n");
+               FW->HistoryForest->DisplayHistory(right->history,tup);
+            }
+#endif
+            if (tup != NULL)
+               delete[] tup;
 #ifdef EXAMPLE_DEBUG
 	    printf("Left: %d Right:%d\n", left->h.index, right->h.index);
 	    printf("ResultA: %d\n", resultA->h.index);
@@ -1104,24 +1114,34 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
 	 }
 	 else{
 	    printf("#Assertion failed.\n");
+	    if (assert_op == OP_IS){
+               FW->FWForest->FindElement(resultC->h, FW->T,tup);
+            }
+            else{
+               FW->FWForest->FindElement(resultB->h, FW->T,tup);
+            }
 	    if (example){
 	       printf("#Counterexample:\n");
-	       if (assert_op == 0){
-                  FW->FWForest->FindElement(resultC->h, FW->T);
-	       }
-	       else{
-                  FW->FWForest->FindElement(resultB->h, FW->T);
-	       }
+               if (tup != NULL)
+                  FW->FWForest->PrintElement(FW->T,tup);
 	    }
+#ifndef NO_HISTORY
+            if (history){
+               printf("Critical Rules:\n");
+               FW->HistoryForest->DisplayHistory(right->history,tup);
+            }
+#endif
+            if (tup != NULL)
+               delete[] tup;
 #ifdef EXAMPLE_DEBUG
 	    printf("Left: %d Right:%d\n", left->h.index, right->h.index);
 	    printf("Results: %d %d %d\n", resultA->h.index, resultB->h.index, resultC->h.index);
 #endif
-	 }
+        }
       break;
-      case 2:
-      case 3:
-      if (assert_op == 2){
+      case OP_NOT_IS:
+      case OP_NOT_SUBSET:
+      if (assert_op == OP_NOT_IS){
          cond = resultA->h.index != 0 || resultB->h.index != 0;
       }
       else{
@@ -1129,15 +1149,26 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
       }
       if (cond){
 	  printf("#Assertion held.\n");
+	  if (assert_op == OP_NOT_IS){
+             FW->FWForest->FindElement(resultC->h,FW->T,tup);
+          }
+	  else{
+             FW->FWForest->FindElement(resultB->h, FW->T,tup);
+          }
 	  if (example){
              printf("#Witness:\n");
-	     if (assert_op == 2){
-                FW->FWForest->FindElement(resultC->h,FW->T);
-	     }
-	     else{
-                  FW->FWForest->FindElement(resultB->h, FW->T);
-	     }
+             if (tup != NULL)
+                FW->FWForest->PrintElement(FW->T,tup);
 	  }
+#ifndef NO_HISTORY
+          if (history){
+             printf("Critical Rules:\n");
+             FW->HistoryForest->DisplayHistory(right->history, tup);
+          }
+#endif
+          if (tup != NULL)
+             delete[] tup;
+
 #ifdef EXAMPLE_DEBUG
 	  printf("Left: %d Right:%d\n", left->h.index, right->h.index);
 	  printf("Result: %d\n", resultB->h.index);
@@ -1145,10 +1176,20 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
       }
       else{
 	  printf("#Assertion failed.\n");
+          FW->FWForest->FindElement(left->h,FW->T,tup);
 	  if (example){
              printf("#Counterexample:\n");
-             FW->FWForest->FindElement(left->h,FW->T);
+             if (tup != NULL)
+                FW->FWForest->PrintElement(FW->T,tup);
 	  }
+#ifndef NO_HISTORY
+          if (history){
+             printf("Critical Rules:\n");
+             FW->HistoryForest->DisplayHistory(right->history, tup);
+          }
+#endif
+          if (tup != NULL)
+             delete[] tup;
 #ifdef EXAMPLE_DEBUG
 	  printf("Left: %d Right:%d\n", left->h.index, right->h.index);
 	  printf("Result: %d\n", left->h.index);
@@ -1329,4 +1370,14 @@ void PrintAddyList(address * list)
       cur = cur->next;
    }
    printf("\n");
+}
+
+int yyparse();
+
+void ParseQueryFile(char *filename){
+   FILE* in;
+   in = fopen(filename, "r");
+   yyin = in;
+   yyparse();
+   fclose(in);
 }

@@ -26,96 +26,81 @@ College of William and Mary
 Williamsburg, VA 23185
 */
 %{
+#include "src/structures.h"
 #include "src/parser.h"
 #include "src/fwlang.tab.hh"
-#include "src/parser_interface.hh"
-YY_DECL;
 
 int FWLANG_LINE_NO = 0;
 %}
-%option noyywrap nounput batch debug
+
+%option noyywrap nounput batch 
 
 NUM [0-9]*|"*"|"["[0-9]*"-"[0-9]*"]"
 ALPHANUM [a-zA-Z][_a-zA-Z0-9\+\*]*
 COMMENT "#".*
 
-
 %{
-# define YY_USER_ACTION yylloc->columns (yyleng);
+//# define YY_USER_ACTION yylloc->columns (yyleng);
 %}
 %%
 {COMMENT} { ECHO; } //Comments
-"GROUP" { ECHO; return yy::parser::token::GROUP; }
-"SERVICE" { ECHO; return yy::parser::token::SERVICE; }
-"QUERY" { ECHO; return yy::parser::token::QUERY; }
-"ASSERT" { ECHO; return yy::parser::token::ASSERT; }
-"ACCEPTED" { ECHO; return yy::parser::token::ACCEPTED; }
-"DROPPED" { ECHO; return yy::parser::token::DROPPED; }
-"LOGGED" { ECHO; return yy::parser::token::LOGGED; }
-"PACKET" { ECHO; return yy::parser::token::PACKET; }
-"SPORT" { ECHO; return yy::parser::token::SPORT; }
-"CLASSES" { ECHO; return yy::parser::token::CLASSES; }
-"SCLASSES" { ECHO; return yy::parser::token::SCLASSES; }
-"SGRAPH" { ECHO; return yy::parser::token::SGRAPH; }
-"DPORT" { ECHO; return yy::parser::token::DPORT; }
-"SADDY" { ECHO; return yy::parser::token::SADDY; }
-"DADDY" { ECHO; return yy::parser::token::DADDY; }
-"STATE" { ECHO; return yy::parser::token::STATE; }
-"TCP" { ECHO; return yy::parser::token::TCP; }
-"UDP" { ECHO; return yy::parser::token::UDP; }
-"BOTH" { ECHO; return yy::parser::token::BOTH; }
-"ICMP" { ECHO; return yy::parser::token::ICMP; }
-"INVALID" { ECHO; return yy::parser::token::T_INVALID;}
-"NEW" { ECHO; return yy::parser::token::T_NEW;}
-"ESTABLISHED" { ECHO; return yy::parser::token::T_ESTABLISHED;}
-"RELATED" { ECHO; return yy::parser::token::T_RELATED;}
-"FIN" { ECHO; return yy::parser::token::FIN;}
-"SYN" { ECHO; return yy::parser::token::SYN;}
-"RST" { ECHO; return yy::parser::token::RST;}
-"PSH" { ECHO; return yy::parser::token::PSH;}
-"ACK" { ECHO; return yy::parser::token::ACK;}
-"URG" { ECHO; return yy::parser::token::URG;}
-"FROM" { ECHO; return yy::parser::token::FROM;}
-"TO" { ECHO; return yy::parser::token::TO;}
-"FOR" {ECHO; return yy::parser::token::FOR;}
-"ON" {ECHO; return yy::parser::token::ON;}
-"IN" {ECHO; return yy::parser::token::IN;}
-"OR" {ECHO; return yy::parser::token::OR;}
-"AND" {ECHO; return yy::parser::token::AND;}
-"NOT SUBSET OF" {ECHO; return yy::parser::token::NOT_SUBSET_OF;}
-"NOT" {ECHO; return yy::parser::token::NOT;}
-"WITH" {ECHO; return yy::parser::token::WITH;}
-"INFACE" {ECHO; return yy::parser::token::INFACE;}
-"OUTFACE" {ECHO; return yy::parser::token::OUTFACE;}
-"INPUT" {ECHO; return yy::parser::token::INPUT;}
-"FORWARD" {ECHO; return yy::parser::token::FORWARD;}
-"OUTPUT" {ECHO; return yy::parser::token::OUTPUT;}
-"ISN'T" {ECHO; return yy::parser::token::ISNT;}
-"IS" {ECHO; return yy::parser::token::IS;}
-"SUBSET OF" {ECHO; return yy::parser::token::SUBSET_OF;}
-"EXAMPLE" {ECHO; return yy::parser::token::EXAMPLE;}
-"HISTORY" {ECHO; return yy::parser::token::HISTORY;}
-"\." {ECHO; return yy::parser::token::DOT;}
-{NUM} { ECHO; yylval->val = new char[256]; strncpy(yylval->val, yytext, 256); return yy::parser::token::NUM;}
-{ALPHANUM} { ECHO; yylval->name = new char[256]; strncpy(yylval->name,yytext,256); return yy::parser::token::NAME;} 
+"GROUP" { ECHO; return GROUP; }
+"SERVICE" { ECHO; return SERVICE; }
+"QUERY" { ECHO; return QUERY; }
+"ASSERT" { ECHO; return ASSERT; }
+"ACCEPTED" { ECHO; return ACCEPTED; }
+"DROPPED" { ECHO; return DROPPED; }
+"LOGGED" { ECHO; return LOGGED; }
+"PACKET" { ECHO; return PACKET; }
+"SPORT" { ECHO; return SPORT; }
+"CLASSES" { ECHO; return CLASSES; }
+"SCLASSES" { ECHO; return SCLASSES; }
+"SGRAPH" { ECHO; return SGRAPH; }
+"DPORT" { ECHO; return DPORT; }
+"SADDY" { ECHO; return SADDY; }
+"DADDY" { ECHO; return DADDY; }
+"STATE" { ECHO; return STATE; }
+"TCP" { ECHO; return TCP; }
+"UDP" { ECHO; return UDP; }
+"BOTH" { ECHO; return BOTH; }
+"ICMP" { ECHO; return ICMP; }
+"INVALID" { ECHO; return T_INVALID;}
+"NEW" { ECHO; return T_NEW;}
+"ESTABLISHED" { ECHO; return T_ESTABLISHED;}
+"RELATED" { ECHO; return T_RELATED;}
+"FIN" { ECHO; return FIN;}
+"SYN" { ECHO; return SYN;}
+"RST" { ECHO; return RST;}
+"PSH" { ECHO; return PSH;}
+"ACK" { ECHO; return ACK;}
+"URG" { ECHO; return URG;}
+"FROM" { ECHO; return FROM;}
+"TO" { ECHO; return TO;}
+"FOR" {ECHO; return FOR;}
+"ON" {ECHO; return ON;}
+"IN" {ECHO; return IN;}
+"OR" {ECHO; return OR;}
+"AND" {ECHO; return AND;}
+"NOT SUBSET OF" {ECHO; return NOT_SUBSET_OF;}
+"NOT" {ECHO; return NOT;}
+"WITH" {ECHO; return WITH;}
+"INFACE" {ECHO; return INFACE;}
+"OUTFACE" {ECHO; return OUTFACE;}
+"INPUT" {ECHO; return INPUT;}
+"FORWARD" {ECHO; return FORWARD;}
+"OUTPUT" {ECHO; return OUTPUT;}
+"ISN'T" {ECHO; return ISNT;}
+"IS" {ECHO; return IS;}
+"SUBSET OF" {ECHO; return SUBSET_OF;}
+"EXAMPLE" {ECHO; return EXAMPLE;}
+"HISTORY" {ECHO; return HISTORY;}
+"\." {ECHO; return DOT;}
+{NUM} { ECHO; yylval->val = new char[256]; strncpy(yylval->val, yytext, 256); return NUM;}
+{ALPHANUM} { ECHO; yylval->name = new char[256]; strncpy(yylval->name,yytext,256); return NAME;} 
 "\t" {ECHO;}
 " " {ECHO;}
 "\n" {ECHO; FWLANG_LINE_NO++;}
-";" { printf(";\n"); return yy::parser::token::SEMI;}
-"(" { ECHO; return yy::parser::token::LPAREN;}
-")" { ECHO; return yy::parser::token::RPAREN;}
+";" { printf(";\n"); return SEMI;}
+"(" { ECHO; return LPAREN;}
+")" { ECHO; return RPAREN;}
 . {printf("Illegal Token: (%s)\n", yytext);}
-%%
-void
-parser_interface::scan_begin ()
-{
-   yy_flex_debug = trace_scanning;
-   if (!(yyin = fopen (file.c_str (), "r")))
-   error (std::string ("cannot open ") + file);
-}
-
-void
-parser_interface::scan_end ()
-{
-   fclose (yyin);
-}

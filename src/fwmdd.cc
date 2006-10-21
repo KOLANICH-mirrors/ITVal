@@ -34,18 +34,8 @@ Williamsburg, VA 23185
 #define MAX(a, b) (a>b ? a : b)
 #define MIN(a, b) (a<b ? a : b)
 
-int fw_fddl_forest::FindElement(mdd_handle root, Topology* T){
-   node_idx newresult;
-   int* vals;
+int fw_fddl_forest::PrintElement(Topology* T, int* vals){
    char flagString[7]="FSRPAU";
-   if (root.index < 0)
-      return INVALID_MDD;
-
-   vals = new int[K+1];
-   for (int k=0;k<K+1;k++)
-      vals[k]=0;
-
-   if (InternalFindElement(K, root.index, vals) != 0){
       if (vals[14]==0)
 	 printf("#ICMP");
       else if (vals[14]==1)
@@ -77,15 +67,22 @@ int fw_fddl_forest::FindElement(mdd_handle root, Topology* T){
 	 else printf(" ");
       }
       printf("].\n");
-/*
-   for (int k=K;k>0;k--){
-     printf("[%d] ", vals[k]);
-   }
-*/
-      delete[] vals;
+}
+
+int fw_fddl_forest::FindElement(mdd_handle root, Topology* T, int*& vals){
+   node_idx newresult;
+   if (root.index < 0)
+      return INVALID_MDD;
+
+   vals = new int[K+1];
+   for (int k=0;k<K+1;k++)
+      vals[k]=0;
+
+   if (InternalFindElement(K, root.index, vals) != 0){
       return SUCCESS;
    }
    delete[] vals;
+   vals = NULL;
    return INVALID_MDD;
 }
 
@@ -104,6 +101,58 @@ node_idx fw_fddl_forest::InternalFindElement(level k, node_idx p, int* vals){
    }
    return 0;
 }
+
+int fw_fddl_forest::DisplayHistory(mdd_handle root, int* vals){
+   node_idx newresult;
+   if (root.index < 0)
+      return INVALID_MDD;
+
+   if (InternalDisplayHistory(K, root.index, vals, 0, 0) != 0){
+      return SUCCESS;
+   }
+   return INVALID_MDD;
+}
+
+node_idx fw_fddl_forest::InternalDisplayHistory(level k, node_idx p,
+int* vals, int chain, int rule){
+   node* nodeP;
+   node_idx q;
+   
+#ifdef HISTORY_DEBUG
+   if (k>=2)
+      printf("DH: <%d,%d>[%d],%d,%d\n", k,p,vals[k-2],chain, rule);
+   else
+      printf("DH: <%d,%d>[-],%d,%d\n", k,p,chain, rule);
+#endif
+   if (k==0){
+      return p;
+   }
+   nodeP = &FDDL_NODE(k,p);
+   if (k==1){
+      for (int i=0;i<nodeP->size;i++){
+         q = FDDL_ARC(k,nodeP,i);
+         if (q != 0 && (InternalDisplayHistory(k-1, q, vals, 0, 0) != 0)){
+            printf("Chain %d Rule %d\n", chain, rule);
+            return 1;
+         }
+      }
+      return 0;
+   }
+   if (k==2){
+      for (int i=0;i<nodeP->size;i++){
+         q = FDDL_ARC(k,nodeP,i);
+         if (q !=0)
+            InternalDisplayHistory(k-1, q, vals, chain, i);
+      }
+      return 1;
+   }
+   q = FDDL_ARC(k, nodeP, vals[k-2]);
+   if (q != 0){
+      return InternalDisplayHistory(k-1,q,vals,vals[k-2],0);
+   }
+   return 0;
+}
+
 
 int fw_fddl_forest::Accepted(mdd_handle root, mdd_handle& result){
    node_idx newresult;

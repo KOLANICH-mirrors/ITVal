@@ -29,8 +29,12 @@ Williamsburg, VA 23185
 #ifndef __PARSER_H
 #define __PARSER_H
 
-#include <FDDL/structures.h>
+#include "structures.h"
 #include "fwmdd.h"
+
+#define YY_DECL int yylex(YYSTYPE *yylval)
+
+enum assertion_operators {OP_IS, OP_SUBSET, OP_NOT_IS, OP_NOT_SUBSET};
 
 //A query condition.
 class condition {
@@ -138,4 +142,6 @@ void InitializeStructures(Firewall * F);
 
 //Set the protocol of port "port" to "protocol"
 port *BuildPort(int protocol, port * port);
+
+void ParseQueryFile(char* filename);
 #endif

@@ -26,7 +26,7 @@ College of William and Mary
 Williamsburg, VA 23185
 */
 
-#define NO_HISTORY
+//#define NO_HISTORY
 
 #ifndef SRC_FWMDD_H
 #   define SRC_FWMDD_H 1
@@ -36,7 +36,7 @@ Williamsburg, VA 23185
 
 #   include <FDDL/mdd.h>
 #   include "nat.h"
-#   include <FDDL/structures.h>
+#   include "structures.h"
 #   include "sets.h"
 #   include "topology.h"
 
@@ -73,8 +73,9 @@ class fw_fddl_forest:public fddl_forest {
       delete[]FWCache;
    }
 
-   int FindElement(mdd_handle p, Topology* T);
+   int FindElement(mdd_handle p, Topology* T, int*& tup);
    node_idx InternalFindElement(level k, node_idx p, int* vals);
+   int PrintElement(Topology* T, int* tup);
 
    int QueryIntersect(mdd_handle p, mdd_handle q, mdd_handle & result);
    node_idx InternalQIntersect(level k, node_idx p, node_idx q);
@@ -85,6 +86,10 @@ class fw_fddl_forest:public fddl_forest {
    node_idx InternalAccepted(level k, node_idx p);
    int Dropped(mdd_handle p, mdd_handle & result);
    node_idx InternalDropped(level k, node_idx p);
+
+   int DisplayHistory(mdd_handle root, int* tup);
+   int InternalDisplayHistory(level k, node_idx p, int* tup, int chain,
+   int rule);
 
    int PrintHistory(mdd_handle p);
    void InternalPrintHistory(level k, node_idx p, int chain_num, int rule_num);

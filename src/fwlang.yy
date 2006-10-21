@@ -1,20 +1,13 @@
-%skeleton "lalr1.cc"
+%pure-parser
 %defines
 %{
-int yyerror(char* str);
 #include <string>
-#include "parser.h"
-#include "parser_interface.hh"
+#include "src/parser.h"
+#include "src/structures.h"
+int yyerror(char* str);
 %}
 
-%parse-param {parser_interface& pi}
-%lex-param {parser_interface& pi}
-%locations
-//%initial-action
-//{
-//@$.begin.filename = @$.end.filename = &pi.file;
-//}
-%debug
+//%debug
 %error-verbose
 
 %union{
@@ -36,6 +29,12 @@ int yyerror(char* str);
    char* val;
    int flag;
 };
+
+%{
+
+YY_DECL;
+
+%}
 
 %token	 TOKEN_EOF   0	"end of file"
 
@@ -119,10 +118,10 @@ assert_expression: ASSERT condition assert_op condition {$$ = PerformAssertion($
 	| ASSERT EXAMPLE HISTORY condition assert_op condition {$$ = PerformAssertion($4, $6, $5, 1,1);}
 		 ;
 
-assert_op: IS {$$ = 0;} 
-	 | SUBSET_OF {$$=1;}
-	 | ISNT {$$ = 2;}
-	 | NOT_SUBSET_OF {$$ = 3;}
+assert_op: IS {$$ = OP_IS;} 
+	 | SUBSET_OF {$$= OP_SUBSET;}
+	 | ISNT {$$ = OP_NOT_IS;}
+	 | NOT_SUBSET_OF {$$ = OP_NOT_SUBSET;}
 	 ;
 
 input_chain: INPUT {$$ = 0;}
@@ -183,8 +182,7 @@ addr: NUM DOT NUM DOT NUM DOT NUM {$$ = ParseAddr($1,$3,$5,$7); delete[] $1; del
 port: NUM {$$=ParsePort($1); delete[] $1;};
 
 %%
-void
-yy::parser::error (const yy::parser::location_type& l, const std::string& m)
-{
-   pi.error(l, m);
+
+int yyerror(char* str){
+   printf("%s\n", str);
 }
