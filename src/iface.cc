@@ -489,6 +489,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    ProcessChain(chain_array, inMDD, inHistMDD, tup->next, 
 	 outMDD, logMDD, outHistMDD);
 
+
    // If it's a log rule, insert it into the Log MDD and continue processing.
 
    if (tup->high[0] == -1) {
@@ -516,7 +517,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
 #ifndef NO_HISTORY
    if (inHistMDD.index != outHistMDD.index){
-      HistoryForest->ReallocHandle(inHistMDD);
+//      HistoryForest->ReallocHandle(inHistMDD);
       HistoryForest->Attach(inHistMDD, outHistMDD.index);
    }
 #endif

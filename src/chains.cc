@@ -399,9 +399,6 @@ void Firewall::BuildVerboseFWRules(char *fname)
          chain_array[current_chain] = newChain;
          cur->chain_id = chain_array[current_chain]->id;
 
-         // Allocate the first rule
-         // cur = new rule;
-
          // Consume the "header display" line
          free(oldLine);
          line = NULL;

@@ -236,16 +236,20 @@ int Firewall::PrintClasses()
    int numClasses = 0;
 
    //FWForest->PrintMDD();
-   FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses,
-                           0);
-//   printf("There are %d Forward Source classes:\n", numClasses);
-   //ClassForest->PrintMDD();
+   FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses, 0);
+//   printf("FWSourceClass: %d\n", FWSourceClass.index);
+//   HistoryForest->PrintMDD();
 
+//   printf("There are %d Forward Source classes:\n", numClasses);
+//   ClassForest->PrintMDD();
 //   ClassForest->PrintClasses(FWSourceClass, numClasses);
+   
    FWForest->BuildClassMDD(Input, ClassForest, INSourceClass, numClasses, 0);
+   
 //   printf("There are %d Input Source classes:\n", numClasses);
    //ClassForest->PrintMDD();
 //   ClassForest->PrintClasses(INSourceClass, numClasses);
+   
    FWForest->BuildClassMDD(Output, ClassForest, OUTSourceClass, numClasses,
                            0);
 //   printf("There are %d Output Source classes:\n", numClasses);
@@ -257,16 +261,17 @@ int Firewall::PrintClasses()
    FWForest->Shift(newChain, 15, newChain);
    FWForest->Shift(newChain, 15, newChain);
    FWForest->Shift(newChain, 15, newChain);
+   
 // As we move lower levels to the top, the top levels move down!
 //   FWForest->Shift(newChain,16,newChain);
 //   FWForest->Shift(newChain,17,newChain);
 //   FWForest->Shift(newChain,18,newChain);
 
    FWForest->BuildClassMDD(newChain, ClassForest, FWDestClass, numClasses, 0);
-//   printf("There are %d Forward Destination classes:\n", numClasses);
-//   ClassForest->PrintClasses(FWDestClass, numClasses);
 
    //Debug
+//   printf("There are %d Forward Destination classes:\n", numClasses);
+//   ClassForest->PrintClasses(FWDestClass, numClasses);
 //   printf("FWDestClass: %d\n", FWDestClass.index);
 //   ClassForest->PrintMDD();
    //End Debug
@@ -284,9 +289,6 @@ int Firewall::PrintClasses()
    FWForest->Shift(newChain, 15, newChain);
    FWForest->Shift(newChain, 15, newChain);
    FWForest->Shift(newChain, 15, newChain);
-//   FWForest->Shift(newChain,16,newChain);
-//   FWForest->Shift(newChain,17,newChain);
-//   FWForest->Shift(newChain,18,newChain);
    FWForest->BuildClassMDD(newChain, ClassForest, OUTDestClass, numClasses,
                            0);
 //   printf("There are %d Output Destination classes:\n", numClasses);

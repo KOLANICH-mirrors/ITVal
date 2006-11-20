@@ -268,21 +268,15 @@ condition* BuildAcceptCondition(int input_chain)
    switch(input_chain){
       case 0:
          FW->FWForest->Accepted(FW->Input, sc->h); 
+#ifndef NO_HISTORY
          FW->HistoryForest->Accepted(FW->InputHist, sc->history); 
+#endif
 	 break;
       case 1:
          FW->FWForest->Accepted(FW->Forward, sc->h); 
 #ifndef NO_HISTORY
          FW->HistoryForest->Accepted(FW->ForwardHist, sc->history); 
 #endif
-/*
-         for (int k=25;k>0;k--){
-	    FW->HistoryForest->Compact(k);
-            if (k<=22){
-               FW->FWForest->Compact(k);
-	    }
-	 }
-*/
 	 break;
       case 2:
          FW->FWForest->Accepted(FW->Output, sc->h); 
@@ -1062,12 +1056,21 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    condition* resultA;
    condition* resultB;
    condition* resultC;
+   condition* resultD;
 
    resultA = new condition;
    resultB = new condition;
    resultC = new condition;
+   resultD = new condition;
    notA = new condition;
    notB = new condition;
+
+   mdd_handle mergedHistory;
+   mdd_handle resultHistory;
+  
+   FW->HistoryForest->Max(FW->InputHist, FW->OutputHist, mergedHistory);
+   FW->HistoryForest->Max(FW->ForwardHist, mergedHistory, mergedHistory);
+  
    FW->FWForest->BinaryComplement(left->h, notA->h);
    FW->FWForest->BinaryComplement(right->h, notB->h);
    FW->HistoryForest->BinaryComplement(left->history, notA->history);
@@ -1079,8 +1082,16 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    #endif
 
    FW->FWForest->Min(notA->h, right->h, resultA->h);
+   FW->HistoryForest->Min(notA->history, right->history, resultA->history);
+   
    FW->FWForest->Min(left->h, notB->h, resultB->h);
+   FW->HistoryForest->Min(left->history, notB->history, resultB->history);
+
    FW->FWForest->Max(resultA->h, resultB->h, resultC->h);
+   FW->HistoryForest->Max(resultA->history, resultB->history, resultC->history);
+
+   FW->FWForest->Min(left->h, right->h, resultD->h);
+   FW->FWForest->Min(left->history, right->history, resultD->history);
    
    switch (assert_op){
       case OP_IS:
@@ -1089,9 +1100,10 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
             cond = (resultA->h.index == 0) && (resultB->h.index == 0);
 	 else
    	    cond = (resultB->h.index == 0);
+
          if (cond){
 	    printf("#Assertion held.\n");
-            FW->FWForest->FindElement(left->h, FW->T,tup);
+            FW->FWForest->FindElement(left->h, FW->T, tup);
 	    if (example){
 	       printf("#Witness:\n");
                if (tup != NULL)
@@ -1100,7 +1112,8 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
 #ifndef NO_HISTORY
             if (history){
                printf("Critical Rules:\n");
-               FW->HistoryForest->DisplayHistory(right->history,tup);
+               FW->HistoryForest->Min(mergedHistory, left->h, resultHistory);
+               FW->HistoryForest->DisplayHistory(resultHistory, tup);
             }
 #endif
             if (tup != NULL)
@@ -1110,6 +1123,7 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
 	    printf("ResultA: %d\n", resultA->h.index);
 	    printf("ResultB: %d\n", resultB->h.index);
 	    printf("ResultC: %d\n", resultC->h.index);
+	    printf("ResultD: %d\n", resultD->h.index);
 #endif
 	 }
 	 else{
@@ -1128,7 +1142,16 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
 #ifndef NO_HISTORY
             if (history){
                printf("Critical Rules:\n");
-               FW->HistoryForest->DisplayHistory(right->history,tup);
+	       if (assert_op == OP_IS){
+                  printf("(IS)\n");
+                  FW->HistoryForest->Min(mergedHistory, resultC->history, resultHistory);
+                  FW->HistoryForest->DisplayHistory(resultHistory, tup);
+               }
+               else{
+                  printf("(SUBSET OF)\n");
+                  FW->HistoryForest->Min(mergedHistory, resultB->history, resultHistory);
+                  FW->HistoryForest->DisplayHistory(resultHistory, tup);
+               }
             }
 #endif
             if (tup != NULL)
@@ -1163,7 +1186,9 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
 #ifndef NO_HISTORY
           if (history){
              printf("Critical Rules:\n");
-             FW->HistoryForest->DisplayHistory(right->history, tup);
+             printf("(IS NOT)\n");
+             FW->HistoryForest->Min(mergedHistory, left->history, resultHistory);
+             FW->HistoryForest->DisplayHistory(resultHistory, tup);
           }
 #endif
           if (tup != NULL)
@@ -1185,7 +1210,9 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
 #ifndef NO_HISTORY
           if (history){
              printf("Critical Rules:\n");
-             FW->HistoryForest->DisplayHistory(right->history, tup);
+             printf("(Not Subset Of)\n");
+             FW->HistoryForest->Min(mergedHistory, right->history, resultHistory);
+             FW->HistoryForest->DisplayHistory(resultHistory, tup);
           }
 #endif
           if (tup != NULL)

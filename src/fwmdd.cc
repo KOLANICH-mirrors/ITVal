@@ -30,9 +30,15 @@ Williamsburg, VA 23185
 #include <stdio.h>
 #include <assert.h>
 #include "fwmdd.h"
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define MAX(a, b) (a>b ? a : b)
 #define MIN(a, b) (a<b ? a : b)
+
+//#define HISTORY_DEBUG
 
 int fw_fddl_forest::PrintElement(Topology* T, int* vals){
    char flagString[7]="FSRPAU";
@@ -127,6 +133,9 @@ int* vals, int chain, int rule){
    if (k==0){
       return p;
    }
+   if (p==0){
+      return 0;
+   }
    nodeP = &FDDL_NODE(k,p);
    if (k==1){
       for (int i=0;i<nodeP->size;i++){
@@ -193,17 +202,20 @@ node_idx fw_fddl_forest::InternalAccepted(level k, node_idx p){
    node* nodeP;
    if (p==0)
       return 0;
+      
    if (k==0)
-      return (p == 3);
+      return (p == 3) ? p : 0;
+
    r = FWCache[k]->Hit(k,p);
    if (r>=0)
       return r;
+
    r = NewNode(k);
    nodeP = &FDDL_NODE(k,p);
    for (int i=0;i<nodeP->size;i++){
       node_idx j;
       j = FDDL_ARC(k,nodeP, i);
-      SetArc(k,r,i, InternalAccepted(k-1, FDDL_ARC(k,nodeP, i)));
+      SetArc(k,r,i, InternalAccepted(k-1, j));
    }
    r = CheckIn(k,r);
    FWCache[k]->Add(k,p,r);
@@ -216,7 +228,7 @@ node_idx fw_fddl_forest::InternalDropped(level k, node_idx p){
    if (p==0)
       return 0;
    if (k==0)
-      return (p == 2) || (p==1);
+      return ((p == 2) || (p==1)) ? p : 0;
    r = FWCache[k]->Hit(k,p);
    if (r>=0)
       return r;
@@ -913,9 +925,8 @@ int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest * forest,
       FWCache[k]->Clear();
    }
 
-   numClasses = 0;
-   newresult =
-      InternalBuildClassMDD(forest, K, p.index, numClasses, services);
+   numClasses = 1;
+   newresult = InternalBuildClassMDD(forest, K, p.index, numClasses, services);
    if (r.index != newresult) {
       forest->ReallocHandle(r);
       forest->Attach(r, newresult);
@@ -930,20 +941,11 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
    node_idx r;
    level newK;
 
-   if (services == 0)
-      newK = k - 18;
-
-   if (services == 1)
-      newK = k - 19;
-
+   newK = k - (18+services);
+   
    r = FWCache[k]->Hit(k, p);
    if (r >= 0)
       return r;
-
-   if (p == 0) {
-      numClasses++;
-      return numClasses - 1;
-   }
 
    if (newK == 0) {
       FWCache[k]->Add(k, p, numClasses);
@@ -952,15 +954,29 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
    }
 
    r = forest->NewNode(newK);
+
    node *nodeP;
-   nodeP = &FDDL_NODE(k, p);
-   for (arc_idx i = 0; i < nodeP->size; i++) {
-      forest->SetArc(newK, r, i,
-                     InternalBuildClassMDD(forest, k - 1,
-                                           FDDL_ARC(k, nodeP, i), numClasses,
-                                           services));
+   if (p !=0)
+      nodeP = &FDDL_NODE(k, p);
+   else nodeP = NULL;
+   
+   for (arc_idx i = 0; i <= maxVals[k]; i++) {
+      node_idx j;
+      if (nodeP && i<nodeP->size)
+         j = FDDL_ARC(k, nodeP, i);
+      else
+         j = 0;
+      node_idx q;
+      q = InternalBuildClassMDD(forest, k-1, j, numClasses, services);
+      forest->SetArc(newK, r, i, q);
    }
-   r = forest->CheckIn(newK, r);
+   if ((*forest->nodes[newK])[r]->size == 0){ // If the node is empty.
+      forest->DeleteNode(newK, r);
+      r = 0;
+   }
+   else{
+      r = forest->CheckIn(newK, r);
+   }
    FWCache[k]->Add(k, p, r);
    return r;
 }
@@ -1098,7 +1114,7 @@ int fw_fddl_forest::PrintClasses(mdd_handle p, int numClasses)
       return INVALID_MDD;
    low = new int[5];
    high = new int[5];
-   for (int i = 0; i < numClasses; i++) {
+   for (int i = 1; i < numClasses; i++) {
       printf("Class%d: \n", i);
       InternalPrintClasses(K, p.index, low, high, i);
    }
@@ -1115,7 +1131,7 @@ int fw_fddl_forest::PrintServiceClasses(mdd_handle p, int numClasses)
       return INVALID_MDD;
    low = new int[4];
    high = new int[4];
-   for (int i = 0; i < numClasses; i++) {
+   for (int i = 1; i < numClasses; i++) {
       printf("Class%d: \n", i);
       InternalPrintServiceClasses(K, p.index, low, high, i);
    }
@@ -1128,13 +1144,48 @@ int fw_fddl_forest::PrintServiceClasses(mdd_handle p, int numClasses)
 void fw_fddl_forest::InternalPrintClasses(level k, node_idx p, int *low,
                                           int *high, int classNum)
 {
+   struct hostent *h;
    if (p == 0 || k == 0) {
       if (p == classNum) {
-         printf("\t[%d-%d].[%d-%d].[%d-%d].[%d-%d]\n", k < 4 ? low[4] : 0,
-                k < 4 ? high[4] : 255, k < 3 ? low[3] : 0,
-                k < 3 ? high[3] : 255, k < 2 ? low[2] : 0,
-                k < 2 ? high[2] : 255, k < 1 ? low[1] : 0,
-                k < 1 ? high[1] : 255);
+         printf("\t");
+         int i;
+         if (k==0){
+            for (i=0;i<4;i++){
+               if (k >=4-i)
+                  break;
+               if (low[4-i] != high[4-i])
+                  break;
+            }
+            if (i==4){
+               char addy[16];
+               struct in_addr *addr;
+               sprintf(addy, "%d.%d.%d.%d\0", low[4], low[3],low[2],low[1]);
+               addr = new in_addr;
+               if (inet_aton(addy,addr) != 0){
+                  h = gethostbyaddr(addr, sizeof(addr), AF_INET);
+                  if (h != NULL){
+                     printf("%s(%s)\n", h->h_name, addy);
+                     return;
+                  }
+               }
+               delete addr;
+            }
+         }
+         for (i=0;i<4;i++){
+            if (k >= 4-i){
+               printf("*");
+            }
+            else if (low[4-i] == high[4-i]){
+               printf("%d", low[4-i]);
+            }
+            else{
+               printf("[%d-%d]",  low[4-i], high[4-i]);
+            }
+            if (i < 3){
+               printf(".");
+            }
+         }
+         printf("\n");
       }
       return;
    }
@@ -1143,6 +1194,8 @@ void fw_fddl_forest::InternalPrintClasses(level k, node_idx p, int *low,
 
    node *nodeP;
    nodeP = &FDDL_NODE(k, p);
+   if (nodeP->size <1) 
+      return;
    low[k] = 0;
    high[k] = 0;
    lastVal = FDDL_ARC(k, nodeP, 0);
@@ -1249,7 +1302,7 @@ int fw_fddl_forest::GetClasses(mdd_handle p, group ** &output, int numClasses)
    if (p.index < 0)
       return INVALID_MDD;
    output = new group *[numClasses];
-   for (int i = 0; i < numClasses; i++) {
+   for (int i = 1; i < numClasses; i++) {
       output[i] = new group();
       sprintf(output[i]->name, "Class%d", i);
       low = new int[5];
@@ -1437,7 +1490,7 @@ int fw_fddl_forest::GetServiceClasses(mdd_handle p, service ** &output,
    if (p.index < 0)
       return INVALID_MDD;
    output = new service *[numClasses];
-   for (int i = 0; i < numClasses; i++) {
+   for (int i = 1; i < numClasses; i++) {
       output[i] = new service();
       sprintf(output[i]->name, "Class%d", i);
       low = new int[4];

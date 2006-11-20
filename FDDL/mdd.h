@@ -129,14 +129,6 @@ public:
     in = 0;
 }};
 
-class val_list
-{
-public:
-  int low;
-  int high;
-  val_list *next;
-};
-
 class print_node
 {
   int K;
@@ -439,8 +431,6 @@ public:
   void PrintAddy (level k, node_idx p, int *vals, int depth);
   void PrintStates (node_idx root);
   void PrintStates (level k, node_idx root, int *states);
-  void PrintByRange (mdd_handle root);
-  void InternalPrintByRange (level k, node_idx root, val_list ** vals);
 
   int CountNodes (node_idx);
   int CountNodes (level k, node_idx p);
