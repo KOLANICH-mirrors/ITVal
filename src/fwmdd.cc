@@ -225,19 +225,38 @@ node_idx fw_fddl_forest::InternalAccepted(level k, node_idx p){
 node_idx fw_fddl_forest::InternalDropped(level k, node_idx p){
    node_idx r;
    node* nodeP;
-   if (p==0)
-      return 0;
-   if (k==0)
+
+   if (k==0){
+      if (p==0) 
+         return 1;
       return ((p == 2) || (p==1)) ? p : 0;
+   }
+   
    r = FWCache[k]->Hit(k,p);
    if (r>=0)
       return r;
+   
+   if (p==0){
+      r = NewNode(k);
+      node_idx j;
+      j = InternalDropped(k-1,0);
+      for (int i=0;i<=maxVals[k];i++){
+         SetArc(k,r,i,j);
+      }
+      r = CheckIn(k,r);
+      FWCache[k]->Add(k,p,r);
+      return r;
+   }
+      
    r = NewNode(k);
    nodeP = &FDDL_NODE(k,p);
-   for (int i=0;i<nodeP->size;i++){
+   for (int i=0;i<=maxVals[k];i++){
       node_idx j;
-      j = FDDL_ARC(k,nodeP, i);
-      SetArc(k,r,i, InternalDropped(k-1, FDDL_ARC(k,nodeP, i)));
+      if (i<nodeP->size)
+         j = FDDL_ARC(k,nodeP, i);
+      else
+         j = 0;
+      SetArc(k,r,i, InternalDropped(k-1, j));
    }
    r = CheckIn(k,r);
    FWCache[k]->Add(k,p,r);

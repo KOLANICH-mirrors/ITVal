@@ -290,6 +290,9 @@ condition* BuildAcceptCondition(int input_chain)
    }
 #ifdef ASSERT_DEBUG
    printf("Accept Condition: %d\n", sc->h.index);
+   for (int k=22;k>0;k--)
+      FW->FWForest->Compact(k);
+   FW->FWForest->PrintMDD();
 #endif
    return sc;
 }
@@ -330,6 +333,9 @@ condition* BuildDropCondition(int input_chain)
    */
 #ifdef ASSERT_DEBUG
    printf("DROPPED Condition: %d\n", sc->h.index);
+   for (int k=22;k>0;k--)
+      FW->FWForest->Compact(k);
+   FW->FWForest->PrintMDD();
 #endif
    return sc;
 }
@@ -1092,6 +1098,14 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
 
    FW->FWForest->Min(left->h, right->h, resultD->h);
    FW->FWForest->Min(left->history, right->history, resultD->history);
+
+#ifdef EXAMPLE_DEBUG
+	    printf("Left: %d Right:%d\n", left->h.index, right->h.index);
+	    printf("ResultA: %d\n", resultA->h.index);
+	    printf("ResultB: %d\n", resultB->h.index);
+	    printf("ResultC: %d\n", resultC->h.index);
+	    printf("ResultD: %d\n", resultD->h.index);
+#endif
    
    switch (assert_op){
       case OP_IS:
@@ -1118,13 +1132,6 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
 #endif
             if (tup != NULL)
                delete[] tup;
-#ifdef EXAMPLE_DEBUG
-	    printf("Left: %d Right:%d\n", left->h.index, right->h.index);
-	    printf("ResultA: %d\n", resultA->h.index);
-	    printf("ResultB: %d\n", resultB->h.index);
-	    printf("ResultC: %d\n", resultC->h.index);
-	    printf("ResultD: %d\n", resultD->h.index);
-#endif
 	 }
 	 else{
 	    printf("#Assertion failed.\n");
