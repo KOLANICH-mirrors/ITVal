@@ -95,8 +95,10 @@ int fw_fddl_forest::FindElement(mdd_handle root, Topology* T, int*& vals){
 node_idx fw_fddl_forest::InternalFindElement(level k, node_idx p, int* vals){
    node* nodeP;
    node_idx q;
-   if (k==0)
+   if (k==0){
+      vals[k] = p;
       return p != 0;
+   }
    nodeP = &FDDL_NODE(k,p);
    for (int i=0;i<nodeP->size;i++){
       q = FDDL_ARC(k,nodeP,i);

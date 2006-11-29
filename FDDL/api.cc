@@ -847,8 +847,8 @@ fddl_forest::InternalMin(level k, node_idx p, node_idx q)
 
 	node_idx newresult = CheckIn(k, result);
 
-	if (k > 0 && newresult)
-		FDDL_NODE(k, newresult).flags |= CHECKED_IN;
+//	if (k > 0 && newresult)
+//		FDDL_NODE(k, newresult).flags |= CHECKED_IN;
 	MinCache[k]->Add(p, q, newresult);
 	MinCache[k]->Add(q, p, newresult);
 	MinCache[k]->Add(p, newresult, newresult);
@@ -907,8 +907,8 @@ fddl_forest::InternalComplement(level k, node_idx p)
 
 		newresult = CheckIn(k, result);
 
-		if (k > 0 && newresult)
-			FDDL_NODE(k, newresult).flags |= CHECKED_IN;
+//		if (k > 0 && newresult)
+//			FDDL_NODE(k, newresult).flags |= CHECKED_IN;
 
 		ComplementCache[k]->Add(p, 1, newresult);
 		ComplementCache[k]->Add(newresult, 1, p);
@@ -930,8 +930,8 @@ fddl_forest::InternalComplement(level k, node_idx p)
 		}
 		newresult = CheckIn(k, result);
 
-		if (k > 0 && newresult)
-			FDDL_NODE(k, newresult).flags |= CHECKED_IN;
+//		if (k > 0 && newresult)
+//			FDDL_NODE(k, newresult).flags |= CHECKED_IN;
 
 		ComplementCache[k]->Add(p, 1, newresult);
 		ComplementCache[k]->Add(newresult, 1, p);
@@ -990,8 +990,8 @@ fddl_forest::InternalBComplement(level k, node_idx p)
 
 		newresult = CheckIn(k, result);
 
-		if (k > 0 && newresult)
-			FDDL_NODE(k, newresult).flags |= CHECKED_IN;
+//		if (k > 0 && newresult)
+//			FDDL_NODE(k, newresult).flags |= CHECKED_IN;
 
 	}
 	else {
@@ -1011,8 +1011,8 @@ fddl_forest::InternalBComplement(level k, node_idx p)
 		}
 		newresult = CheckIn(k, result);
 
-		if (k > 0 && newresult)
-			FDDL_NODE(k, newresult).flags |= CHECKED_IN;
+//		if (k > 0 && newresult)
+//			FDDL_NODE(k, newresult).flags |= CHECKED_IN;
 	}
 
 	BComplementCache[k]->Add(p, newresult);

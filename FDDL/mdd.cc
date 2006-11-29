@@ -599,13 +599,13 @@ node_idx fddl_forest::InternalRestrict (level k, node_idx p, node_idx q)
 
 node_idx fddl_forest::CheckIn (level k, node_idx p)
 {
-  node *
-    nodeP;
+  node *nodeP;
 
   nodeP = &FDDL_NODE (k, p);
   //are sparse.
   if (nodeP->size == 0)
     {
+      assert (!(nodeP->flags & CHECKED_IN));
       DeleteNode (k, p);
       //If the node is a dummy (has size 0), it must be a just created
       //node, so it appears at the end of the node array for this level.
@@ -662,13 +662,14 @@ node_idx fddl_forest::CheckIn (level k, node_idx p)
 	}
       delete[]tempArray;
     }
-  node_idx
-    q;
+    
+  node_idx q;
 
   thisForest = this;
-  q = UT->Add (k, p);
-  node *
-    nodeQ = &FDDL_NODE (k, q);
+  q = UT->Add(k, p);
+
+  node *nodeQ;
+  nodeQ = &FDDL_NODE (k, q);
 
   if (q != p)
     {
@@ -684,6 +685,10 @@ node_idx fddl_forest::CheckIn (level k, node_idx p)
 	}
 
       DeleteNode (k, p);
+
+      if (nodeP->flags & CHECKED_IN){ //Deleted Node is no longer checked in (we've scrambled the arcs!).
+         nodeP->flags -= CHECKED_IN;
+      }
       last[k]--;
     }
   if (nodeQ->flags & DELETED)
@@ -725,11 +730,23 @@ node_idx fddl_forest::NewNode (level k)
 void
 fddl_forest::DeleteNode (level k, node_idx p)
 {
-  if (k < 1)
+  if (k < 1)  //Can't delete terminal nodes!
     return;
-  if (!(FDDL_NODE (k, p).flags & DELETED))
-    numnodes--;
-  FDDL_NODE (k, p).flags |= DELETED;
+
+  if (p==0)  //Can't delete node 0!
+     return;
+ 
+  node* nodeP;
+
+  nodeP = &FDDL_NODE(k,p);
+
+  if (nodeP->flags & DELETED) //If already deleted, return.
+     return;
+ 
+  assert(nodeP->in == 0); //Only delete disconnected nodes!
+ 
+  numnodes--;
+  nodeP->flags |= DELETED;
 }
 
 void
@@ -829,11 +846,12 @@ fddl_forest::Compact (level k)
   //Don't compact bad levels
   if (k > K)
     return;
+
   if (k == K)
-    {				//The Top Level is special.
+  {				//The Top Level is special.
       CompactTopLevel ();
       return;
-    }
+  }
 
   dynarray < node_idx > *arc_temp_array;	//Store the new arcs for level k
   arc_temp_array = new dynarray < node_idx > (0);
@@ -845,11 +863,11 @@ fddl_forest::Compact (level k)
   //node indices so that we can re-hash
   //and also update the level above.   
   if (node_remap_array[k])
-    {
+  {
       delete node_remap_array[k];
 
       node_remap_array[k] = NULL;
-    }
+  }
   node_remap_array[k] = new dynarray < node_idx > (0);
 
   //thisForest = this;
@@ -869,12 +887,13 @@ fddl_forest::Compact (level k)
       node *nodeI = &FDDL_NODE (k, i);
 
       //If it's not deleted, copy it.
-      if (nodeI->in > 0)
+//      if (nodeI->in > 0)
+      if (!(nodeI->flags & DELETED))
 	{	
 	  //Save the "old" idx of the node
 	  //into a temp array.  
 	  (*(*node_remap_array[k])[i]) = numvalidnodes;	
-	  (*(*node_temp_array)[numvalidnodes]) = (*nodeI);	
+	  (*(*node_temp_array)[numvalidnodes]) = (*nodeI);
 
 	  //Copy (and compact) the arcs, too.
 	  int newdown = tail[k];
@@ -903,13 +922,14 @@ fddl_forest::Compact (level k)
 	  numvalidnodes++;
 	}
       else
-	{
+	{		//If it IS deleted, "DeleteDownstream" it.
 	  thisForest = this;
 	  UT->Delete (k, i);
-	  if (k >= 2)
-	    {			//If it IS deleted, "DeleteDownstream" it.
+          assert(nodeI->flags & DELETED);
+          if (k >= 2)
+	  {	
 	      for (j = 0; j < nodeI->size; j++)
-		{
+	      {
 		  if (nodeI->flags & SPARSE)
 		    arc = SPARSE_ARC (k, nodeI, j);
 		  else
@@ -918,8 +938,8 @@ fddl_forest::Compact (level k)
 		  SetArc (k, i, j, 0);	//Compaction should ALWAYS be done
 		  if (nodeJ->in == 0)	//Top Down so that Deletion Marking
 		    DeleteNode (k - 1, arc);	//Actually Deletes -Downstream-
-		}
-	    }
+	      }
+	  }
 	}
     }
   last[k] = numvalidnodes;
