@@ -1079,8 +1079,15 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
   
    FW->FWForest->BinaryComplement(left->h, notA->h);
    FW->FWForest->BinaryComplement(right->h, notB->h);
+   
    FW->HistoryForest->BinaryComplement(left->history, notA->history);
+//   printf("Left: %d notA: %d\n", left->history.index, notA->history.index);
+//   for (int k=25;k>0;k--)
+//      FW->HistoryForest->Compact(k);
+//   FW->HistoryForest->PrintMDD();
+   
    FW->HistoryForest->BinaryComplement(right->history, notB->history);
+
    #ifdef EXAMPLE_DEBUG
    printf("ASSERT_OP: %d\n", assert_op);
    printf("NotA: %d\n", notA->h.index);
@@ -1089,7 +1096,6 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
 
    FW->FWForest->Min(notA->h, right->h, resultA->h);
    FW->HistoryForest->Min(notA->history, right->history, resultA->history);
-   
    FW->FWForest->Min(left->h, notB->h, resultB->h);
    FW->HistoryForest->Min(left->history, notB->history, resultB->history);
 
@@ -1110,18 +1116,21 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    switch (assert_op){
       case OP_IS:
          if (resultA->h.index != 0){
-            printf("#Assertion failed (x in NOT A is in B).\n");
+            printf("#Assertion failed.\n");
             FW->FWForest->FindElement(resultA->h, FW->T, tup);
+            FW->HistoryForest->Min(mergedHistory, resultA->history, resultHistory);
             cond = false;
          }
          else if (resultB->h.index != 0){
-            printf("#Assertion failed (x in NOT B is in A).\n");
+            printf("#Assertion failed.\n");
             FW->FWForest->FindElement(resultB->h, FW->T, tup);
+            FW->HistoryForest->Min(mergedHistory, resultB->history, resultHistory);
             cond = false;
          }
          else{
             printf("#Assertion held.\n");
             FW->FWForest->FindElement(left->h, FW->T, tup);
+            FW->HistoryForest->Min(mergedHistory, left->history, resultHistory);
             cond = true;
          }
       break;
@@ -1129,40 +1138,47 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
          if (resultB->h.index == 0){
 	    printf("#Assertion held.\n");
             FW->FWForest->FindElement(left->h, FW->T, tup);
+            FW->HistoryForest->Min(mergedHistory, left->history, resultHistory);
             cond = true;
 	 }
 	 else{
 	    printf("#Assertion failed.\n");
-            FW->FWForest->FindElement(resultB->h, FW->T,tup);
+            FW->FWForest->FindElement(resultB->h, FW->T, tup);
+            FW->HistoryForest->Min(mergedHistory, resultB->history, resultHistory);
             cond = false;
         }
       break;
       case OP_NOT_IS:
       if (resultA->h.index != 0){
 	  printf("#Assertion held.\n");
-          FW->FWForest->FindElement(resultA->h,FW->T,tup);
+          FW->FWForest->FindElement(resultA->h,FW->T, tup);
+          FW->HistoryForest->Min(mergedHistory, resultA->history, resultHistory);
           cond = true;
       }
       else if (resultB->h.index !=0){
 	  printf("#Assertion held.\n");
-          FW->FWForest->FindElement(resultB->h,FW->T,tup);
+          FW->FWForest->FindElement(resultB->h,FW->T, tup);
+          FW->HistoryForest->Min(mergedHistory, resultB->history, resultHistory);
           cond = true;
       }
       else{
 	  printf("#Assertion failed.\n");
-          FW->FWForest->FindElement(left->h,FW->T,tup);
+          FW->FWForest->FindElement(left->h,FW->T, tup);
+          FW->HistoryForest->Min(mergedHistory, left->history, resultHistory);
           cond = false;
       }
       break;
       case OP_NOT_SUBSET:
       if (resultB->h.index !=0){
          printf("#Assertion held.\n");
-         FW->FWForest->FindElement(resultB->h, FW->T,tup);
+         FW->FWForest->FindElement(resultB->h, FW->T, tup);
+         FW->HistoryForest->Min(mergedHistory, resultB->history, resultHistory);
          cond = true;
       }
       else{
          printf("#Assertion failed.\n");
          FW->FWForest->FindElement(left->h, FW->T, tup);
+         FW->HistoryForest->Min(mergedHistory, left->history, resultHistory);
          cond = false;
       }
       break;
@@ -1174,18 +1190,21 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
       else{
          printf("#Counterexample:\n");
       }
-      if (tup != NULL)
-         FW->FWForest->PrintElement(FW->T,tup);
-      }
+      if (tup != NULL){
+         FW->FWForest->PrintElement(FW->T, tup);
 #ifndef NO_HISTORY
-      if (history){
-         printf("Critical Rules:\n");
-         FW->HistoryForest->Min(mergedHistory, left->h, resultHistory);
-         FW->HistoryForest->DisplayHistory(resultHistory, tup);
-      }
+         if (history){
+            printf("Critical Rules:\n");
+            FW->HistoryForest->DisplayHistory(resultHistory, tup);
+//            printf("History MDD:%d\n", resultHistory.index);
+//            for (int k=25;k>0;k--)
+//               FW->HistoryForest->Compact(k);
+//            FW->HistoryForest->PrintMDD();
+         }
 #endif
-      if (tup != NULL)
          delete[] tup;
+      }
+   }
    delete resultA;
    delete resultB;
    delete resultC;

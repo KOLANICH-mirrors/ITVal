@@ -389,7 +389,7 @@ void Firewall::BuildVerboseFWRules(char *fname)
             printf("%d: Bad chain definition\n", lineNo);
             exit(-1);
          }
-         printf("%d: Chain %s[%d]\n", lineNo, newChain->name,newChain->id);
+         printf("%d: Chain %s[%d](Default %d)\n", lineNo, newChain->name,newChain->id, newChain->Default);
 #endif
 
          current_chain++;

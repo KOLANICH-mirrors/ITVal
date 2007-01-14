@@ -348,7 +348,7 @@ node_idx (*func)(node_idx *, int))
 
         indices = new node_idx[num_roots];
          
-        for (j=0;j<maxVals[k];j++){
+        for (j=0;j<=maxVals[k];j++){
            for (i=0;i<num_roots;i++){
               node* nodeP;
               nodeP = &FDDL_NODE(k,roots[i]);
@@ -981,10 +981,7 @@ fddl_forest::InternalBComplement(level k, node_idx p)
 	//If the node is not sparse, do things the easy way.
 	if (!IS_SPARSE(nodeP)) {
 		for (arc_idx i = 0; i <= maxVals[k]; i++) {
-			node_idx u = i < psize ? InternalBComplement(k - 1,
-																		FULL_ARC(k, nodeP,
-																					i)) :
-				InternalBComplement(k - 1, 0);
+			node_idx u = i < psize ? InternalBComplement(k - 1, FULL_ARC(k, nodeP, i)) : InternalBComplement(k - 1, 0);
 			SetArc(k, result, i, u);
 		}
 

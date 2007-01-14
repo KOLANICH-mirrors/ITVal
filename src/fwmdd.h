@@ -88,8 +88,7 @@ class fw_fddl_forest:public fddl_forest {
    node_idx InternalDropped(level k, node_idx p);
 
    int DisplayHistory(mdd_handle root, int* tup);
-   int InternalDisplayHistory(level k, node_idx p, int* tup, int chain,
-   int rule);
+   int InternalDisplayHistory(level k, node_idx p, int* tup, int chain);
 
    int PrintHistory(mdd_handle p);
    void InternalPrintHistory(level k, node_idx p, int chain_num, int rule_num);

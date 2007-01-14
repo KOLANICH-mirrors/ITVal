@@ -146,7 +146,7 @@ void PrintRuleTuple(rule_tuple * r)
 {
    int i;
 
-   printf("-->");
+   printf("Chain %d, Rule %d --> ", r->chain_id, r->id);
    for (i = 22; i >= 0; i--) {
       printf("%d-%d ", r->low[i], r->high[i]);
    }

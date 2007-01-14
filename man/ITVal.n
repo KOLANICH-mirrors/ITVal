@@ -8,8 +8,8 @@ ITVal \- iptables analysis engine
 .| ITVal
 ITVal is a firewall analysis tool that provides answers to user specified 
 queries about an iptables firewall or firewall system.
-Unlike other firewall testing tools, ITVal uses offline analysis of the
-firewall policy file.  To generate inputs to ITVal, you can simply use
+Unlike many other firewall testing tools, ITVal uses offline analysis of 
+the firewall policy file.  To generate inputs to ITVal, you can simply use
 the commands 
 .PP 
 .B iptables -L -v \> filter.out

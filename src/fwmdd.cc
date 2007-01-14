@@ -115,51 +115,53 @@ int fw_fddl_forest::DisplayHistory(mdd_handle root, int* vals){
    if (root.index < 0)
       return INVALID_MDD;
 
-   if (InternalDisplayHistory(K, root.index, vals, 0, 0) != 0){
+   if (InternalDisplayHistory(K, root.index, vals, 0) != 0){
       return SUCCESS;
    }
    return INVALID_MDD;
 }
 
 node_idx fw_fddl_forest::InternalDisplayHistory(level k, node_idx p,
-int* vals, int chain, int rule){
+int* vals, int chain){
    node* nodeP;
    node_idx q;
    
 #ifdef HISTORY_DEBUG
    if (k>=2)
-      printf("DH: <%d,%d>[%d],%d,%d\n", k,p,vals[k-2],chain, rule);
+      printf("DH: <%d,%d>[%d],%d,%d\n", k,p,vals[k-2],chain);
    else
-      printf("DH: <%d,%d>[-],%d,%d\n", k,p,chain, rule);
+      printf("DH: <%d,%d>[-],%d,%d\n", k,p,chain);
 #endif
-   if (k==0){
-      return p;
-   }
    if (p==0){
       return 0;
    }
+   if (k==0){
+      return p;
+   }
    nodeP = &FDDL_NODE(k,p);
    if (k==1){
+      int found;
+      found = 0;
       for (int i=0;i<nodeP->size;i++){
          q = FDDL_ARC(k,nodeP,i);
-         if (q != 0 && (InternalDisplayHistory(k-1, q, vals, 0, 0) != 0)){
-            printf("Chain %d Rule %d\n", chain, rule);
-            return 1;
+         if (q != 0 && (InternalDisplayHistory(k-1, q, vals, 0) != 0)){
+            printf("Chain %d Rule %d\n", chain, i);
+            found = 1;
          }
       }
-      return 0;
+      return found;
    }
    if (k==2){
       for (int i=0;i<nodeP->size;i++){
          q = FDDL_ARC(k,nodeP,i);
          if (q !=0)
-            InternalDisplayHistory(k-1, q, vals, chain, i);
+            InternalDisplayHistory(k-1, q, vals, i);
       }
       return 1;
    }
    q = FDDL_ARC(k, nodeP, vals[k-2]);
    if (q != 0){
-      return InternalDisplayHistory(k-1,q,vals,vals[k-2],0);
+      return InternalDisplayHistory(k-1,q,vals,0);
    }
    return 0;
 }

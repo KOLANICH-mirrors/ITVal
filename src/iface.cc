@@ -23,6 +23,7 @@
  * and Mary Williamsburg, VA 23185 
  */
 //#define STACK_DEBUG
+#define RULE_QUERY_DEBUG
 
 #include "iface.h"
 #include "firewall.h"
@@ -445,6 +446,16 @@ void Firewall::BuildRules(processed_rule * head, rule_tuple * &stack)
 #endif
    if (head->pktcond <=1)               // Temporarily, ignore PKTTYPE flags.
       ProcessSource(head, tup, stack);     // Initiate the processing chain.
+#ifdef RULE_QUERY_DEBUG
+    printf("Building rule tuples:\n");
+    if (stack==NULL){
+       printf("No rules.\n");
+    }
+    else{
+       PrintRuleTuple(stack);
+    }
+    printf("Done building rule tuples.\n");
+#endif
    delete tup;
 }
 
@@ -723,10 +734,9 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
    }
 //   hlow[0] = 1;
 //   hhigh[0] = 1;
-   hlow[0] = low[0];
-   hhigh[0] = high[0];
+   hlow[0] = hhigh[0] = chain->Default;
 
-   hlow[1] = 0;
+   hlow[1] = 0;   //Default Policy is rule 0.
    hhigh[1] = 0;
 
    hlow[2] = chain->id;

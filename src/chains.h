@@ -58,8 +58,7 @@ class chain {
       Default = -1;
       chain::numChains++;
       id = chain::numChains;
-      //numRules = 1;  //Default policy counts as rule 0.
-      numRules = 0;  //Default policy counts as rule 0.
+      numRules = 1;  //Default policy counts as rule 0.
      } 
      
      chain(char *fileName) {
@@ -70,8 +69,7 @@ class chain {
       strncpy(fname, fileName, 256);
       chain::numChains++;
       id = chain::numChains;
-      numRules = 0;  //Default policy counts as rule 0.
-      //numRules = 1;  //Default policy counts as rule 0.
+      numRules = 1;  //Default policy counts as rule 0.
    }
 
    ~chain() {

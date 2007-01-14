@@ -173,6 +173,8 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    for (level k = 22; k > 0; k--)
       FWForest->Compact(k);
    FWForest->PrintMDD();
+#endif 
+#ifdef DEBUG
    printf("ForwardHist: %d InputHist: %d OutputHist %d\n", ForwardHist.index, InputHist.index, OutputHist.index);
    for (level k = 24; k > 0; k--){
       HistoryForest->Compact(k);
