@@ -1,40 +1,43 @@
-Thank you for downloading version 0.8 of ITVal, an iptables configuration
-verification and analysis tool.  This release of ITVal adds several important
-new features and fixes some minor bugs in topology handling and parsing.
+Thank you for downloading version 0.99 of ITVal, an iptables
+configuration verification and analysis tool.  
 
-IMPORTANT NOTE: Version 0.8 breaks compatability with previous versions of the
-tool!  Query files created for versions 0.7 and lower may not work with this
-version or may generate unexpected results.  See below for more details.
+Release 0.99 is a pre-release intended for beta-testing in preparation
+for ITVal-1.0.  Version 0.99 features RPM and DPKG packages of the tool,
+as well as several new features and a few minor bug fixes in calculation
+of equivalence classes and parsing.
 
-Version 0.7 added support for address ranges both in queries and in
-group/service definitions and made the output of the "CLASSES" query more
-manageable.
+IMPORTANT NOTE: Version 0.99 breaks compatibility with previous versions
+of the tool!  Query files created for versions 0.7 and lower may not
+work with this version or may generate unexpected results.  See below
+for more details.
 
-Version 0.6 included many bug fixes and some features from version 0.5 (which
-was not released) including some preliminary code for a GUI.
-
-Version 0.5 introduced a new type of query called "CLASSES" that partitions the
-set of all IP addresses into groups according to how the firewall treats each
-host with that address.  It also introduced a few minor bugfixes.  
-
-What's new in 0.8?
+What's new in 0.99?
 ------------------
-New query primitives: 
+*Witnesses and Counter-examples (for Assertions)
 
-The semantics of the query have changed so that the query condition is no
-longer implicitly intersected with the set of accepted packets.  Instead, ITVal
-provides two new query primitives, "ACCEPTED" and "DROPPED", which represent
-the set of ACCEPTED and DROPPED packets, respectively.  This allows the user to
-create queries such as "QUERY SADDY FROM 192.168.2.* AND (ACCEPTED FORWARD OR
-ACCEPTED INPUT)" that test for acceptance from multiple built-in chains.
+If you insert the keyword "EXAMPLE" at the beginning of your assertion,
+ITVal will generate a packet illustating why the assertion failed or, if
+the assertion holds, a packet that honors the assertion.
 
-As a consequence of this change, queries no longer take an "input_chain"
-argument.  Instead, this argument should be passed to the "ACCEPTED" or
-"DROPPED" keyword.  
+For example, you can use:
 
-This change BREAKS COMPATABILITY with old query files.  To convert old files to
-the new syntax, replace the "input_chain" parameter from each query with an
-"AND ACCEPTED <input_chain>" at the end of the query.  For instance:
+ASSERT EXAMPLE FROM 192.168.2.* AND NOT INFACE eth1 SUBSET OF DROPPED FORWARD;
+
+To test whether a packet from 192.168.2.0/24 can show up on interface
+eth1 without being dropped.  If the assertion fails, ITVal will show you
+a packet from 192.168.2.0/24 that can arrive on eth1 without being
+dropped by the firewall.
+
+*Changes to queries and assertions:
+
+The semantics of a the ACCEPT and DROPPED keywords have changed so that
+queries no longer take an "input_chain" argument.  Instead, this
+argument should be passed to the "ACCEPTED" or "DROPPED" keyword.  
+
+This change BREAKS COMPATABILITY with old query files.  To convert old
+files to the new syntax, replace the "input_chain" parameter from each
+query with an "AND ACCEPTED <input_chain>" at the end of the query.  For
+instance:
 
 QUERY SADDY INPUT FROM 192.168.2.* AND IN NEW;
 
@@ -42,26 +45,19 @@ would become:
 
 QUERY SADDY (FROM 192.168.2.* AND IN NEW) AND ACCEPTED INPUT;
 
-Assertion statements:
-
-Version 0.8 adds support for "assertions".  Assertions are similar to queries,
-but return a true or false value.  They are particularly useful for expressing
-desired properties of the firewall policy.  Although assertion statements
-currently provide similar functionality to queries, they are very extensible.
-Future versions of ITVal will provide detailed analysis of why an assertion
-failed or held true -- information which can make it much easier to fix
-problems in the rule set.
-
-What is not provided in release 0.8?
+What is not provided in release 0.99?
 ------------------------------------
 1.  Support for non-iptables filters.
 
-ITVal does not filters for platforms other than Linux. Because maintaining
-parsers for other languages is costly and time-consuming, it is unlikely
-that I will be adding support for other platforms.  However, I do intend
-to create an API for writing language modules, so if you want to see
-your platform supported, you will have the tools to add support for that
-language.
+ITVal does not filters for platforms other than Linux. Because
+maintaining parsers for other languages is costly and time-consuming, it
+is unlikely that I will be adding support for other platforms.  However,
+I do intend to create an API for writing language modules, so if you
+want to see your platform supported, you will have the tools to add
+support for that language.  I am working with Alain Mayer at redseal.org
+to generate conversion tools from redseal's excellent security tool to
+work with ITVal an vice-versa.  You can also obtain tools for converting
+from ipfw or ipchains to iptables at http://www.stearns.org.
 
 2.  Support for application level filtering.
 
@@ -75,27 +71,23 @@ Work on the GUI continues slowly as we decide what to provide through the
 interface and refactor the code to make it more amenable to graphical
 manipulation.
 
+4.  Support for dynamic firewalls
+
+ITVal can process a ``snapshot in time'' of a firewall, but has no query
+capabilities for analyzing the evolution of firewalls over time.
+
 What is coming in future versions of ITVal?
 -------------------------------------------
-1.  Witnesses and Counter-examples (for Assertions)
-When an assertion fails, ITVal will optionally generate an example packet that
-violates the assertion.  When an assertion succeeds, ITVal will generate a
-packet that honors the assertion.
-
-2.  Guided repair
+1.  Guided repair
 ITVal will generate a list of suggested changes to the rule set that satisfy
 all the assertions in a query file.
 
-3.  Translations
+2.  Translations
 Aleksandr Shubnik has volunteered to provide Russian translations for ITVal.  
 Hopefully, others will join the team to provide translations in other languages.
 
-4.  Packages for popular distributions
-Alex has also volunteered to help with an RPM package for ITVal.  Also in 
-progress is an ebuild for Gentoo portage.
-
-5.  A Graphical Front-End
+3.  A Graphical Front-End
 Yes, really!  I am leaning now toward a QT-based interface that will allow the
 user to manipulate queries in a text-editing environment and then check them in
 real time against the rule set.  The old, klugy, python/TK attempt was not
-very portable and introduced a bunch of problems with paths.
+very portable and introduced problems with paths.

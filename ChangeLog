@@ -1,3 +1,25 @@
+ITVal-0.99: Feb 1, 2007 Robert Marmorstein
+	**** THIS RELEASE BREAKS COMPATABILITY WITH PREVIOUS VERSIONS ****
+	Pre-release of ITVal-1.0 for beta testing purposes.  ITVal now
+	features witnesses and counterexamples in addition to the new ASSERT
+	structure.  I have also fixed several bugs and
+	support for equivalence classes.
+
+	*IMPORTANT*  
+	The syntax of the ACCEPT and DROPPED conditions 
+	has changed!  Instead of doing:
+
+	QUERY SADDY INPUT FROM 192.168.1.* AND ACCEPTED;
+
+	The syntax is now:
+
+	QUERY SADDY FROM 192.168.1.* AND ACCEPTED INPUT;
+
+	This allows you to do things like:
+
+	QUERY SADDY FROM 192.168.1.* AND ACCEPTED INPUT OR ACCEPTED
+	FORWARD;
+
 ITVal-0.8: June 17, 2006 Robert Marmorstein
 	Began preliminary support for guided repair.  Adding history options
 	to the MDD library.  Redesigning the GUI in QT/KDE.  Fixed several

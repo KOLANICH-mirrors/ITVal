@@ -9,9 +9,11 @@ Marmorstein, Robert (Atomopawn) <rmmarm@sdf.lonestar.org>
     * FDDL Decision Diagram Library
     * SNAT and DNAT support
     * Composition of Multiple Firewalls
+    * Assertions
+    * Witnesses and CounterExamples
 
 Kearns, Phil (College of William and Mary)
     * Research Advisor
 
-
-Thanks to Aleksandr Shubnik(www.great-wall.by) for extensive testing and bug reporting.
+Thanks to Aleksandr Shubnik(www.great-wall.by) for extensive testing and
+bug reporting.
