@@ -981,10 +981,6 @@ query *PerformQuery(int subject, condition * c)
 
    // Intersect the set of accepted packets with the set of packets
    // relevant to the query (stored in condition "c").
-#ifndef NO_HISTORY
-   FW->HistoryForest->PrintHistory(c->history);
-#endif
-
 #ifdef DEBUG
    printf("Rules: %d Query: %d\n", FW->Forward.index, c->h.index);
    //FW->FWForest->PruneMDD(c->h);
