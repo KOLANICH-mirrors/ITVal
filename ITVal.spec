@@ -25,7 +25,7 @@ an equivalence class abstraction of the firewall policy.
 %setup -q
 
 %build
-./configure --prefix ${RPM_BUILD_ROOT}/usr
+./configure --prefix ${RPM_BUILD_ROOT}/usr --libdir ${RPM_BUILD_ROOT}/%{_libdir}
 make
 
 %install 
@@ -35,11 +35,11 @@ make install
 %defattr(-,root,root)
 %doc README LICENSE RELEASE AUTHORS COPYING INSTALL 
 /usr/bin/ITVal
-/usr/lib/libFDDL.a
-/usr/lib/libFDDL.la
-/usr/lib/libFDDL.so.0.0.0
-/usr/lib/libFDDL.so.0
-/usr/lib/libFDDL.so
+%{_libdir}/libFDDL.a
+%{_libdir}/libFDDL.la
+%{_libdir}/libFDDL.so.0.0.0
+%{_libdir}/libFDDL.so.0
+%{_libdir}/libFDDL.so
 /usr/include/ITVal/mdd.h
 /usr/include/ITVal/mddtypes.h
 /usr/include/ITVal/caches.h
