@@ -1,7 +1,6 @@
 #This query file was obtained using a list of vulnerable ports from
 #http://www.jlathamsite.com/dslr/suspectports.htm
-
-#It lists possibly insecure services that may be running on your
+#and lists possibly insecure services that may be running on your
 #machine.  If you know you need that service, ignore the results.
 #If you aren't running that service, you should secure those ports.
 
@@ -21,6 +20,7 @@ QUERY SADDY IN NEW AND FOR ICMP 5 AND ACCEPTED FORWARD;
 QUERY SADDY IN NEW AND FOR UDP 7 AND ACCEPTED FORWARD;
 
 #Ping Attack
+#If you want to allow "pings" on your network, you need this enabled.
 QUERY SADDY IN NEW AND FOR ICMP 8 AND ACCEPTED FORWARD;
 
 #Ajan Trojan
@@ -28,4 +28,5 @@ QUERY SADDY IN NEW AND FOR ICMP 8 AND ACCEPTED FORWARD;
 #This port also supports normal SMTP service.
 QUERY SADDY IN NEW AND FOR BOTH 25 AND ACCEPTED FORWARD;
 
-
+#Port 0 Fingerprinting
+QUERY SADDY IN NEW AND ON TCP 0 OR ON UDP 0 AND ACCEPTED FORWARD OR ACCEPTED INPUT;

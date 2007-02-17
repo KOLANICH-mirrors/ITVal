@@ -1,3 +1,4 @@
+# vim : set filetype=itval
 #These queries are taken from some lists of vulnerable ports found
 #on the internet.  They examine ports used by trojan horses, worms, and
 #viruses that are probably not needed for normal system use.
