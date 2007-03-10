@@ -26,7 +26,7 @@ College of William and Mary
 Williamsburg, VA 23185
 */
 %{
-#include "src/structures.h"
+#include "FDDL/structures.h"
 #include "src/parser.h"
 #include "src/fwlang.tab.hh"
 

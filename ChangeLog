@@ -1,3 +1,8 @@
+ITVal-1.0: Feb 3, 2007 Robert Marmorstein
+	Added RPM packages and a gentoo ebuild.  Debian support has been
+	delayed until I can find someone willing to maintain a Debian 
+	package.
+
 ITVal-0.99: Feb 1, 2007 Robert Marmorstein
 	**** THIS RELEASE BREAKS COMPATABILITY WITH PREVIOUS VERSIONS ****
 	Pre-release of ITVal-1.0 for beta testing purposes.  ITVal now

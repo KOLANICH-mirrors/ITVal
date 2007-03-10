@@ -36,7 +36,7 @@ Williamsburg, VA 23185
 
 #   include <FDDL/mdd.h>
 #   include "nat.h"
-#   include "structures.h"
+#   include <FDDL/structures.h>
 #   include "sets.h"
 #   include "topology.h"
 

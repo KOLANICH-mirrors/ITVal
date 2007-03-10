@@ -29,7 +29,7 @@ Williamsburg, VA 23185
 #ifndef __PARSER_H
 #define __PARSER_H
 
-#include "structures.h"
+#include <FDDL/structures.h>
 #include "fwmdd.h"
 
 #define YY_DECL int yylex(YYSTYPE *yylval)

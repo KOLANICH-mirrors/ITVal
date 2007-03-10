@@ -1,23 +1,22 @@
-Thank you for downloading version 0.99 of ITVal, an iptables
-configuration verification and analysis tool.  
+Thank you for downloading version 1.0 of ITVal, an iptables configuration
+verification and analysis tool.  
 
-Release 0.99 is a pre-release intended for beta-testing in preparation
-for ITVal-1.0.  Version 0.99 features RPM and DPKG packages of the tool,
-as well as several new features and a few minor bug fixes in calculation
-of equivalence classes and parsing.
+Version 1.0 features RPM and DPKG packages of the tool, as well as several new
+features and a few minor bug fixes in calculation of equivalence classes and
+parsing.
 
-IMPORTANT NOTE: Version 0.99 breaks compatibility with previous versions
-of the tool!  Query files created for versions 0.7 and lower may not
-work with this version or may generate unexpected results.  See below
-for more details.
+IMPORTANT NOTE: Version 1.0 breaks compatibility with pre-release versions 0.7
+and lower of the tool.  Query files created for versions 0.7 and lower may not
+work with this version or may generate unexpected results.  See below for more
+details.
 
-What's new in 0.99?
+What's new in 1.0?
 ------------------
 *Witnesses and Counter-examples (for Assertions)
 
-If you insert the keyword "EXAMPLE" at the beginning of your assertion,
-ITVal will generate a packet illustating why the assertion failed or, if
-the assertion holds, a packet that honors the assertion.
+If you insert the keyword "EXAMPLE" at the beginning of your assertion, ITVal
+will generate a packet illustating why the assertion failed or, if the
+assertion holds, a packet that honors the assertion.
 
 For example, you can use:
 
@@ -45,7 +44,7 @@ would become:
 
 QUERY SADDY (FROM 192.168.2.* AND IN NEW) AND ACCEPTED INPUT;
 
-What is not provided in release 0.99?
+What is not provided in release 1.0?
 ------------------------------------
 1.  Support for non-iptables filters.
 
