@@ -3,7 +3,7 @@
 %{
 #include <string>
 #include "src/parser.h"
-#include "structures.h"
+#include "src/structures.h"
 int yyerror(char* str);
 %}
 

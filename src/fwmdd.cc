@@ -957,7 +957,7 @@ int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest * forest,
    return SUCCESS;
 }
 
-int fw_fddl_forest::BuildHistoryMDD(mdd_handle p, fddl_forest * forest,
+int fw_fddl_forest::BuildHistoryMDD(mdd_handle p, fw_fddl_forest * forest,
                                   mdd_handle & r)
 {
 
@@ -976,7 +976,6 @@ int fw_fddl_forest::BuildHistoryMDD(mdd_handle p, fddl_forest * forest,
       forest->FWCache[k]->Clear();
    }
 
-   numClasses = 1;
    newresult = InternalBuildHistoryMDD(forest, K, p.index);
    if (r.index != newresult) {
       forest->ReallocHandle(r);
@@ -1032,7 +1031,7 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
    return r;
 }
 
-node_idx fw_fddl_forest::InternalBuildHistoryMDD(fddl_forest * forest, level k,
+node_idx fw_fddl_forest::InternalBuildHistoryMDD(fw_fddl_forest * forest, level k,
                                                node_idx p)
 {
    node_idx r;
@@ -1051,7 +1050,7 @@ node_idx fw_fddl_forest::InternalBuildHistoryMDD(fddl_forest * forest, level k,
    r = forest->NewNode(newK);
 
    if (newK <=2){
-      node_idx j;
+      node_idx q;
       q = InternalBuildHistoryMDD(forest,k-1,p);
       for (arc_idx i = 1; i <= forest->maxVals[newK]; i++){
          forest->SetArc(newK, r, i, q);

@@ -592,7 +592,7 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "fwlang_scanner.ll"
+#line 1 "src/fwlang_scanner.ll"
 /*
 ITVal: The IPTables Firewall Validator
 Copyright (C) 2004 Robert Marmorstein
@@ -620,13 +620,13 @@ Department of Computer Science
 College of William and Mary
 Williamsburg, VA 23185
 */
-#line 29 "fwlang_scanner.ll"
-#include "FDDL/structures.h"
+#line 29 "src/fwlang_scanner.ll"
+#include "src/structures.h"
 #include "src/parser.h"
 #include "src/fwlang.tab.hh"
 
 int FWLANG_LINE_NO = 0;
-#line 43 "fwlang_scanner.ll"
+#line 43 "src/fwlang_scanner.ll"
 //# define YY_USER_ACTION yylloc->columns (yyleng);
 #line 632 "fwlang_scanner.cc"
 
@@ -779,7 +779,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 45 "fwlang_scanner.ll"
+#line 45 "src/fwlang_scanner.ll"
 
 #line 785 "fwlang_scanner.cc"
 
@@ -862,313 +862,313 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 46 "fwlang_scanner.ll"
+#line 46 "src/fwlang_scanner.ll"
 { ECHO; } //Comments
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 47 "fwlang_scanner.ll"
+#line 47 "src/fwlang_scanner.ll"
 { ECHO; return GROUP; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 48 "fwlang_scanner.ll"
+#line 48 "src/fwlang_scanner.ll"
 { ECHO; return SERVICE; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 49 "fwlang_scanner.ll"
+#line 49 "src/fwlang_scanner.ll"
 { ECHO; return QUERY; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 50 "fwlang_scanner.ll"
+#line 50 "src/fwlang_scanner.ll"
 { ECHO; return ASSERT; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 51 "fwlang_scanner.ll"
+#line 51 "src/fwlang_scanner.ll"
 { ECHO; return ACCEPTED; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 52 "fwlang_scanner.ll"
+#line 52 "src/fwlang_scanner.ll"
 { ECHO; return DROPPED; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 53 "fwlang_scanner.ll"
+#line 53 "src/fwlang_scanner.ll"
 { ECHO; return LOGGED; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 54 "fwlang_scanner.ll"
+#line 54 "src/fwlang_scanner.ll"
 { ECHO; return PACKET; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 55 "fwlang_scanner.ll"
+#line 55 "src/fwlang_scanner.ll"
 { ECHO; return SPORT; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 56 "fwlang_scanner.ll"
+#line 56 "src/fwlang_scanner.ll"
 { ECHO; return CLASSES; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 57 "fwlang_scanner.ll"
+#line 57 "src/fwlang_scanner.ll"
 { ECHO; return SCLASSES; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 58 "fwlang_scanner.ll"
+#line 58 "src/fwlang_scanner.ll"
 { ECHO; return SGRAPH; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 59 "fwlang_scanner.ll"
+#line 59 "src/fwlang_scanner.ll"
 { ECHO; return DPORT; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 60 "fwlang_scanner.ll"
+#line 60 "src/fwlang_scanner.ll"
 { ECHO; return SADDY; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 61 "fwlang_scanner.ll"
+#line 61 "src/fwlang_scanner.ll"
 { ECHO; return DADDY; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 62 "fwlang_scanner.ll"
+#line 62 "src/fwlang_scanner.ll"
 { ECHO; return STATE; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 63 "fwlang_scanner.ll"
+#line 63 "src/fwlang_scanner.ll"
 { ECHO; return TCP; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 64 "fwlang_scanner.ll"
+#line 64 "src/fwlang_scanner.ll"
 { ECHO; return UDP; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 65 "fwlang_scanner.ll"
+#line 65 "src/fwlang_scanner.ll"
 { ECHO; return BOTH; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 66 "fwlang_scanner.ll"
+#line 66 "src/fwlang_scanner.ll"
 { ECHO; return ICMP; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 67 "fwlang_scanner.ll"
+#line 67 "src/fwlang_scanner.ll"
 { ECHO; return T_INVALID;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 68 "fwlang_scanner.ll"
+#line 68 "src/fwlang_scanner.ll"
 { ECHO; return T_NEW;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 69 "fwlang_scanner.ll"
+#line 69 "src/fwlang_scanner.ll"
 { ECHO; return T_ESTABLISHED;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 70 "fwlang_scanner.ll"
+#line 70 "src/fwlang_scanner.ll"
 { ECHO; return T_RELATED;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 71 "fwlang_scanner.ll"
+#line 71 "src/fwlang_scanner.ll"
 { ECHO; return FIN;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 72 "fwlang_scanner.ll"
+#line 72 "src/fwlang_scanner.ll"
 { ECHO; return SYN;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 73 "fwlang_scanner.ll"
+#line 73 "src/fwlang_scanner.ll"
 { ECHO; return RST;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 74 "fwlang_scanner.ll"
+#line 74 "src/fwlang_scanner.ll"
 { ECHO; return PSH;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 75 "fwlang_scanner.ll"
+#line 75 "src/fwlang_scanner.ll"
 { ECHO; return ACK;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 76 "fwlang_scanner.ll"
+#line 76 "src/fwlang_scanner.ll"
 { ECHO; return URG;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 77 "fwlang_scanner.ll"
+#line 77 "src/fwlang_scanner.ll"
 { ECHO; return FROM;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 78 "fwlang_scanner.ll"
+#line 78 "src/fwlang_scanner.ll"
 { ECHO; return TO;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 79 "fwlang_scanner.ll"
+#line 79 "src/fwlang_scanner.ll"
 {ECHO; return FOR;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 80 "fwlang_scanner.ll"
+#line 80 "src/fwlang_scanner.ll"
 {ECHO; return ON;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 81 "fwlang_scanner.ll"
+#line 81 "src/fwlang_scanner.ll"
 {ECHO; return IN;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 82 "fwlang_scanner.ll"
+#line 82 "src/fwlang_scanner.ll"
 {ECHO; return OR;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 83 "fwlang_scanner.ll"
+#line 83 "src/fwlang_scanner.ll"
 {ECHO; return AND;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 84 "fwlang_scanner.ll"
+#line 84 "src/fwlang_scanner.ll"
 {ECHO; return NOT_SUBSET_OF;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 85 "fwlang_scanner.ll"
+#line 85 "src/fwlang_scanner.ll"
 {ECHO; return NOT;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 86 "fwlang_scanner.ll"
+#line 86 "src/fwlang_scanner.ll"
 {ECHO; return WITH;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 87 "fwlang_scanner.ll"
+#line 87 "src/fwlang_scanner.ll"
 {ECHO; return INFACE;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 88 "fwlang_scanner.ll"
+#line 88 "src/fwlang_scanner.ll"
 {ECHO; return OUTFACE;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 89 "fwlang_scanner.ll"
+#line 89 "src/fwlang_scanner.ll"
 {ECHO; return INPUT;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 90 "fwlang_scanner.ll"
+#line 90 "src/fwlang_scanner.ll"
 {ECHO; return FORWARD;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 91 "fwlang_scanner.ll"
+#line 91 "src/fwlang_scanner.ll"
 {ECHO; return OUTPUT;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 92 "fwlang_scanner.ll"
+#line 92 "src/fwlang_scanner.ll"
 {ECHO; return ISNT;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 93 "fwlang_scanner.ll"
+#line 93 "src/fwlang_scanner.ll"
 {ECHO; return IS;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 94 "fwlang_scanner.ll"
+#line 94 "src/fwlang_scanner.ll"
 {ECHO; return SUBSET_OF;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 95 "fwlang_scanner.ll"
+#line 95 "src/fwlang_scanner.ll"
 {ECHO; return EXAMPLE;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 96 "fwlang_scanner.ll"
+#line 96 "src/fwlang_scanner.ll"
 {ECHO; return HISTORY;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 97 "fwlang_scanner.ll"
+#line 97 "src/fwlang_scanner.ll"
 {ECHO; return DOT;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 98 "fwlang_scanner.ll"
+#line 98 "src/fwlang_scanner.ll"
 { ECHO; yylval->val = new char[256]; strncpy(yylval->val, yytext, 256); return NUM;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 99 "fwlang_scanner.ll"
+#line 99 "src/fwlang_scanner.ll"
 { ECHO; yylval->name = new char[256]; strncpy(yylval->name,yytext,256); return NAME;} 
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 100 "fwlang_scanner.ll"
+#line 100 "src/fwlang_scanner.ll"
 {ECHO;}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 101 "fwlang_scanner.ll"
+#line 101 "src/fwlang_scanner.ll"
 {ECHO;}
 	YY_BREAK
 case 57:
 /* rule 57 can match eol */
 YY_RULE_SETUP
-#line 102 "fwlang_scanner.ll"
+#line 102 "src/fwlang_scanner.ll"
 {ECHO; FWLANG_LINE_NO++;}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 103 "fwlang_scanner.ll"
+#line 103 "src/fwlang_scanner.ll"
 { printf(";\n"); return SEMI;}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 104 "fwlang_scanner.ll"
+#line 104 "src/fwlang_scanner.ll"
 { ECHO; return LPAREN;}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 105 "fwlang_scanner.ll"
+#line 105 "src/fwlang_scanner.ll"
 { ECHO; return RPAREN;}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 106 "fwlang_scanner.ll"
+#line 106 "src/fwlang_scanner.ll"
 {printf("Illegal Token: (%s)\n", yytext);}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 107 "fwlang_scanner.ll"
+#line 107 "src/fwlang_scanner.ll"
 ECHO;
 	YY_BREAK
 #line 1175 "fwlang_scanner.cc"
@@ -2131,4 +2131,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 107 "fwlang_scanner.ll"
+#line 107 "src/fwlang_scanner.ll"
