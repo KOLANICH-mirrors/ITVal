@@ -957,6 +957,34 @@ int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest * forest,
    return SUCCESS;
 }
 
+int fw_fddl_forest::BuildHistoryMDD(mdd_handle p, fddl_forest * forest,
+                                  mdd_handle & r)
+{
+
+   int *low;
+   int *high;
+
+   node_idx newresult;
+
+   if (p.index < 0)
+      return INVALID_MDD;
+
+   if (forest == NULL)
+      return INVALID_MDD;
+
+   for (level k = K+2; k > 0; k--) {
+      forest->FWCache[k]->Clear();
+   }
+
+   numClasses = 1;
+   newresult = InternalBuildHistoryMDD(forest, K, p.index);
+   if (r.index != newresult) {
+      forest->ReallocHandle(r);
+      forest->Attach(r, newresult);
+   }
+   return SUCCESS;
+}
+
 node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
                                                node_idx p, int &numClasses,
                                                int services)
@@ -1001,6 +1029,63 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
       r = forest->CheckIn(newK, r);
    }
    FWCache[k]->Add(k, p, r);
+   return r;
+}
+
+node_idx fw_fddl_forest::InternalBuildHistoryMDD(fddl_forest * forest, level k,
+                                               node_idx p)
+{
+   node_idx r;
+   level newK;
+
+   newK = k+2;
+   
+   r = forest->FWCache[newK]->Hit(newK, p);
+   if (r >= 0)
+      return r;
+
+   if (newK == 0) {
+      return p;
+   }
+   
+   r = forest->NewNode(newK);
+
+   if (newK <=2){
+      node_idx j;
+      q = InternalBuildHistoryMDD(forest,k-1,p);
+      for (arc_idx i = 1; i <= forest->maxVals[newK]; i++){
+         forest->SetArc(newK, r, i, q);
+      }
+   }
+
+
+   node *nodeP;
+   if (p !=0)
+      nodeP = &FDDL_NODE(k, p);
+   else nodeP = NULL;
+   
+   for (arc_idx i = 0; i <= maxVals[k]; i++) {
+      node_idx j;
+      if (nodeP && i<nodeP->size)
+         j = FDDL_ARC(k, nodeP, i);
+      else
+         j = 0;
+      node_idx q;
+      q = InternalBuildHistoryMDD(forest, k-1, j);
+      forest->SetArc(newK, r, i, q);
+   }
+   /*
+   if ((*forest->nodes[newK])[r]->size == 0){ // If the node is empty.
+      forest->DeleteNode(newK, r);
+      r = 0;
+   }
+   else{
+      r = forest->CheckIn(newK, r);
+   }
+   HistoryCache[k]->Add(k, p, r);
+   */
+   r = forest->CheckIn(newK,r);
+   forest->FWCache[newK]->Add(newK,p,r);
    return r;
 }
 

@@ -36,7 +36,7 @@ Williamsburg, VA 23185
 
 #   include <FDDL/mdd.h>
 #   include "nat.h"
-#   include <FDDL/structures.h>
+#   include "structures.h"
 #   include "sets.h"
 #   include "topology.h"
 
@@ -102,9 +102,13 @@ class fw_fddl_forest:public fddl_forest {
 
    int BuildClassMDD(mdd_handle p, fddl_forest * forest, mdd_handle & r,
                      int &numClasses, int services);
+
    int InternalBuildClassMDD(fddl_forest * forest, level k, node_idx p,
                              int &numClasses, int services);
-   
+  
+   int BuildHistoryMDD(mdd_handle p, fddl_forest * forest, mdd_handle & r);
+   int InternalBuildHistoryMDD(fddl_forest * forest, level k, node_idx p);
+
    int BuildServiceGraphMDD(mdd_handle p, fddl_forest * forest, mdd_handle & r,
                      int &numArcs);
    int InternalBuildServiceGraphMDD(fddl_forest * forest, level k, node_idx p,
