@@ -792,6 +792,11 @@ query *PerformQuery(int subject, condition * c)
 }
 
 assert* PerformAssertion(condition* A, condition* B, int assert_op, int example, int history){
+
+#ifndef NO_HISTORY   
+   mdd_handle conditionHistory;
+#endif
+
    int cond;
    int* tup;
 
@@ -809,7 +814,7 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
    AandB = new condition;
    notA = new condition;
    notB = new condition;
-
+      
    FW->FWForest->BinaryComplement(A->h, notA->h);
    FW->FWForest->BinaryComplement(B->h, notB->h);
    
@@ -840,11 +845,23 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
             printf("#Assertion failed.\n");
             FW->FWForest->FindElement(BnotA->h, FW->T, tup);
             cond = false;
+#ifndef NO_HISTORY
+   if (history){
+      FW->FWForest->BuildHistoryMDD(BnotA->h, FW->HistoryForest, conditionHistory); 
+   }
+#endif
+
          }
          else if (AnotB->h.index != 0){
             printf("#Assertion failed.\n");
             FW->FWForest->FindElement(AnotB->h, FW->T, tup);
             cond = false;
+#ifndef NO_HISTORY
+   if (history){
+      FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
+   }
+#endif
+
          }
          else{
             printf("#Assertion held.\n");
@@ -862,6 +879,12 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 	    printf("#Assertion failed.\n");
             FW->FWForest->FindElement(AnotB->h, FW->T, tup);
             cond = false;
+#ifndef NO_HISTORY
+   if (history){
+      FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
+   }
+#endif
+
         }
       break;
       case OP_NOT_IS:
@@ -879,6 +902,12 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 	  printf("#Assertion failed.\n");
           FW->FWForest->FindElement(A->h,FW->T, tup);
           cond = false;
+#ifndef NO_HISTORY
+   if (history){
+      FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
+   }
+#endif
+
       }
       break;
       case OP_NOT_SUBSET:
@@ -891,6 +920,12 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          printf("#Assertion failed.\n");
          FW->FWForest->FindElement(A->h, FW->T, tup);
          cond = false;
+#ifndef NO_HISTORY
+   if (history){
+      FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
+   }
+#endif
+
       }
       break;
    }
@@ -906,6 +941,23 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          delete[] tup;
       }
    }
+
+#ifndef NO_HISTORY
+   if (history && !cond){
+      mdd_handle resultHistory;
+      printf("Critical Rules:\n");
+      printf("\tInput Chain:\n");
+      FW->HistoryForest->Min(conditionHistory, FW->InputHist, resultHistory);
+      FW->HistoryForest->PrintHistory(resultHistory);
+      printf("\tForward Chain:\n");
+      FW->HistoryForest->Min(conditionHistory, FW->ForwardHist, resultHistory);
+      FW->HistoryForest->PrintHistory(resultHistory);
+      printf("\tOutput Chain:\n");
+      FW->HistoryForest->Min(conditionHistory, FW->OutputHist, resultHistory);
+      FW->HistoryForest->PrintHistory(resultHistory);
+   }
+#endif
+
    delete BnotA;
    delete AnotB;
    delete NotBoth;
