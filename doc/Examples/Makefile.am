@@ -1,1 +1,1 @@
-EXTRA_DIST = Attacks.fw Trojans.fw Classes.fw Example.fw Example.top
+EXTRA_DIST = Assert.fw Attacks.fw Classes.fw Example.top Interfaces.fw Trojans.fw 
