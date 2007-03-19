@@ -301,13 +301,29 @@ int fw_fddl_forest::PrintHistory(mdd_handle root){
    for (level k = K; k >= 0; k--) {
       FWCache[k]->Clear();
    }
-   InternalPrintHistory(K, root.index, 0,0);
+   InternalPrintHistory(K, root.index, 0,0,0);
    delete FWCache[0];
    FWCache[0]=NULL;
    return SUCCESS;
 }
 
-void fw_fddl_forest::InternalPrintHistory(level k, node_idx p, int chain_num, int rule_num){
+chain_rule* fw_fddl_forest::GetHistory(mdd_handle root){
+   chain_rule* result = NULL;
+   if (root.index < 0)
+      return NULL;
+
+   FWCache[0] = new cache;
+   for (level k = K; k >= 0; k--) {
+      FWCache[k]->Clear();
+   }
+
+   result = InternalGetHistory(K, root.index, 0,0,0, NULL);
+   delete FWCache[0];
+   FWCache[0]=NULL;
+   return result;
+}
+
+void fw_fddl_forest::InternalPrintHistory(level k, node_idx p, int fw_num, int chain_num, int rule_num){
    int i;
    node* nodeP;
    int result;
@@ -316,35 +332,92 @@ void fw_fddl_forest::InternalPrintHistory(level k, node_idx p, int chain_num, in
       return;
    
    if (k==0){
-      result = FWCache[0]->Hit(chain_num, rule_num);
+      result = FWCache[0]->Hit(fw_num, chain_num, rule_num);
       if (result >=0)
 	 return;
-      printf("Chain %d Rule %d\n", chain_num, rule_num);
-      FWCache[0]->Add(chain_num, rule_num, 1);
+      printf("Firewall %d Chain %d Rule %d\n", fw_num, chain_num, rule_num);
+      FWCache[0]->Add(fw_num, chain_num, rule_num, 1);
       return;
    }
 
-   result = FWCache[k]->Hit(p, 1);
+   result = FWCache[k]->Hit(p, 1, 1);
    if (result >= 0)
       return;
    
    nodeP = &FDDL_NODE(k,p);
    if (k==1){
       for (int i=0;i<nodeP->size;i++){
-         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP,i), chain_num, i);
+         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP,i), fw_num, chain_num, i);
       }
    }
    else if (k==2){
       for (int i=0;i<nodeP->size;i++){
-         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP,i), i, 0);
+         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP,i), fw_num, i, 0);
+      }
+   }
+   else if (k==3){
+      for (int i=0;i<nodeP->size;i++){
+         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP,i), i, 0, 0);
       }
    }
    else{
       for (int i=0;i<nodeP->size;i++){
-         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP, i), 0, 0);
+         InternalPrintHistory(k-1, FDDL_ARC(k,nodeP, i), 0, 0, 0);
       }
    }
-   FWCache[k]->Add(p, 1, 1);
+   FWCache[k]->Add(p, 1, 1, 1);
+}
+
+chain_rule* fw_fddl_forest::InternalGetHistory(level k, node_idx p, int fw_num, int chain_num, int rule_num, chain_rule* head){
+   int i;
+   node* nodeP;
+   int result;
+   chain_rule* cur;
+   
+   if (p==0)
+      return head;
+   
+   if (k==0){
+      result = FWCache[0]->Hit(fw_num, chain_num, rule_num);
+      if (result >=0)
+	 return head;
+      cur = new chain_rule;
+      cur->next = head;
+      cur->fw_id = fw_num;
+      cur->chain_id = chain_num;
+      cur->rule_id = rule_num;
+      FWCache[0]->Add(fw_num, chain_num, rule_num, 1);
+      return cur;
+   }
+
+   result = FWCache[k]->Hit(p, 1, 1);
+   if (result >= 0)
+      return head;
+
+   cur = head; 
+   nodeP = &FDDL_NODE(k,p);
+   if (k==1){
+      for (int i=0;i<nodeP->size;i++){
+         cur = InternalGetHistory(k-1, FDDL_ARC(k,nodeP,i), fw_num, chain_num, i, cur);
+      }
+   }
+   else if (k==2){
+      for (int i=0;i<nodeP->size;i++){
+         cur = InternalGetHistory(k-1, FDDL_ARC(k,nodeP,i), fw_num, i, 0, cur);
+      }
+   }
+   else if (k==3){
+      for (int i=0;i<nodeP->size;i++){
+         cur = InternalGetHistory(k-1, FDDL_ARC(k,nodeP,i), i, 0, 0, cur);
+      }
+   }
+   else{
+      for (int i=0;i<nodeP->size;i++){
+         cur = InternalGetHistory(k-1, FDDL_ARC(k,nodeP, i), 0, 0, 0, cur);
+      }
+   }
+   FWCache[k]->Add(p, 1, 1, 1);
+   return cur;
 }
 
 int fw_fddl_forest::HistoryIntersect(mdd_handle root, mdd_handle root2, mdd_handle & result) {
@@ -972,7 +1045,7 @@ int fw_fddl_forest::BuildHistoryMDD(mdd_handle ruleMDD, fw_fddl_forest * forest,
    if (forest == NULL)
       return INVALID_MDD;
 
-   for (level k = K+2; k > 0; k--) {
+   for (level k = K+3; k > 0; k--) {
       forest->FWCache[k]->Clear();
    }
 
@@ -1040,7 +1113,7 @@ node_idx fw_fddl_forest::InternalBuildHistoryMDD(fw_fddl_forest * forest, level 
    if (p==0) 
       return 0;
 
-   newK = k+2;
+   newK = k+3;
    
    r = forest->FWCache[newK]->Hit(newK, p);
    if (r >= 0)
@@ -1052,10 +1125,10 @@ node_idx fw_fddl_forest::InternalBuildHistoryMDD(fw_fddl_forest * forest, level 
    
    r = forest->NewNode(newK);
 
-   if (newK <=2){
+   if (newK <=3){
       node_idx q;
       q = InternalBuildHistoryMDD(forest,k-1,p);
-      for (arc_idx i = 1; i <= forest->maxVals[newK]; i++){
+      for (arc_idx i = 0; i <= forest->maxVals[newK]; i++){ // Should this go from 1 to maxVals?
          forest->SetArc(newK, r, i, q);
       }
       r = forest->CheckIn(newK,r);
@@ -1498,7 +1571,7 @@ int fw_fddl_forest::GetServiceArcs(mdd_handle p, int* src, int* dst, service * &
 
 int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* dst, int* low, int* high, service*& output, int& numArcs){
 /*
-   char spaces[23];
+   char spaces[TOP_LEVEL+1];
    for (int i=0;i<K-k;i++){
       spaces[i]=' ';
       spaces[i+1]='\0';
@@ -1588,8 +1661,8 @@ int fw_fddl_forest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
       InternalGetServiceArcs(k-1, FDDL_ARC(k,nodeP, dst[18-k]), src,
       dst, low, high, output, numArcs);
    }
-   else if (k<=22 & k>=19){
-      InternalGetServiceArcs(k-1, FDDL_ARC(k,nodeP, src[22-k]), src,
+   else if (k<=TOP_LEVEL & k>=19){
+      InternalGetServiceArcs(k-1, FDDL_ARC(k,nodeP, src[TOP_LEVEL-k]), src,
       dst, low, high, output, numArcs);
    }
    else{

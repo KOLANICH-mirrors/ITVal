@@ -97,6 +97,8 @@ class chain {
          delete cur_tup;
       }
    }
+
+   rule_tuple* FindRule(int rule_id);
 };
 
 class nat_chain:public chain {

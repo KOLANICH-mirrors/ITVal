@@ -48,6 +48,17 @@ ssize_t getline(char **, size_t *, FILE *);
 #include "debug.h"
 #include "firewall.h"
 
+rule_tuple* chain::FindRule(int rule_id){
+   rule_tuple* cur_tup;
+   cur_tup = tup;
+   while (cur_tup != NULL){
+      if (cur_tup->id == rule_id)
+         return cur_tup;
+      cur_tup = cur_tup->next;
+   }
+   return NULL;
+}
+
 // Read the name of a Chain from the rule file
 void Firewall::ReadChain(char *line, ssize_t length, chain * newChain)
 {
@@ -179,6 +190,7 @@ void Firewall::BuildFWRules(char *fname)
 
          chain_array[current_chain] = newChain;
          cur->chain_id = chain_array[current_chain]->id;
+	 cur->fw_id = id;
 
          // Allocate the first rule
          // cur = new rule;
@@ -214,6 +226,7 @@ void Firewall::BuildFWRules(char *fname)
             // Allocate next rule
             cur = new rule;
 	    cur->chain_id = chain_array[current_chain]->id;
+	    cur->fw_id = id;
          }
          // Do priming read
          free(oldLine);
@@ -398,6 +411,7 @@ void Firewall::BuildVerboseFWRules(char *fname)
 
          chain_array[current_chain] = newChain;
          cur->chain_id = chain_array[current_chain]->id;
+	 cur->fw_id = id;
 
          // Consume the "header display" line
          free(oldLine);
@@ -433,6 +447,7 @@ void Firewall::BuildVerboseFWRules(char *fname)
             // Allocate next rule
             cur = new rule;
 	    cur->chain_id = chain_array[current_chain]->id;
+	    cur->fw_id = id;
          }
          // Do priming read
          free(oldLine);
@@ -612,6 +627,7 @@ void Firewall::BuildNATRules(char *fname)
          // Allocate the first rule
          cur = new rule;
 	 cur->chain_id = nat_chains[current_nchain]->id;
+	 cur->fw_id = id;
 
          // Consume the "header display" line
          free(oldLine);
@@ -647,6 +663,7 @@ void Firewall::BuildNATRules(char *fname)
          // Allocate next rule
          cur = new rule;
 	 cur->chain_id = nat_chains[current_nchain]->id;
+	 cur->fw_id = id;
       }
       // Do priming read
       free(oldLine);
@@ -796,6 +813,16 @@ int Firewall::FindChain(char *name)
          return i;
    }
    return -1;
+}
+
+chain* Firewall::FindChain(int fw_id, int cid){
+   if (merged_chains[fw_id] == NULL)
+      return NULL;
+   for (int i=0; i < 256; i++){
+      if (merged_chains[fw_id][i] && merged_chains[fw_id][i]->id == cid)
+         return merged_chains[fw_id][i];
+   }
+   return NULL;
 }
 
 int Firewall::FindNATChain(char *name)

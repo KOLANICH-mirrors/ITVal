@@ -49,6 +49,14 @@ Williamsburg, VA 23185
  * printing Firewall query results.
  */
 
+class chain_rule{
+   public:
+   int rule_id;
+   int chain_id;
+   int fw_id;
+   chain_rule* next;
+};
+
 class fw_fddl_forest:public fddl_forest {
  private:
    cache **FWCache;        //Cache for all firewall specific operations.
@@ -57,16 +65,16 @@ class fw_fddl_forest:public fddl_forest {
 
     fw_fddl_forest(int numlevels, int *maxvals):fddl_forest(numlevels, maxvals){
 
-      FWCache = new cache *[K + 1];
+      FWCache = new cache *[K + 4];
 
-      for (int k = 0; k <= K; k++) {
+      for (int k = 0; k <= K+3; k++) {
          FWCache[k] = new cache;
       } 
    }
 
    //Clean up data structures used by the forest
    ~fw_fddl_forest() {
-      for (level k = K; k >= 0; k--) {
+      for (level k = K+3; k >= 0; k--) {
          if (FWCache[k])
             delete FWCache[k];
       }
@@ -93,7 +101,10 @@ class fw_fddl_forest:public fddl_forest {
    int InternalDisplayHistory(level k, node_idx p, int* tup, int chain);
 
    int PrintHistory(mdd_handle p);
-   void InternalPrintHistory(level k, node_idx p, int chain_num, int rule_num);
+   void InternalPrintHistory(level k, node_idx p, int fw_num, int chain_num, int rule_num);
+
+   chain_rule* GetHistory(mdd_handle p);
+   chain_rule* InternalGetHistory(level k, node_idx p, int fw_num, int chain_num, int rule_num, chain_rule* cur);
 
    int DNAT(mdd_handle p, nat_tuple * pnr, mdd_handle & result);
    node_idx InternalDNAT(level k, node_idx p, node_idx q, nat_tuple * pnr);

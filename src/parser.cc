@@ -272,7 +272,7 @@ condition* BuildAcceptCondition(int input_chain)
    }
 #ifdef ASSERT_DEBUG
    printf("Accept Condition: %d\n", sc->h.index);
-   for (int k=22;k>0;k--)
+   for (int k=TOP_LEVEL;k>0;k--)
       FW->FWForest->Compact(k);
    FW->FWForest->PrintMDD();
 #endif
@@ -299,14 +299,14 @@ condition* BuildDropCondition(int input_chain)
 	 break;
    }
    /*
-   for (int k=22;k>0;k--)
+   for (int k=TOP_LEVEL;k>0;k--)
       FW->FWForest->Compact(k);
    printf("Dropped(%d):%d\n",input_chain, sc->h.index);
    FW->FWForest->PrintMDD();
    */
 #ifdef ASSERT_DEBUG
    printf("DROPPED Condition: %d\n", sc->h.index);
-   for (int k=22;k>0;k--)
+   for (int k=TOP_LEVEL;k>0;k--)
       FW->FWForest->Compact(k);
    FW->FWForest->PrintMDD();
 #endif
@@ -328,25 +328,25 @@ condition *BuildConditionFromGroup(group * g, int op)
    address *cur;
    int i;
 
-   low = new int[23];
-   high = new int[23];
+   low = new int[TOP_LEVEL+1];
+   high = new int[TOP_LEVEL+1];
    
    sc = new condition;
 
    cur = g->list;
    while (cur != NULL) {
       // Initialize all elements of the tuple to [0-MAX]
-      for (i = 22; i >= 1; i--) {
+      for (i = TOP_LEVEL; i >= 1; i--) {
          low[i] = 0;
          high[i] = FW->FWForest->GetMaxVal(i);
       }
       // If it's a source address group, copy the values into positions
-      // 19 through 22.
+      // 19 through TOP_LEVEL.
       if (op == 0) {
-         for (i = 22; i > 18; i--) {
-            low[i] = cur->low[22 - i];
-            high[i] = cur->high[22 - i];
-            if (cur->high[22 - i] < 0) {
+         for (i = TOP_LEVEL; i > 18; i--) {
+            low[i] = cur->low[TOP_LEVEL - i];
+            high[i] = cur->high[TOP_LEVEL - i];
+            if (cur->high[TOP_LEVEL - i] < 0) {
                low[i] = 0;
                high[i] = FW->FWForest->GetMaxVal(i);
             }
@@ -404,15 +404,15 @@ condition *BuildConditionFromService(service * s, int op)
    port *prev;
    int i;
 
-   low = new int[23];
-   high = new int[23];
+   low = new int[TOP_LEVEL+1];
+   high = new int[TOP_LEVEL+1];
 
    sc = new condition;
 
    cur = s->list;
    while (cur != NULL) {
       // Initialize all values to [0-MAX]
-      for (i = 22; i >= 1; i--) {
+      for (i = TOP_LEVEL; i >= 1; i--) {
          low[i] = 0;
          high[i] = FW->FWForest->GetMaxVal(i);
       }
@@ -466,7 +466,7 @@ condition *BuildConditionFromService(service * s, int op)
    }
 #ifdef DEBUG
    printf("%.256s\n", s->name);
-   for (level k = 22; k > 0; k--) {
+   for (level k = TOP_LEVEL; k > 0; k--) {
       printf("%d-%d ", low[k], high[k]);
       FW->FWForest->Compact(k);
    }
@@ -496,13 +496,13 @@ condition *BuildConditionFromState(int state)
 
    int i;
 
-   low = new int[23];
-   high = new int[23];
+   low = new int[TOP_LEVEL+1];
+   high = new int[TOP_LEVEL+1];
 
    sc = new condition;
 
    // Initialize all elements to [0-MAX]
-   for (i = 22; i >= 1; i--) {
+   for (i = TOP_LEVEL; i >= 1; i--) {
       low[i] = 0;
       high[i] = FW->FWForest->GetMaxVal(i);
    }
@@ -532,10 +532,10 @@ condition *BuildConditionFromIface(char *name, int in_out)
    int i;
 
    newCond = new condition;
-   low = new int[23];
-   high = new int[23];
+   low = new int[TOP_LEVEL+1];
+   high = new int[TOP_LEVEL+1];
    // Initialize all elements to [0-MAX]
-   for (i = 22; i >= 1; i--) {
+   for (i = TOP_LEVEL; i >= 1; i--) {
       low[i] = 0;
       high[i] = FW->FWForest->GetMaxVal(i);
    }
@@ -567,7 +567,7 @@ condition *BuildConditionFromIface(char *name, int in_out)
    FW->FWForest->MakeMDDFromTuple(low, high, newCond->h);
 
 #ifdef DEBUG
-   for (level k = 22; k > 0; k--)
+   for (level k = TOP_LEVEL; k > 0; k--)
       FW->FWForest->Compact(k);
    FW->FWForest->PrintMDD();
 #endif
@@ -587,11 +587,11 @@ condition *BuildConditionFromFlag(int flag)
    int i;
 
    newCond = new condition;
-   low = new int[23];
-   high = new int[23];
+   low = new int[TOP_LEVEL+1];
+   high = new int[TOP_LEVEL+1];
 
    // Initialize all elements to [0-MAX]
-   for (i = 22; i >= 1; i--) {
+   for (i = TOP_LEVEL; i >= 1; i--) {
       low[i] = 0;
       high[i] = FW->FWForest->GetMaxVal(i);
    }
@@ -649,7 +649,7 @@ condition *NegateCondition(condition * c)
 
 #ifdef DEBUG
    printf("Negate\n");
-   for (level k = 22; k > 0; k--)
+   for (level k = TOP_LEVEL; k > 0; k--)
       FW->FWForest->Compact(k);
    FW->FWForest->PrintMDD();
 #endif
@@ -677,7 +677,7 @@ condition *UnionConditions(condition * c1, condition * c2)
 
 #ifdef DEBUG
    printf("Union\n");
-   for (level k = 22; k > 0; k--)
+   for (level k = TOP_LEVEL; k > 0; k--)
       FW->FWForest->Compact(k);
    FW->FWForest->PrintMDD();
 #endif
@@ -717,9 +717,9 @@ condition *IntersectConditions(condition * c1, condition * c2)
 
 query *PerformQuery(int subject, condition * c)
 {
-   int mask[23];
+   int mask[TOP_LEVEL+1];
 
-   for (int i = 0; i < 23; i++)
+   for (int i = 0; i <= TOP_LEVEL; i++)
       mask[i] = 0;
    
 
@@ -728,7 +728,7 @@ query *PerformQuery(int subject, condition * c)
 #ifdef DEBUG
    printf("Rules: %d Query: %d\n", FW->Forward.index, c->h.index);
    //FW->FWForest->PruneMDD(c->h);
-   for (level k = 22; k > 0; k--)
+   for (level k = TOP_LEVEL; k > 0; k--)
       FW->FWForest->Compact(k);
    FW->FWForest->PrintMDD();
 #endif
@@ -737,7 +737,7 @@ query *PerformQuery(int subject, condition * c)
    switch (subject) {
       case 0:
          FW->FWForest->PruneMDD(c->h);
-         for (level k = 22; k > 0; k--)
+         for (level k = TOP_LEVEL; k > 0; k--)
             FW->FWForest->Compact(k);
          FW->FWForest->PrintMDD();
          // FW->FWForest->PrintStates(c->h.index);
@@ -761,13 +761,13 @@ query *PerformQuery(int subject, condition * c)
          break;
       case 3:
          printf("# Addresses: ");
-         // Source addresses start at level 22
-         mask[22] = 1;
+         // Source addresses start at level TOP_LEVEL
+         mask[TOP_LEVEL] = 1;
          mask[21] = 1;
          mask[20] = 1;
          mask[19] = 1;
          FW->FWForest->PrintRanges(c->h, mask);
-         //FW->FWForest->PrintAddy(c->h, 22);
+         //FW->FWForest->PrintAddy(c->h, TOP_LEVEL);
          break;
       case 4:
          printf("# Addresses: ");
@@ -817,7 +817,7 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       
    FW->FWForest->BinaryComplement(A->h, notA->h);
    FW->FWForest->BinaryComplement(B->h, notB->h);
-   
+            
    #ifdef EXAMPLE_DEBUG
    printf("ASSERT_OP: %d\n", assert_op);
    printf("NotA: %d\n", notA->h.index);
@@ -838,7 +838,7 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 	    printf("ResultC: %d\n", NotBoth->h.index);
 	    printf("ResultD: %d\n", AandB->h.index);
 #endif
-   
+  
    switch (assert_op){
       case OP_IS:
          if (BnotA->h.index != 0){
@@ -879,6 +879,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 	    printf("#Assertion failed.\n");
             FW->FWForest->FindElement(AnotB->h, FW->T, tup);
             cond = false;
+
+
+	
 #ifndef NO_HISTORY
    if (history){
       FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
@@ -945,16 +948,35 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 #ifndef NO_HISTORY
    if (history && !cond){
       mdd_handle resultHistory;
-      printf("Critical Rules:\n");
-      printf("\tInput Chain:\n");
+      chain_rule* results;
+
+      printf("\nCritical Rules:\n\n");
+      //printf("\tInput Chain:\n");
       FW->HistoryForest->Min(conditionHistory, FW->InputHist, resultHistory);
-      FW->HistoryForest->PrintHistory(resultHistory);
-      printf("\tForward Chain:\n");
+     
+      results = FW->HistoryForest->GetHistory(resultHistory);
+      while (results != NULL){
+         FW->DisplayRule(results->fw_id, results->chain_id, results->rule_id);
+         results = results->next;
+      }
+
+      //printf("\tForward Chain:\n");
       FW->HistoryForest->Min(conditionHistory, FW->ForwardHist, resultHistory);
-      FW->HistoryForest->PrintHistory(resultHistory);
-      printf("\tOutput Chain:\n");
+      results = FW->HistoryForest->GetHistory(resultHistory);
+      while (results != NULL){
+         FW->DisplayRule(results->fw_id, results->chain_id, results->rule_id);
+         results = results->next;
+      }
+
+
+      //printf("\tOutput Chain:\n");
       FW->HistoryForest->Min(conditionHistory, FW->OutputHist, resultHistory);
-      FW->HistoryForest->PrintHistory(resultHistory);
+      results = FW->HistoryForest->GetHistory(resultHistory);
+      while (results != NULL){
+         FW->DisplayRule(results->fw_id, results->chain_id, results->rule_id);
+         results = results->next;
+      }
+
    }
 #endif
 

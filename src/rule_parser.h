@@ -38,20 +38,23 @@ class rule {
  public:
    int id;
    int chain_id;
-   char target[1024];
-   char protocol[1024];
-   char opt[1024];
-   char source[1024];
-   char dest[1024];
-   char in[1024];
-   char out[1024];
-   char info[1024];
+   int fw_id;
+   char text[2048];
+   char target[256];
+   char protocol[256];
+   char opt[256];
+   char source[256];
+   char dest[256];
+   char in[256];
+   char out[256];
+   char info[256];
    int pktCond;
    rule *next;
 
      rule() { 
 	id = -1;
 	chain_id = -1; //No chain.
+	fw_id = -1; // No FW.
       next = NULL;
 }};
 

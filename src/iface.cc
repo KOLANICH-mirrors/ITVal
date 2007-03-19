@@ -98,14 +98,16 @@ void
    newTup = new rule_tuple;
    newTup->id = pr->id;
    newTup->chain_id = pr->chain_id;
+   newTup->fw_id = pr->fw_id;
+   strncpy(newTup->text, pr->text, 2048);
 #ifdef STACK_DEBUG
 printf("On Stack:\n");
-for (int i=22;i>=0;i--){
+for (int i=TOP_LEVEL;i>=0;i--){
    printf("%d-%d ", tup->low[i], tup->high[i]);
 }
 printf("\n");
 #endif
-   for (int i = 0; i < 23; i++) {
+   for (int i = 0; i <= TOP_LEVEL; i++) {
       newTup->low[i] = tup->low[i];
       newTup->high[i] = tup->high[i];
    }
@@ -293,38 +295,38 @@ tup, rule_tuple * &stack){
       for (i=0;i<4;i++){
          int j;
          for (j=i+1;j<4;j++){
-            tup->low[22-j] = 0;
-            tup->high[22-j] = 255;
+            tup->low[TOP_LEVEL-j] = 0;
+            tup->high[TOP_LEVEL-j] = 255;
          }
-         tup->low[22-i] = 0;
-         tup->high[22-i] = cur->low[i]-1;
-         if (tup->low[22-i]<=tup->high[22-i])
+         tup->low[TOP_LEVEL-i] = 0;
+         tup->high[TOP_LEVEL-i] = cur->low[i]-1;
+         if (tup->low[TOP_LEVEL-i]<=tup->high[TOP_LEVEL-i])
             ProcessDest(pr,tup,stack);
-         tup->low[22-i] = cur->high[i]+1;
-         tup->high[22-i] = 255;
-         if (tup->low[22-i]<=tup->high[22-i])
+         tup->low[TOP_LEVEL-i] = cur->high[i]+1;
+         tup->high[TOP_LEVEL-i] = 255;
+         if (tup->low[TOP_LEVEL-i]<=tup->high[TOP_LEVEL-i])
             ProcessDest(pr,tup,stack);
-         tup->low[22-i] = cur->low[i];
-         tup->high[22-i] = cur->high[i];
+         tup->low[TOP_LEVEL-i] = cur->low[i];
+         tup->high[TOP_LEVEL-i] = cur->high[i];
       }
       return;
    }
    for (i=0;i<=cur->mask/8;i++){
       int j;
       for (j=i+1;j<4;j++){
-         tup->low[22-j] = 0;
-         tup->high[22-j] = 255;
+         tup->low[TOP_LEVEL-j] = 0;
+         tup->high[TOP_LEVEL-j] = 255;
       }
-      tup->low[22-i] = 0;
-      tup->high[22-i] = cur->low[i]-1;
-      if (tup->low[22-i]<=tup->high[22-i])
+      tup->low[TOP_LEVEL-i] = 0;
+      tup->high[TOP_LEVEL-i] = cur->low[i]-1;
+      if (tup->low[TOP_LEVEL-i]<=tup->high[TOP_LEVEL-i])
          ProcessDest(pr,tup,stack);
-      tup->low[22-i] = cur->high[i]+1;
-      tup->high[22-i] = 255;
-      if (tup->low[22-i]<=tup->high[22-i])
+      tup->low[TOP_LEVEL-i] = cur->high[i]+1;
+      tup->high[TOP_LEVEL-i] = 255;
+      if (tup->low[TOP_LEVEL-i]<=tup->high[TOP_LEVEL-i])
          ProcessDest(pr,tup,stack);
-      tup->low[22-i] = cur->low[i];
-      tup->high[22-i] = cur->high[i];
+      tup->low[TOP_LEVEL-i] = cur->low[i];
+      tup->high[TOP_LEVEL-i] = cur->high[i];
    }
 }
 
@@ -414,8 +416,8 @@ void Firewall::ProcessSource(processed_rule * pr, rule_tuple * tup,
       int i;
       if (!cur->invert){
          for (i=0;i<4;i++){
-            tup->low[22-i] = cur->low[i];
-            tup->high[22-i] = cur->high[i];
+            tup->low[TOP_LEVEL-i] = cur->low[i];
+            tup->high[TOP_LEVEL-i] = cur->high[i];
          }
          ProcessDest(pr, tup, stack);
       }
@@ -434,29 +436,34 @@ void Firewall::ProcessSource(processed_rule * pr, rule_tuple * tup,
 
 void Firewall::BuildRules(processed_rule * head, rule_tuple * &stack)
 {
-   rule_tuple *tup;                       // A placeholder output tuple
 
    if (head == NULL)            // If the list is empty, we're done.
       return;
 
-   tup = new rule_tuple;
    BuildRules(head->next, stack);       // In Reverse order.
+
 #ifdef STACK_DEBUG
-   printf("Processing Chain: %d Rule: %d\n", head->chain_id, head->id); 
+   printf("Processing Firewall: %d Chain: %d Rule: %d\n", head->fw_id, head->chain_id, head->id); 
 #endif
-   if (head->pktcond <=1)               // Temporarily, ignore PKTTYPE flags.
+
+   if (head->pktcond <=1){               // Temporarily, ignore PKTTYPE flags.
+      rule_tuple *tup;                   // A placeholder output tuple
+      tup = new rule_tuple;
       ProcessSource(head, tup, stack);     // Initiate the processing chain.
+      delete tup;
+   }
+
 #ifdef RULE_QUERY_DEBUG
-    printf("Building rule tuples:\n");
-    if (stack==NULL){
-       printf("No rules.\n");
-    }
-    else{
-       PrintRuleTuple(stack);
-    }
-    printf("Done building rule tuples.\n");
+   printf("Building rule tuples:\n");
+   if (stack==NULL){
+      printf("No rules.\n");
+   }
+   else{
+      PrintRuleTuple(stack);
+   }
+   printf("Done building rule tuples.\n");
 #endif
-   delete tup;
+
 }
 
 // Turn a stack of rule_tuples into an MDD describing the set of accepted
@@ -508,6 +515,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       FWForest->Assign(logMDD, tup->low, tup->high, logMDD);
       tup->low[0] = tup->high[0] = -1;
 
+//      tup->hlow[3] = tup->hhigh[3] = tup->fw_id;
 //      tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
 //      tup->hlow[1] = tup->hhigh[1] = tup->id;  
 //      tup->hlow[0] = tup->hhigh[0] = 1;
@@ -534,10 +542,11 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 #endif
 
    // Create the intermediate MDDs
-   for (int k=22;k>=0;k--){
-      tup->hlow[k+2] = tup->low[k];
-      tup->hhigh[k+2] = tup->high[k];
+   for (int k=TOP_LEVEL;k>=0;k--){
+      tup->hlow[k+3] = tup->low[k];
+      tup->hhigh[k+3] = tup->high[k];
    } 
+   tup->hlow[3] = tup->hhigh[3] = tup->fw_id;
    tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
    tup->hlow[1] = tup->hhigh[1] = tup->id;  
 
@@ -558,10 +567,11 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       // or not.  The result is stored in outMDD.
 
 //      FWForest->Replace(inMDD, criteriaMDD, true, outMDD);
-      for (int k=22;k>=0;k--){
-         tup->hlow[k+2] = tup->low[k];
-         tup->hhigh[k+2] = tup->high[k];
+      for (int k=TOP_LEVEL;k>=0;k--){
+         tup->hlow[k+3] = tup->low[k];
+         tup->hhigh[k+3] = tup->high[k];
       } 
+      tup->hlow[3] = tup->hhigh[3] = tup->fw_id; 
       tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
       tup->hlow[1] = tup->hhigh[1] = tup->id;  
 
@@ -571,12 +581,12 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       tup->hlow[0] = tup->low[0];
       tup->hhigh[0] = tup->high[0];
 #ifdef STACK_DEBUG
-      printf("B: Chain %d, Rule %d: MDD %d\n", tup->chain_id, tup->id, outMDD.index);
+      printf("B: Firewall %d, Chain %d, Rule %d: MDD %d\n", tup->fw_id, tup->chain_id, tup->id, outMDD.index);
       FWForest->PrintMDD();
 #endif
       FWForest->Assign(inMDD, tup->low, tup->high, outMDD);
 #ifdef STACK_DEBUG
-      printf("A: Chain %d, Rule %d: MDD %d\n", tup->chain_id, tup->id, outMDD.index);
+      printf("A: Firweall %d, Chain %d, Rule %d: MDD %d\n", tup->fw_id, tup->chain_id, tup->id, outMDD.index);
       FWForest->PrintMDD();
 #endif
       //Union the input MDD with the intermediate and store in "outHistMDD".
@@ -658,9 +668,6 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    /*
    for (level k = 24; k > 0; k--)
       HistoryForest->Compact(k);
-
-   for (level k = 22; k > 0; k--)
-      FWForest->Compact(k);
    */
 }
 
@@ -673,8 +680,8 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
    mdd_handle initMDD;
    mdd_handle initHistMDD;
 
-   int low[23], hlow[25];
-   int high[23], hhigh[25];
+   int low[TOP_LEVEL+1], hlow[TOP_LEVEL+1+3];
+   int high[TOP_LEVEL+1], hhigh[TOP_LEVEL+1+3];
 
    low[0] = high[0] = chain->Default;   // Set default policy
    low[1] = 0;
@@ -695,19 +702,20 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
    high[8] = 255;               // Any Output Interface
    low[9] = 0;
    high[9] = 255;               // Any Input Interface
-   low[10] = 0;
 
+   low[10] = 0;
    high[10] = 255;              // Any destination port
    low[11] = 0;
    high[11] = 255;
+   
    low[12] = 0;
-
    high[12] = 255;              // Any source port
    low[13] = 0;
    high[13] = 255;
-   low[14] = 0;
 
+   low[14] = 0;
    high[14] = 2;                // Any Protocol
+
    low[15] = 0;
 
    high[15] = 255;              // Any destination IP
@@ -727,10 +735,9 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
    low[22] = 0;
    high[22] = 255;
 
-
-   for (int i=0;i<=22;i++){
-      hhigh[i+2] = high[i];
-      hlow[i+2] = low[i];
+   for (int i=0;i<=TOP_LEVEL;i++){
+      hhigh[i+3] = high[i];
+      hlow[i+3] = low[i];
    }
 //   hlow[0] = 1;
 //   hhigh[0] = 1;
@@ -741,6 +748,9 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
 
    hlow[2] = chain->id;
    hhigh[2] = chain->id;
+
+   hlow[3] = id;
+   hhigh[3] = id;
 
    // Create an MDD representing the default policy
    FWForest->MakeMDDFromTuple(low, high, initMDD);

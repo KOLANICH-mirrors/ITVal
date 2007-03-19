@@ -26,7 +26,7 @@
 
 #define SIZE_OF_LEVEL_18 256
 
-Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H)
+Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H, int id_num)
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
    FWForest = F;
@@ -35,6 +35,7 @@ Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H)
 #endif
    num_nat_chains = -1;
    num_chains = -1;
+   id = id_num;
    for (int i = 0; i < 256; i++) {
       chain_array[i] = nat_chains[i] = NULL;
    }
@@ -46,15 +47,17 @@ Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H)
 };
 
 Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
-                   Topology * top, fw_fddl_forest *H)
+                   Topology * top, fw_fddl_forest *H, int id_num)
 {
    int ranges[5] = { 65536, 256, 256, 256, 256 };
-   int high[23];
-   int low[23];
+   int high[TOP_LEVEL+1];
+   int low[TOP_LEVEL+1];
 
    int input_chain;
    int forward_chain;
    int output_chain;
+
+   id = id_num;
 
    FWForest = F;
 #ifndef NO_HISTORY
@@ -69,7 +72,7 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    }
 
    // Create and Initialize the Log MDDs
-   for (level k = 0; k < 23; k++) {
+   for (level k = 0; k <= TOP_LEVEL; k++) {
       low[k] = 0;
       high[k] = F->GetMaxVal(k);
    }
@@ -111,16 +114,17 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
 }
 
 Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
-                   Topology * top, int verbose, fw_fddl_forest * H)
+                   Topology * top, int verbose, fw_fddl_forest * H, int id_num)
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
-   int high[23];
-   int low[23];
+   int high[TOP_LEVEL+1];
+   int low[TOP_LEVEL+1];
 
    int input_chain;
    int forward_chain;
    int output_chain;
 
+   id = id_num;
    FWForest = F;
    T = top;
 
@@ -134,7 +138,7 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    }
 
    // Create and Initialize the Log MDDs
-   for (level k = 0; k < 23; k++) {
+   for (level k = 0; k <= TOP_LEVEL; k++) {
       low[k] = 0;
       high[k] = F->GetMaxVal(k);
    }
@@ -170,7 +174,7 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
 
 #ifdef DEBUG
    printf("Forward:%d Input:%d Output:%d\n", Forward.index, Input.index, Output.index);
-   for (level k = 22; k > 0; k--)
+   for (level k = TOP_LEVEL; k > 0; k--)
       FWForest->Compact(k);
    FWForest->PrintMDD();
 #endif 
@@ -473,7 +477,7 @@ int Firewall::PrintServiceClasses()
 */
 
 /*
-   for (level k=23;k>0;k--)
+   for (level k=TOP_LEVEL+1;k>0;k--)
       FWForest->Compact(k);
    FWForest->PrintMDD();
 */
@@ -646,12 +650,22 @@ Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n, fw_fddl_fo
    Firewall *f;
    int prerouting, postrouting;
 
-   int i;
+   int i = 0;
 
    if (n == 0)
       return NULL;
 
-   f = new Firewall(FWForest, HistoryForest);
+   f = new Firewall(FWForest, HistoryForest, -1);
+   // Copy Rule Tuples into Merged Firewall
+   f->merged_chains = new chain**[n];
+   for (i=0;i<n;i++){
+      f->merged_chains[fws[i]->id] = new chain*[256];
+      for (int j=0;j<256;j++){
+         if (fws[i]->id <0 || fws[i]->id > n)
+	    continue;
+         f->merged_chains[fws[i]->id][j] = fws[i]->chain_array[j];
+      }
+   }
 
    prerouting = fws[0]->FindNATChain("Prerouting");
    postrouting = fws[0]->FindNATChain("Postrouting");
@@ -720,7 +734,7 @@ Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n, fw_fddl_fo
    }
 
    f->T = NULL;
-   for (int i = 0; i < n; i++) {
+   for (i = 0; i < n; i++) {
       tmp = MergeTopology(f->T, fws[i]->T);
       if (f->T)
          delete f->T;
@@ -748,4 +762,40 @@ Topology *MergeTopology(Topology * curTop, Topology * newTop)
       }
    }
    return newT;
+}
+
+int Firewall::DisplayRule(int fw_id, int chain_id, int rule_id){
+   chain* c;
+   rule_tuple* r;
+   chain** chain_list;
+   if (fw_id <0){
+      printf("Firewall ID out of range.\n");
+      return 0;
+   }
+   if (chain_id <0 || chain_id > chain::numChains){
+      printf("Chain out of range.\n");
+      return 0;
+   }
+   chain_list = merged_chains[fw_id];
+   if (chain_list == NULL){
+      printf("Null Chain List encountered: Firewall %d, Chain %d.\n", fw_id, chain_id);
+      return 0;
+   }
+   c = FindChain(fw_id, chain_id);
+   if (c == NULL){
+      printf("Null Chain Encountered: Firewall %d, Chain %d.\n", fw_id, chain_id);
+      return 0;
+   }
+   if (rule_id == 0){
+      printf("                                      Default Policy for firewall %d, chain %d.\n", fw_id, chain_id);
+   }
+   else{
+      r = c->FindRule(rule_id);
+      if (r == NULL){
+         printf("Missing Rule.\n");
+         return 0;
+      }
+      printf("Firewall: %4d Chain: %4d Rule %4d: %s\n", fw_id, chain_id, rule_id, r->text);
+   }
+   return 1;
 }
