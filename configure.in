@@ -1,4 +1,4 @@
-AC_INIT(ITVal, 1.0, rmmarm@sdf.lonestar.org)
+AC_INIT([ITVal],[1.0],[rmmarm@sdf.lonestar.org])
 AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE(ITVal,1.0)
 AC_PROG_CC
@@ -7,4 +7,5 @@ AC_PROG_YACC
 AM_PROG_LEX
 AC_PROG_LIBTOOL
 AC_CHECK_FUNCS(getline)
-AC_OUTPUT(Makefile FDDL/Makefile doc/Makefile doc/Examples/Makefile doc/Rsets/Makefile)
+AC_CONFIG_FILES([Makefile FDDL/Makefile doc/Makefile doc/Examples/Makefile doc/Rsets/Makefile])
+AC_OUTPUT
