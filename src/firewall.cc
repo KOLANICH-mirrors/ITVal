@@ -787,7 +787,7 @@ int Firewall::DisplayRule(int fw_id, int chain_id, int rule_id){
       return 0;
    }
    if (rule_id == 0){
-      printf("                                      Default Policy for firewall %d, chain %d.\n", fw_id, chain_id);
+      printf("Firewall %d Chain %d Default.\n", fw_id, chain_id);
    }
    else{
       r = c->FindRule(rule_id);
@@ -795,7 +795,7 @@ int Firewall::DisplayRule(int fw_id, int chain_id, int rule_id){
          printf("Missing Rule.\n");
          return 0;
       }
-      printf("Firewall: %4d Chain: %4d Rule %4d: %s\n", fw_id, chain_id, rule_id, r->text);
+      printf("Firewall %d Chain %d Rule %d: %s\n", fw_id, chain_id, rule_id, r->text);
    }
    return 1;
 }

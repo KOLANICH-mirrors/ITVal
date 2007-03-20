@@ -343,9 +343,6 @@ FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;
 typedef int yy_state_type;
 
 extern int yylineno;
-
-int yylineno = 1;
-
 extern char *yytext;
 #define yytext_ptr yytext
 
@@ -628,7 +625,7 @@ Williamsburg, VA 23185
 int FWLANG_LINE_NO = 0;
 #line 43 "src/fwlang_scanner.ll"
 //# define YY_USER_ACTION yylloc->columns (yyleng);
-#line 632 "fwlang_scanner.cc"
+#line 629 "fwlang_scanner.cc"
 
 #define INITIAL 0
 
@@ -781,7 +778,7 @@ YY_DECL
     
 #line 45 "src/fwlang_scanner.ll"
 
-#line 785 "fwlang_scanner.cc"
+#line 782 "fwlang_scanner.cc"
 
 	if ( !(yy_init) )
 		{
@@ -1171,7 +1168,7 @@ YY_RULE_SETUP
 #line 107 "src/fwlang_scanner.ll"
 ECHO;
 	YY_BREAK
-#line 1175 "fwlang_scanner.cc"
+#line 1172 "fwlang_scanner.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1677,19 +1674,9 @@ static void yy_load_buffer_state  (void)
 	yyfree((void *) b  );
 }
 
-#ifndef _UNISTD_H /* assume unistd.h has isatty() for us */
-#ifdef __cplusplus
-extern "C" {
-#endif
-#ifdef __THROW /* this is a gnuism */
-extern int isatty (int ) __THROW;
-#else
+#ifndef __cplusplus
 extern int isatty (int );
-#endif
-#ifdef __cplusplus
-}
-#endif
-#endif
+#endif /* __cplusplus */
     
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
@@ -1955,15 +1942,6 @@ static void yy_fatal_error (yyconst char* msg )
 
 /* Accessor  methods (get/set functions) to struct members. */
 
-/** Get the current line number.
- * 
- */
-int yyget_lineno  (void)
-{
-        
-    return yylineno;
-}
-
 /** Get the input stream.
  * 
  */
@@ -1995,16 +1973,6 @@ int yyget_leng  (void)
 char *yyget_text  (void)
 {
         return yytext;
-}
-
-/** Set the current line number.
- * @param line_number
- * 
- */
-void yyset_lineno (int  line_number )
-{
-    
-    yylineno = line_number;
 }
 
 /** Set the input stream. This does not discard the current

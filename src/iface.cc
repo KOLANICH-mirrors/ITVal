@@ -669,6 +669,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    for (level k = 24; k > 0; k--)
       HistoryForest->Compact(k);
    */
+
 }
 
 // Initiate construction of outMDD and logMDD.
