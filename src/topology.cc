@@ -27,7 +27,8 @@ char *Topology::LookupInterface(int idx)
 {
    if (idx < numIfaces)
       return ifaces[idx]->name;
-   return NULL;
+   return "any";
+//   return NULL;
 }
 
 int Topology::AddAnonymousInterface(char *name)

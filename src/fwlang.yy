@@ -116,6 +116,7 @@ assert_expression: ASSERT condition assert_op condition {$$ = PerformAssertion($
 	| ASSERT EXAMPLE condition assert_op condition {$$ = PerformAssertion($3, $5, $4, 1, 0);}
 	| ASSERT HISTORY condition assert_op condition {$$ = PerformAssertion($3, $5, $4, 0, 1);}
 	| ASSERT EXAMPLE HISTORY condition assert_op condition {$$ = PerformAssertion($4, $6, $5, 1,1);}
+	| ASSERT HISTORY EXAMPLE condition assert_op condition {$$ = PerformAssertion($4, $6, $5, 1,1);}
 		 ;
 
 assert_op: IS {$$ = OP_IS;} 

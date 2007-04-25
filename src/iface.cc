@@ -23,7 +23,7 @@
  * and Mary Williamsburg, VA 23185 
  */
 //#define STACK_DEBUG
-#define RULE_QUERY_DEBUG
+//#define RULE_QUERY_DEBUG
 
 #include "iface.h"
 #include "firewall.h"

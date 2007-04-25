@@ -817,6 +817,13 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       
    FW->FWForest->BinaryComplement(A->h, notA->h);
    FW->FWForest->BinaryComplement(B->h, notB->h);
+      
+      FW->HistoryForest->PruneMDD(FW->ForwardHist);
+      for (int k=25;k>0;k--){
+         FW->HistoryForest->Compact(k);
+      }
+      FW->HistoryForest->PrintMDD();
+      assert(1);
             
    #ifdef EXAMPLE_DEBUG
    printf("ASSERT_OP: %d\n", assert_op);
@@ -879,9 +886,6 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 	    printf("#Assertion failed.\n");
             FW->FWForest->FindElement(AnotB->h, FW->T, tup);
             cond = false;
-
-
-	
 #ifndef NO_HISTORY
    if (history){
       FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
@@ -928,7 +932,6 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
    }
 #endif
-
       }
       break;
    }
@@ -953,7 +956,7 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       printf("\nCritical Rules:\n\n");
       //printf("\tInput Chain:\n");
       FW->HistoryForest->Min(conditionHistory, FW->InputHist, resultHistory);
-     
+
       results = FW->HistoryForest->GetHistory(resultHistory);
       while (results != NULL){
          FW->DisplayRule(results->fw_id, results->chain_id, results->rule_id);
@@ -967,6 +970,14 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          FW->DisplayRule(results->fw_id, results->chain_id, results->rule_id);
          results = results->next;
       }
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+      FW->HistoryForest->PruneMDD(resultHistory);
+      for (int k=25;k>0;k--)
+         FW->HistoryForest->Compact(k);
+      FW->HistoryForest->PrintMDD();
+      return 0;
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+     
 
 
       //printf("\tOutput Chain:\n");

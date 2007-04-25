@@ -24,8 +24,6 @@
  */
 #include "firewall.h"
 
-#define SIZE_OF_LEVEL_18 256
-
 Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H, int id_num)
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
