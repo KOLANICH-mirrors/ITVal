@@ -497,9 +497,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       // If we've gotten past the last chain, we just copy the inputMDD
       // and return.
       FWForest->Attach(outMDD, inMDD.index);
-#ifndef NO_HISTORY
       HistoryForest->Attach(outHistMDD, inHistMDD.index);
-#endif
       return;
    }
 
@@ -527,19 +525,13 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    // Otherwise, take the output of the previous function off the stack
    // and make it the input MDD.
 
-//   FWForest->DestroyMDD(inMDD); //bad?
-//   HistoryForest->DestroyMDD(inHistMDD); //bad?
-
    if (inMDD.index != outMDD.index){
       FWForest->Attach(inMDD, outMDD.index);
    }
 
-#ifndef NO_HISTORY
    if (inHistMDD.index != outHistMDD.index){
-//      HistoryForest->ReallocHandle(inHistMDD);
       HistoryForest->Attach(inHistMDD, outHistMDD.index);
    }
-#endif
 
    // Create the intermediate MDDs
    for (int k=TOP_LEVEL;k>=0;k--){
@@ -574,12 +566,10 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       tup->hlow[3] = tup->hhigh[3] = tup->fw_id; 
       tup->hlow[2] = tup->hhigh[2] = tup->chain_id; 
       tup->hlow[1] = tup->hhigh[1] = tup->id;  
-
-//      assert(tup->low[0] >= 0);
-//      assert(tup->high[0] >= 0);
-
+      
       tup->hlow[0] = tup->low[0];
       tup->hhigh[0] = tup->high[0];
+
 #ifdef STACK_DEBUG
       printf("B: Firewall %d, Chain %d, Rule %d: MDD %d\n", tup->fw_id, tup->chain_id, tup->id, outMDD.index);
       FWForest->PrintMDD();
@@ -589,13 +579,9 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       printf("A: Firweall %d, Chain %d, Rule %d: MDD %d\n", tup->fw_id, tup->chain_id, tup->id, outMDD.index);
       FWForest->PrintMDD();
 #endif
-      //Union the input MDD with the intermediate and store in "outHistMDD".
-      //HistoryForest->Max(inHistMDD, historyMDD, outHistMDD);
 
-#ifndef NO_HISTORY
       //Actually, just assign, since we're interested in the 'critical rule'.
       HistoryForest->Assign(inHistMDD, tup->hlow, tup->hhigh, outHistMDD);
-#endif
       // Since we are doing things in reverse order, it's possible
       // that a packet that matches a log rule later in the chain 
       // has already been inserted into logMDD, but can't get there
@@ -629,47 +615,28 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    
       FWForest->MakeMDDFromTuple(tup->low, tup->high, criteriaMDD);
       
-#ifndef NO_HISTORY
       HistoryForest->MakeMDDFromTuple(tup->hlow, tup->hhigh, historyMDD);
-#endif
 
       FWForest->ProjectOnto(targetMDD, criteriaMDD, resultMDD);
       
-#ifndef NO_HISTORY
       HistoryForest->ProjectOnto(targetHistMDD, historyMDD, resultHistMDD);
-#endif
 
       // Clean up criteriaMDD.
       FWForest->DestroyMDD(criteriaMDD);
       
-#ifndef NO_HISTORY
       HistoryForest->DestroyMDD(historyMDD);
-#endif
 
       //Any rule in the new chain that affects the packet needs to be counted
       //now.  
 
       FWForest->Replace(inMDD, resultMDD, true, outMDD);
-      //HistoryForest->Max(inHistMDD, resultHistMDD, outHistMDD); 
-      //Is this correct?@@@@
       
-#ifndef NO_HISTORY
       HistoryForest->Replace(inHistMDD, resultHistMDD, true, outHistMDD); //Is this correct?@@@@
-#endif
       FWForest->DestroyMDD(resultMDD);
-#ifndef NO_HISTORY
       HistoryForest->DestroyMDD(resultHistMDD);
-#endif
       FWForest->DestroyMDD(targetMDD);
-#ifndef NO_HISTORY
       HistoryForest->DestroyMDD(targetHistMDD);
-#endif
    }
-   /*
-   for (level k = 24; k > 0; k--)
-      HistoryForest->Compact(k);
-   */
-
 }
 
 // Initiate construction of outMDD and logMDD.
@@ -755,22 +722,16 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
 
    // Create an MDD representing the default policy
    FWForest->MakeMDDFromTuple(low, high, initMDD);
-#ifndef NO_HISTORY
    HistoryForest->MakeMDDFromTuple(hlow, hhigh, initHistMDD);
-#endif
 
    // It becomes the initial "inMDD" to ProcessChain.
    if (chain->tup != NULL) {
       ProcessChain(chain_array, initMDD, initHistMDD, chain->tup, outMDD, logMDD, outHistMDD);
       FWForest->DestroyMDD(initMDD);
-#ifndef NO_HISTORY
       HistoryForest->DestroyMDD(initHistMDD);
-#endif
    }
    else {
       FWForest->Attach(outMDD, initMDD.index);
-#ifndef NO_HISTORY
       HistoryForest->Attach(outHistMDD, initHistMDD.index);
-#endif
    }
 }

@@ -26,7 +26,6 @@ College of William and Mary
 Williamsburg, VA 23185
 */
 
-//#define NO_HISTORY
 
 #ifndef SRC_FWMDD_H
 #   define SRC_FWMDD_H 1
@@ -153,6 +152,12 @@ class fw_fddl_forest:public fddl_forest {
       int* low, int* high, service*&output, int& numArcs);
   void PrintPort (mdd_handle h, level k);
   int PrintPort (level k, node_idx p, int highByte, int depth, portset * p);
+
+  int IsolateClass(mdd_handle h, int classNum, mdd_handle &r);
+  node_idx InternalIsolateClass(level k, node_idx p, int classNum);
+  
+  int ExpandClass(fw_fddl_forest* forest, mdd_handle h, mdd_handle &r, level top);
+  node_idx InternalExpandClass(fw_fddl_forest* forest, level k, node_idx p, level top);
 };
 
 #endif

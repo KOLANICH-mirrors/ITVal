@@ -137,8 +137,9 @@ class Firewall {
               Topology * top, int verbose, fw_fddl_forest * H, int id_num);
 
    ~Firewall();
-   int PrintClasses();
-   int PrintServiceClasses();
+   int PrintClasses(int history);
+   int PrintClassHistory(mdd_handle classMDD, int numClasses);
+   int PrintServiceClasses(int history);
    int GetClasses(group ** &Classes, int &numClasses);
    int GetServiceClasses(service ** &Classes, int &numClasses);
    int GetServiceGraph(int* src, int* dst, service* &arcs, int& numArcs);

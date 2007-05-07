@@ -79,9 +79,9 @@ int main(int argc, char **argv)
 
    int hranges[TOP_LEVEL+1+3] = { 
       256,			/* Exists */
-      65536,      		/* Rule ID */
-      65536,      		/* Chain ID */
-      65536,			/* Firewall ID */
+      65535,      		/* Rule ID */
+      65535,      		/* Chain ID */
+      65535,			/* Firewall ID */
       1, 1, 1, 1, 1, 1,         /* Flags (FIN, SYN, RST, PSH, ACK, URG) */
       3,                        /* Connection State             */
       255, 255,                 /* Output and Input Interface   */

@@ -298,12 +298,6 @@ condition* BuildDropCondition(int input_chain)
 	 printf("Illegal input chain to Logged.\n");
 	 break;
    }
-   /*
-   for (int k=TOP_LEVEL;k>0;k--)
-      FW->FWForest->Compact(k);
-   printf("Dropped(%d):%d\n",input_chain, sc->h.index);
-   FW->FWForest->PrintMDD();
-   */
 #ifdef ASSERT_DEBUG
    printf("DROPPED Condition: %d\n", sc->h.index);
    for (int k=TOP_LEVEL;k>0;k--)
@@ -793,9 +787,7 @@ query *PerformQuery(int subject, condition * c)
 
 assert* PerformAssertion(condition* A, condition* B, int assert_op, int example, int history){
 
-#ifndef NO_HISTORY   
    mdd_handle conditionHistory;
-#endif
 
    int cond;
    int* tup;
@@ -817,14 +809,15 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       
    FW->FWForest->BinaryComplement(A->h, notA->h);
    FW->FWForest->BinaryComplement(B->h, notB->h);
-      
+
+/*
       FW->HistoryForest->PruneMDD(FW->ForwardHist);
       for (int k=25;k>0;k--){
          FW->HistoryForest->Compact(k);
       }
       FW->HistoryForest->PrintMDD();
       assert(1);
-            
+*/       
    #ifdef EXAMPLE_DEBUG
    printf("ASSERT_OP: %d\n", assert_op);
    printf("NotA: %d\n", notA->h.index);
@@ -852,22 +845,18 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
             printf("#Assertion failed.\n");
             FW->FWForest->FindElement(BnotA->h, FW->T, tup);
             cond = false;
-#ifndef NO_HISTORY
    if (history){
       FW->FWForest->BuildHistoryMDD(BnotA->h, FW->HistoryForest, conditionHistory); 
    }
-#endif
 
          }
          else if (AnotB->h.index != 0){
             printf("#Assertion failed.\n");
             FW->FWForest->FindElement(AnotB->h, FW->T, tup);
             cond = false;
-#ifndef NO_HISTORY
    if (history){
       FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
    }
-#endif
 
          }
          else{
@@ -886,11 +875,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 	    printf("#Assertion failed.\n");
             FW->FWForest->FindElement(AnotB->h, FW->T, tup);
             cond = false;
-#ifndef NO_HISTORY
    if (history){
       FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
    }
-#endif
 
         }
       break;
@@ -909,11 +896,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 	  printf("#Assertion failed.\n");
           FW->FWForest->FindElement(A->h,FW->T, tup);
           cond = false;
-#ifndef NO_HISTORY
    if (history){
       FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
    }
-#endif
 
       }
       break;
@@ -927,11 +912,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          printf("#Assertion failed.\n");
          FW->FWForest->FindElement(A->h, FW->T, tup);
          cond = false;
-#ifndef NO_HISTORY
    if (history){
       FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
    }
-#endif
       }
       break;
    }
@@ -948,7 +931,6 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       }
    }
 
-#ifndef NO_HISTORY
    if (history && !cond){
       mdd_handle resultHistory;
       chain_rule* results;
@@ -971,11 +953,11 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          results = results->next;
       }
 /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-      FW->HistoryForest->PruneMDD(resultHistory);
-      for (int k=25;k>0;k--)
-         FW->HistoryForest->Compact(k);
-      FW->HistoryForest->PrintMDD();
-      return 0;
+//      FW->HistoryForest->PruneMDD(resultHistory);
+//      for (int k=25;k>0;k--)
+//         FW->HistoryForest->Compact(k);
+//      FW->HistoryForest->PrintMDD();
+//      return 0;
 /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
      
 
@@ -989,7 +971,6 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       }
 
    }
-#endif
 
    delete BnotA;
    delete AnotB;
@@ -1086,21 +1067,21 @@ void DoCleanup()
    FW->FWForest->DestroyMDD(FW->ForwardLog);
 }
 
-query *PrintClasses()
+query *PrintClasses(int history)
 {
 
-   FW->PrintClasses();          //Nodes at level 19.
+   FW->PrintClasses(history);          //Nodes at level 19.
    return NULL;
 }
 
-query *PrintServiceClasses()
+query *PrintServiceClasses(int history)
 {
 
-   FW->PrintServiceClasses();
+   FW->PrintServiceClasses(history);
    return NULL;
 }
 
-query *PrintServiceGraph()
+query *PrintServiceGraph(int history)
 {
    address* fromAd;
    address* toAd;

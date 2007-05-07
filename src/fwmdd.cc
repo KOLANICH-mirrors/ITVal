@@ -1001,6 +1001,114 @@ node_idx fw_fddl_forest::InternalHIntersect(level k, node_idx p, node_idx q)
    return result;
 }
 
+int fw_fddl_forest::IsolateClass(mdd_handle p, int classNum, mdd_handle& r)
+{
+
+   node_idx newresult;
+
+   if (p.index < 0)
+      return INVALID_MDD;
+
+   for (level k = K; k > 0; k--) {
+      FWCache[k]->Clear();
+   }
+
+   newresult = InternalIsolateClass(K, p.index, classNum);
+   if (r.index != newresult) {
+      ReallocHandle(r);
+      Attach(r, newresult);
+   }
+   return SUCCESS;
+}
+
+node_idx fw_fddl_forest::InternalIsolateClass(level k, node_idx p, int classNum){
+   node_idx result;
+   if (p==0) return 0;
+   if (k==0 && p == classNum)
+      return 1;
+   if (k==0) 
+      return 0;
+
+   result = FWCache[k]->Hit(k,p);
+   if (result >= 0)
+      return result;
+   
+
+   result = NewNode(k);
+
+   node* nodeP;
+   nodeP = &FDDL_NODE(k,p);
+   for (int i=0;i<nodeP->size;i++){
+      SetArc(k,result,i,InternalIsolateClass(k-1,FDDL_ARC(k,nodeP,i),classNum)); 
+   }
+   result = CheckIn(k,result);
+   FWCache[k]->Add(k, p, result);
+   return result;
+}
+
+int fw_fddl_forest::ExpandClass(fw_fddl_forest * forest, mdd_handle classMDD,
+                                  mdd_handle & r, level top)
+{
+
+   node_idx newresult;
+
+   if (classMDD.index < 0)
+      return INVALID_MDD;
+
+   if (forest == NULL)
+      return INVALID_MDD;
+
+   for (level k = K; k > 0; k--) {
+      FWCache[k]->Clear();
+   }
+
+   newresult = InternalExpandClass(forest, K, classMDD.index, top);
+   if (r.index != newresult) {
+      forest->ReallocHandle(r);
+      forest->Attach(r, newresult);
+   }
+   return SUCCESS;
+}
+
+node_idx fw_fddl_forest::InternalExpandClass(fw_fddl_forest * forest, level k, node_idx p, level top){
+   node_idx result;
+
+   if (k==0) return p;
+   if (p==0) return 0;
+   result = FWCache[k]->Hit(k,p);
+   if (result >=0) 
+      return result;
+
+   result = NewNode(k);
+
+   if (k>top || k < top-3){
+      node_idx child;
+      child = InternalExpandClass(forest, k-1, p, top);
+      for (int i = 0;i<=maxVals[k];i++){
+         SetArc(k,result,i,child); 
+      }
+      result = CheckIn(k,result);
+      FWCache[k]->Add(k,p,result);
+      return result;
+   }
+   else{
+      //printf("Level: %d Top: %d\n", k, top);
+      node* nodeP;
+      nodeP = (*forest->nodes[k+4-top])[p];
+      node_idx child;
+      node_idx index;
+      for (int i=0;i<nodeP->size;i++){
+         index = nodeP->down + i;
+         child = *((*forest->arcs[k+4-top])[index]);
+         SetArc(k,result, i, InternalExpandClass(forest,k-1,child,top));
+	 //printf("Expand: <%d,%d>[%d] = %d\n", k,result,i, child);
+      }
+      result = CheckIn(k,result);
+      FWCache[k]->Add(k,p,result);
+      return result;
+   }
+}
+
 int fw_fddl_forest::BuildClassMDD(mdd_handle p, fddl_forest * forest,
                                   mdd_handle & r, int &numClasses,
                                   int services)
@@ -1712,7 +1820,7 @@ void fw_fddl_forest::InternalGetServiceClasses(level k, node_idx p, int *low,
             newPort->high += (256 * high[2]);
          }
          else {
-            newPort->high += (256 * 255);
+            newPort->high += (256 * 256);
          }
 
          if (k <= 2) {

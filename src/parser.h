@@ -29,6 +29,11 @@ Williamsburg, VA 23185
 #ifndef __PARSER_H
 #define __PARSER_H
 
+#define FLAG_NO_EXAMPLE 0
+#define FLAG_EXAMPLE 1
+#define FLAG_NO_HISTORY 0
+#define FLAG_HISTORY 1
+
 #include "structures.h"
 #include "fwmdd.h"
 
@@ -119,9 +124,9 @@ query *PerformQuery(int s, condition * c);
 assert *PerformAssertion(condition *left, condition *right, int assertion_operator, int example_flag, int history_flag);
 
 //Compute Host Equivalence Classes and print them.
-query *PrintClasses();
-query *PrintServiceClasses();
-query *PrintServiceGraph();
+query *PrintClasses(int history);
+query *PrintServiceClasses(int history);
+query *PrintServiceGraph(int history);
 group *GetClasses();
 service *GetServiceClasses();
 

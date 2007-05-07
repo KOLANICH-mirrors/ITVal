@@ -28,9 +28,7 @@ Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H, int id_num)
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
    FWForest = F;
-#ifndef NO_HISTORY   
    HistoryForest = H;
-#endif
    num_nat_chains = -1;
    num_chains = -1;
    id = id_num;
@@ -39,6 +37,9 @@ Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H, int id_num)
    }
    ClassForest = new fw_fddl_forest(5, ranges);
    ClassForest->ToggleSparsity(false);
+   ranges[3] = 2; //Right?
+   ranges[2] = 256;
+   ranges[1] = 256;
    ServiceClassForest = new fw_fddl_forest(4, ranges);
    ServiceClassForest->ToggleSparsity(false);
    natHead = NULL;
@@ -58,9 +59,7 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    id = id_num;
 
    FWForest = F;
-#ifndef NO_HISTORY
    HistoryForest = H;
-#endif   
    T = top;
    
    num_nat_chains = -1;
@@ -126,9 +125,7 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    FWForest = F;
    T = top;
 
-#ifndef NO_HISTORY
    HistoryForest = H;
-#endif
    num_nat_chains = -1;
    num_chains = -1;
    for (int i = 0; i < 256; i++) {
@@ -207,11 +204,9 @@ Firewall::~Firewall() {
       FWForest->DestroyMDD(Input);
       FWForest->DestroyMDD(Output);
       FWForest->DestroyMDD(Forward);
-#ifndef NO_HISTORY
       HistoryForest->DestroyMDD(InputHist);
       HistoryForest->DestroyMDD(OutputHist);
       HistoryForest->DestroyMDD(ForwardHist);
-#endif
       FWForest->DestroyMDD(InputLog);
       FWForest->DestroyMDD(OutputLog);
       FWForest->DestroyMDD(ForwardLog);
@@ -224,7 +219,7 @@ Firewall::~Firewall() {
    }
 
 
-int Firewall::PrintClasses()
+int Firewall::PrintClasses(int history)
 {
    mdd_handle FWSourceClass;
    mdd_handle INSourceClass;
@@ -239,10 +234,7 @@ int Firewall::PrintClasses()
 
    int numClasses = 0;
 
-   //FWForest->PrintMDD();
    FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses, 0);
-//   printf("FWSourceClass: %d\n", FWSourceClass.index);
-//   HistoryForest->PrintMDD();
 
 //   printf("There are %d Forward Source classes:\n", numClasses);
 //   ClassForest->PrintMDD();
@@ -270,6 +262,7 @@ int Firewall::PrintClasses()
 //   FWForest->Shift(newChain,16,newChain);
 //   FWForest->Shift(newChain,17,newChain);
 //   FWForest->Shift(newChain,18,newChain);
+
 
    FWForest->BuildClassMDD(newChain, ClassForest, FWDestClass, numClasses, 0);
 
@@ -317,6 +310,57 @@ int Firewall::PrintClasses()
 
    printf("There are %d total host classes:\n", numClasses);
    ClassForest->PrintClasses(resultClass, numClasses);
+   if (history)
+      PrintClassHistory(resultClass, numClasses);
+}
+
+int Firewall::PrintClassHistory(mdd_handle classMDD, int numClasses){
+   int i;
+   chain_rule* results;
+   mdd_handle newClass;
+   mdd_handle sourceHistory;
+   mdd_handle destinationHistory;
+   mdd_handle result;
+   bool resultsFound;
+   for (i=1;i<numClasses;i++){
+      printf("Class %d:\n", i);
+      ClassForest->IsolateClass(classMDD,i,newClass); 
+      HistoryForest->ExpandClass(ClassForest,newClass,sourceHistory,25); 
+      HistoryForest->ExpandClass(ClassForest,newClass,destinationHistory,21); 
+
+      HistoryForest->Min(sourceHistory, InputHist, result);
+      results = HistoryForest->GetHistory(result);
+      resultsFound = false;
+      while (results != NULL){
+         DisplayRule(results->fw_id, results->chain_id, results->rule_id);
+         results = results->next;
+	 resultsFound = true;
+      }
+
+
+      HistoryForest->Min(sourceHistory, ForwardHist, result);
+      results = HistoryForest->GetHistory(result);
+      while (results != NULL){
+         DisplayRule(results->fw_id, results->chain_id, results->rule_id);
+         results = results->next;
+	 resultsFound = true;
+      }
+
+      HistoryForest->Min(sourceHistory, OutputHist, result);
+      results = HistoryForest->GetHistory(result);
+      while (results != NULL){
+         DisplayRule(results->fw_id, results->chain_id, results->rule_id);
+         results = results->next;
+	 resultsFound = true;
+      } 
+      if (!resultsFound)
+	 printf("No rules matched!\n");
+      printf("\n");
+   }
+   //HistoryForest->PruneMDD(sourceHistory);
+   //   for (int k=25;k>0;k--)
+   //      HistoryForest->Compact(k);
+   //   HistoryForest->PrintMDD();
 }
 
 int Firewall::GetClasses(group ** &classes, int &numClasses)
@@ -452,7 +496,7 @@ int Firewall::GetServiceGraph(int* src, int* dst, service*& arcs, int& numArcs){
    return 0;
 }
 
-int Firewall::PrintServiceClasses()
+int Firewall::PrintServiceClasses(int history)
 {
    int numClasses;
 
@@ -675,21 +719,15 @@ Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n, fw_fddl_fo
    }
    else {
       FWForest->Attach(f->Forward, fws[0]->Forward.index);
-#ifndef NO_HISTORY
       HistoryForest->Attach(f->ForwardHist, fws[0]->ForwardHist.index);
-#endif
       FWForest->Attach(f->ForwardLog, fws[0]->ForwardLog.index);
 
       FWForest->Attach(f->Input, fws[0]->Input.index);
-#ifndef NO_HISTORY
       HistoryForest->Attach(f->InputHist, fws[0]->InputHist.index);
-#endif
       FWForest->Attach(f->InputLog, fws[0]->InputLog.index);
 
       FWForest->Attach(f->Output, fws[n - 1]->Output.index);
-#ifndef NO_HISTORY
       HistoryForest->Attach(f->OutputHist, fws[n - 1]->OutputHist.index);
-#endif
       FWForest->Attach(f->OutputLog, fws[n - 1]->OutputLog.index);
    }
 
@@ -698,11 +736,9 @@ Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n, fw_fddl_fo
       FWForest->Min(f->Input, fws[i]->Forward, f->Forward);
       FWForest->Min(f->Output, fws[(n - 1) - i]->Forward, f->Forward);
 
-#ifndef NO_HISTORY
       HistoryForest->Min(f->ForwardHist, fws[i]->ForwardHist, f->ForwardHist);
       HistoryForest->Min(f->InputHist, fws[i]->ForwardHist, f->ForwardHist);
       HistoryForest->Min(f->OutputHist, fws[(n - 1) - i]->ForwardHist, f->ForwardHist);
-#endif
 
       prerouting = fws[i]->FindNATChain("Prerouting");
       postrouting = fws[i - 1]->FindNATChain("Postrouting");
