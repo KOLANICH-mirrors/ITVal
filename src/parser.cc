@@ -809,15 +809,14 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       
    FW->FWForest->BinaryComplement(A->h, notA->h);
    FW->FWForest->BinaryComplement(B->h, notB->h);
-
 /*
       FW->HistoryForest->PruneMDD(FW->ForwardHist);
       for (int k=25;k>0;k--){
          FW->HistoryForest->Compact(k);
       }
       FW->HistoryForest->PrintMDD();
-      assert(1);
-*/       
+      assert(0);
+      */
    #ifdef EXAMPLE_DEBUG
    printf("ASSERT_OP: %d\n", assert_op);
    printf("NotA: %d\n", notA->h.index);

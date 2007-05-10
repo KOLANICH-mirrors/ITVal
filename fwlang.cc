@@ -236,7 +236,7 @@ typedef union YYSTYPE
    char* val;
    int flag;
 }
-/* Line 187 of yacc.c.  */
+/* Line 193 of yacc.c.  */
 #line 241 "fwlang.cc"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
