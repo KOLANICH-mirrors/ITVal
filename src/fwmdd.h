@@ -156,8 +156,11 @@ class fw_fddl_forest:public fddl_forest {
   int IsolateClass(mdd_handle h, int classNum, mdd_handle &r);
   node_idx InternalIsolateClass(level k, node_idx p, int classNum);
   
-  int ExpandClass(fw_fddl_forest* forest, mdd_handle h, mdd_handle &r, level top);
-  node_idx InternalExpandClass(fw_fddl_forest* forest, level k, node_idx p, level top);
+  int ExpandClass(fw_fddl_forest* forest, mdd_handle h, mdd_handle &r, level top, int serviceFlag);
+  node_idx InternalExpandClass(fw_fddl_forest* forest, level k, node_idx p, level top, int serviceFlag);
+
+  int And(mdd_handle a, mdd_handle b, mdd_handle& r);
+  node_idx InternalAnd(level k, node_idx a, node_idx b);
 };
 
 #endif

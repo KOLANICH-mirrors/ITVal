@@ -239,7 +239,6 @@ protected:
   int K;			//Number of Non-terminal Levels
   int *tail;			//Array [1..K] which records number of arcs per level.
   node_idx *last;		//Array [1..K] which records number of nodes per level.
-  int *maxVals;			//Array [0..K] of maximum values for each level.
 
   int CompactCounter;
 
@@ -264,7 +263,7 @@ protected:
   int Value (level k, node_idx p, int *tup);
 
 public:
-
+  int *maxVals;			//Array [0..K] of maximum values for each level.
   void ReallocHandle (mdd_handle & ref);
 
   void Attach (mdd_handle & ref, node_idx i)

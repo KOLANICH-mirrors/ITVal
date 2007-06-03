@@ -139,6 +139,7 @@ class Firewall {
    ~Firewall();
    int PrintClasses(int history);
    int PrintClassHistory(mdd_handle classMDD, int numClasses);
+   int PrintServiceClassHistory(mdd_handle classMDD, int numClasses);
    int PrintServiceClasses(int history);
    int GetClasses(group ** &Classes, int &numClasses);
    int GetServiceClasses(service ** &Classes, int &numClasses);

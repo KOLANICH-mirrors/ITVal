@@ -38,8 +38,8 @@ Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H, int id_num)
    ClassForest = new fw_fddl_forest(5, ranges);
    ClassForest->ToggleSparsity(false);
    ranges[3] = 2; //Right?
-   ranges[2] = 256;
-   ranges[1] = 256;
+   ranges[2] = 255;
+   ranges[1] = 255;
    ServiceClassForest = new fw_fddl_forest(4, ranges);
    ServiceClassForest->ToggleSparsity(false);
    natHead = NULL;
@@ -105,6 +105,9 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    BuildChains(output_chain, Output, OutputLog, OutputHist);
    ClassForest = new fw_fddl_forest(5, ranges);
    ClassForest->ToggleSparsity(false);
+   ranges[3] = 2; //Right?
+   ranges[2] = 255;
+   ranges[1] = 255;
    ServiceClassForest = new fw_fddl_forest(4, ranges);
    ServiceClassForest->ToggleSparsity(false);
    natHead = NULL;
@@ -182,7 +185,10 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
 #endif
    ClassForest = new fw_fddl_forest(5, ranges);
    ClassForest->ToggleSparsity(false);
-   ServiceClassForest = new fw_fddl_forest(3, ranges);
+   ranges[3] = 2; //Right?
+   ranges[2] = 255;
+   ranges[1] = 255;
+   ServiceClassForest = new fw_fddl_forest(4, ranges);
    ServiceClassForest->ToggleSparsity(false);
    natHead = NULL;
 }
@@ -308,7 +314,7 @@ int Firewall::PrintClasses(int history)
    ClassForest->JoinClasses(resultClass, OUTDestClass, resultClass,
                             numClasses);
 
-   printf("There are %d total host classes:\n", numClasses);
+   printf("There are %d total host classes:\n", numClasses-1);
    ClassForest->PrintClasses(resultClass, numClasses);
    if (history)
       PrintClassHistory(resultClass, numClasses);
@@ -325,10 +331,10 @@ int Firewall::PrintClassHistory(mdd_handle classMDD, int numClasses){
    for (i=1;i<numClasses;i++){
       printf("Class %d:\n", i);
       ClassForest->IsolateClass(classMDD,i,newClass); 
-      HistoryForest->ExpandClass(ClassForest,newClass,sourceHistory,25); 
-      HistoryForest->ExpandClass(ClassForest,newClass,destinationHistory,21); 
+      HistoryForest->ExpandClass(ClassForest,newClass,sourceHistory,25,0); 
+      HistoryForest->ExpandClass(ClassForest,newClass,destinationHistory,21,0); 
 
-      HistoryForest->Min(sourceHistory, InputHist, result);
+      HistoryForest->And(sourceHistory, InputHist, result);
       results = HistoryForest->GetHistory(result);
       resultsFound = false;
       while (results != NULL){
@@ -338,7 +344,7 @@ int Firewall::PrintClassHistory(mdd_handle classMDD, int numClasses){
       }
 
 
-      HistoryForest->Min(sourceHistory, ForwardHist, result);
+      HistoryForest->And(sourceHistory, ForwardHist, result);
       results = HistoryForest->GetHistory(result);
       while (results != NULL){
          DisplayRule(results->fw_id, results->chain_id, results->rule_id);
@@ -346,7 +352,60 @@ int Firewall::PrintClassHistory(mdd_handle classMDD, int numClasses){
 	 resultsFound = true;
       }
 
-      HistoryForest->Min(sourceHistory, OutputHist, result);
+      HistoryForest->And(sourceHistory, OutputHist, result);
+      results = HistoryForest->GetHistory(result);
+      while (results != NULL){
+         DisplayRule(results->fw_id, results->chain_id, results->rule_id);
+         results = results->next;
+	 resultsFound = true;
+      } 
+      if (!resultsFound)
+	 printf("No rules matched!\n");
+      printf("\n");
+   }
+   //HistoryForest->PruneMDD(sourceHistory);
+   //   for (int k=25;k>0;k--)
+   //      HistoryForest->Compact(k);
+   //   HistoryForest->PrintMDD();
+}
+
+int Firewall::PrintServiceClassHistory(mdd_handle classMDD, int numClasses){
+   int i;
+   chain_rule* results;
+   mdd_handle newClass;
+   mdd_handle sourceHistory;
+   mdd_handle destinationHistory;
+   mdd_handle result;
+   bool resultsFound;
+   for (i=1;i<numClasses;i++){
+      printf("Class %d:\n", i);
+      ServiceClassForest->IsolateClass(classMDD,i,newClass); 
+
+      HistoryForest->ExpandClass(ServiceClassForest,newClass,sourceHistory,14,1); 
+      HistoryForest->ExpandClass(ServiceClassForest,newClass,destinationHistory,14,2); 
+      //printf("sourceHistory: %d\n", sourceHistory.index);
+      //printf("sourceHistory: %d\n", destinationHistory.index);
+      //HistoryForest->PrintMDD();
+
+      HistoryForest->And(sourceHistory, InputHist, result);
+      results = HistoryForest->GetHistory(result);
+      resultsFound = false;
+      while (results != NULL){
+         DisplayRule(results->fw_id, results->chain_id, results->rule_id);
+         results = results->next;
+	 resultsFound = true;
+      }
+
+
+      HistoryForest->And(sourceHistory, ForwardHist, result);
+      results = HistoryForest->GetHistory(result);
+      while (results != NULL){
+         DisplayRule(results->fw_id, results->chain_id, results->rule_id);
+         results = results->next;
+	 resultsFound = true;
+      }
+
+      HistoryForest->And(sourceHistory, OutputHist, result);
       results = HistoryForest->GetHistory(result);
       while (results != NULL){
          DisplayRule(results->fw_id, results->chain_id, results->rule_id);
@@ -511,13 +570,12 @@ int Firewall::PrintServiceClasses(int history)
    mdd_handle newChain;
    mdd_handle resultClass;
 
-/* 
+/*
    for (level k=3;k>0;k--)
       ServiceClassForest->Compact(k);
    printf("There are %d total service classes:\n",numClasses);
    ServiceClassForest->PrintMDD();
 */
-
 /*
    for (level k=TOP_LEVEL+1;k>0;k--)
       FWForest->Compact(k);
@@ -536,26 +594,26 @@ int Firewall::PrintServiceClasses(int history)
    FWForest->Shift(newChain, 12, newChain);     //Grab protocol
    FWForest->BuildClassMDD(newChain, ServiceClassForest, INSourceClass,
                            numClasses, 1);
-
+   
    FWForest->Shift(Output, 12, newChain);       //Grab destination port byte 2
    FWForest->Shift(newChain, 12, newChain);     //Grab destination port byte 1
    FWForest->Shift(newChain, 12, newChain);     //Grab protocol
    FWForest->BuildClassMDD(newChain, ServiceClassForest, OUTSourceClass,
                            numClasses, 1);
-
+   
    //Shift Destination Port to Top.
    FWForest->Shift(Forward, 10, newChain);      //Grab destination port byte 2
    FWForest->Shift(newChain, 10, newChain);     //Grab destination port byte 1
    FWForest->Shift(newChain, 12, newChain);     //Grab protocol
    FWForest->BuildClassMDD(newChain, ServiceClassForest, FWDestClass,
                            numClasses, 1);
-
+   
    FWForest->Shift(Input, 10, newChain);
    FWForest->Shift(newChain, 10, newChain);
    FWForest->Shift(newChain, 12, newChain);
    FWForest->BuildClassMDD(newChain, ServiceClassForest, INDestClass,
                            numClasses, 1);
-
+   
    FWForest->Shift(Output, 10, newChain);
    FWForest->Shift(newChain, 10, newChain);
    FWForest->Shift(newChain, 12, newChain);
@@ -584,13 +642,10 @@ int Firewall::PrintServiceClasses(int history)
                                    numClasses);
    ServiceClassForest->DestroyMDD(OUTDestClass);
 
-//   for (level k=3;k>0;k--)
-//      ClassForest->Compact(k);
-//   printf("There are %d total service classes:\n",numClasses);
-//   ClassForest->PrintMDD();
-
-   printf("There are %d total service classes:\n", numClasses);
+   printf("There are %d total service classes:\n", numClasses-1);
    ServiceClassForest->PrintServiceClasses(resultClass, numClasses);
+   if (history)
+      PrintServiceClassHistory(resultClass, numClasses);
    return 1;
 }
 

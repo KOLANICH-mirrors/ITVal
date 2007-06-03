@@ -323,6 +323,7 @@ chain_rule* fw_fddl_forest::GetHistory(mdd_handle root){
    return result;
 }
 
+
 void fw_fddl_forest::InternalPrintHistory(level k, node_idx p, int fw_num, int chain_num, int rule_num){
    int i;
    node* nodeP;
@@ -1047,7 +1048,7 @@ node_idx fw_fddl_forest::InternalIsolateClass(level k, node_idx p, int classNum)
 }
 
 int fw_fddl_forest::ExpandClass(fw_fddl_forest * forest, mdd_handle classMDD,
-                                  mdd_handle & r, level top)
+                                  mdd_handle & r, level top, int serviceFlag)
 {
 
    node_idx newresult;
@@ -1062,7 +1063,7 @@ int fw_fddl_forest::ExpandClass(fw_fddl_forest * forest, mdd_handle classMDD,
       FWCache[k]->Clear();
    }
 
-   newresult = InternalExpandClass(forest, K, classMDD.index, top);
+   newresult = InternalExpandClass(forest, K, classMDD.index, top,serviceFlag);
    if (r.index != newresult) {
       forest->ReallocHandle(r);
       forest->Attach(r, newresult);
@@ -1070,20 +1071,33 @@ int fw_fddl_forest::ExpandClass(fw_fddl_forest * forest, mdd_handle classMDD,
    return SUCCESS;
 }
 
-node_idx fw_fddl_forest::InternalExpandClass(fw_fddl_forest * forest, level k, node_idx p, level top){
+node_idx fw_fddl_forest::InternalExpandClass(fw_fddl_forest * forest, level k, node_idx p, level top, int serviceFlag){
    node_idx result;
-
+   
+   int groupSize;
    if (k==0) return p;
    if (p==0) return 0;
    result = FWCache[k]->Hit(k,p);
    if (result >=0) 
       return result;
+      
+   if (serviceFlag == 1){
+      groupSize = 3;
+   }
+   else if (serviceFlag == 2){
+      groupSize = 5;
+   }
+   else{
+      groupSize = 4;
+   }
 
    result = NewNode(k);
 
-   if (k>top || k < top-3){
+   //Insert wild card nodes at all levels above and below those representing the class attributes.  In the case of
+   //destination port, we also have to insert wildcards in the source ports areas to take care of the 'protocol' problem.
+   if (k>top || (serviceFlag == 2 && k != top && k != top-3 && k != top-4) || (serviceFlag !=2 && k < top-(groupSize-1))){
       node_idx child;
-      child = InternalExpandClass(forest, k-1, p, top);
+      child = InternalExpandClass(forest, k-1, p, top, serviceFlag);
       for (int i = 0;i<=maxVals[k];i++){
          SetArc(k,result,i,child); 
       }
@@ -1092,15 +1106,22 @@ node_idx fw_fddl_forest::InternalExpandClass(fw_fddl_forest * forest, level k, n
       return result;
    }
    else{
-      //printf("Level: %d Top: %d\n", k, top);
+   //   printf("Level: %d Top: %d\n", k, top);
       node* nodeP;
-      nodeP = (*forest->nodes[k+4-top])[p];
+      int newK;
+      if (serviceFlag == 2 && k==top){
+         newK = 3;
+      }
+      else{
+         newK = k+groupSize-top;
+      }
+      nodeP = (*forest->nodes[newK])[p];
       node_idx child;
       node_idx index;
       for (int i=0;i<nodeP->size;i++){
          index = nodeP->down + i;
-         child = *((*forest->arcs[k+4-top])[index]);
-         SetArc(k,result, i, InternalExpandClass(forest,k-1,child,top));
+         child = *((*forest->arcs[newK])[index]);
+         SetArc(k,result, i, InternalExpandClass(forest,k-1,child,top, serviceFlag));
 	 //printf("Expand: <%d,%d>[%d] = %d\n", k,result,i, child);
       }
       result = CheckIn(k,result);
@@ -1191,7 +1212,7 @@ node_idx fw_fddl_forest::InternalBuildClassMDD(fddl_forest * forest, level k,
       nodeP = &FDDL_NODE(k, p);
    else nodeP = NULL;
    
-   for (arc_idx i = 0; i <= maxVals[k]; i++) {
+   for (arc_idx i = 0; i <= forest->maxVals[newK]; i++) {
       node_idx j;
       if (nodeP && i<nodeP->size)
          j = FDDL_ARC(k, nodeP, i);
@@ -1863,3 +1884,44 @@ void fw_fddl_forest::InternalGetServiceClasses(level k, node_idx p, int *low,
                              high, classNum, head);
 }
 
+int fw_fddl_forest::And(mdd_handle a, mdd_handle b, mdd_handle& r){
+   node_idx newresult;
+   if (a.index < 0)
+      return INVALID_MDD;
+
+   if (b.index < 0)
+      return INVALID_MDD;
+
+   for (level k=K;k>0;k--){
+      FWCache[k]->Clear();
+   }
+
+   newresult = InternalAnd(K, a.index, b.index);
+   if (r.index != newresult){
+      ReallocHandle(r);
+      Attach(r, newresult);
+   }
+   return SUCCESS;
+}
+
+node_idx fw_fddl_forest::InternalAnd(level k, node_idx a, node_idx b){
+   node_idx result;
+   if (a == 0 || b == 0)
+      return 0;
+   if (k == 0) 
+      return 1;
+   result = FWCache[k]->Hit(k,a,b);
+   if (result >=0) 
+      return result;
+   result = NewNode(k);
+   for (int i=0;i<=maxVals[k];i++){
+      node* nodeA = &FDDL_NODE(k,a);
+      node* nodeB = &FDDL_NODE(k,b);
+      node_idx aChild = i < nodeA->size ? FDDL_ARC(k,nodeA,i) : 0;
+      node_idx bChild = i < nodeB->size ? FDDL_ARC(k,nodeB,i) : 0;
+      SetArc(k,result,i,InternalAnd(k-1,aChild,bChild));
+   }
+   result = CheckIn(k,result);
+   FWCache[k]->Add(k,a,b,result);
+   return result;
+}
