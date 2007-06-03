@@ -935,16 +935,13 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       chain_rule* results;
 
       printf("\nCritical Rules:\n\n");
-      //printf("\tInput Chain:\n");
       FW->HistoryForest->Min(conditionHistory, FW->InputHist, resultHistory);
-
       results = FW->HistoryForest->GetHistory(resultHistory);
       while (results != NULL){
          FW->DisplayRule(results->fw_id, results->chain_id, results->rule_id);
          results = results->next;
       }
 
-      //printf("\tForward Chain:\n");
       FW->HistoryForest->Min(conditionHistory, FW->ForwardHist, resultHistory);
       results = FW->HistoryForest->GetHistory(resultHistory);
       while (results != NULL){
@@ -961,7 +958,6 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
      
 
 
-      //printf("\tOutput Chain:\n");
       FW->HistoryForest->Min(conditionHistory, FW->OutputHist, resultHistory);
       results = FW->HistoryForest->GetHistory(resultHistory);
       while (results != NULL){
