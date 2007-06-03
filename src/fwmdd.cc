@@ -75,6 +75,20 @@ int fw_fddl_forest::PrintElement(Topology* T, int* vals){
       printf("].\n");
 }
 
+void fw_fddl_forest::DisplayElement(mdd_handle root, Topology *T, bool cond){
+   int *tup;
+   FindElement(root, T, tup);
+   if (cond)
+      printf("#Witness:\n");
+   else
+      printf("#Counterexample:\n");
+   
+   if (tup != NULL){
+      PrintElement(T, tup);
+      delete[] tup;
+   }
+}
+
 int fw_fddl_forest::FindElement(mdd_handle root, Topology* T, int*& vals){
    node_idx newresult;
    if (root.index < 0)

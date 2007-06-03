@@ -789,16 +789,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 
    mdd_handle conditionHistory;
 
-   int cond;
-   int* tup;
+   condition *notA, *notB;
 
-   condition* notA;
-   condition* notB;
-
-   condition* BnotA;
-   condition* AnotB;
-   condition* NotBoth;
-   condition* AandB;
+   condition *BnotA, *AnotB, *NotBoth, *AandB;
 
    BnotA = new condition;
    AnotB = new condition;
@@ -809,128 +802,116 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       
    FW->FWForest->BinaryComplement(A->h, notA->h);
    FW->FWForest->BinaryComplement(B->h, notB->h);
-/*
-      FW->HistoryForest->PruneMDD(FW->ForwardHist);
-      for (int k=25;k>0;k--){
-         FW->HistoryForest->Compact(k);
-      }
-      FW->HistoryForest->PrintMDD();
-      assert(0);
-      */
-   #ifdef EXAMPLE_DEBUG
-   printf("ASSERT_OP: %d\n", assert_op);
-   printf("NotA: %d\n", notA->h.index);
-   printf("NotB: %d\n", notB->h.index);
-   #endif
-
+   
    FW->FWForest->Min(B->h, notA->h, BnotA->h);
    FW->FWForest->Min(A->h, notB->h, AnotB->h);
 
    FW->FWForest->Max(BnotA->h, AnotB->h, NotBoth->h);
-
    FW->FWForest->Min(A->h, B->h, AandB->h);
 
 #ifdef EXAMPLE_DEBUG
-	    printf("A: %d B:%d\n", A->h.index, B->h.index);
-	    printf("ResultA: %d\n", BnotA->h.index);
-	    printf("ResultB: %d\n", AnotB->h.index);
-	    printf("ResultC: %d\n", NotBoth->h.index);
-	    printf("ResultD: %d\n", AandB->h.index);
+   printf("ASSERT_OP: %d\n", assert_op);
+   printf("A: %d B:%d\n", A->h.index, B->h.index);
+   printf("NotA: %d\n", notA->h.index);
+   printf("NotB: %d\n", notB->h.index);
+   printf("B not A: %d\n", BnotA->h.index);
+   printf("A not B: %d\n", AnotB->h.index);
+   printf("not Both: %d\n", NotBoth->h.index);
+   printf("A and B: %d\n", AandB->h.index);
 #endif
   
    switch (assert_op){
       case OP_IS:
          if (BnotA->h.index != 0){
             printf("#Assertion failed.\n");
-            FW->FWForest->FindElement(BnotA->h, FW->T, tup);
-            cond = false;
-   if (history){
-      FW->FWForest->BuildHistoryMDD(BnotA->h, FW->HistoryForest, conditionHistory); 
-   }
-
+   	    if (history){
+               FW->FWForest->BuildHistoryMDD(BnotA->h, FW->HistoryForest, conditionHistory); 
+            }
+	    if (exampleClass){
+               FW->FWForest->FindProblemClasses(BnotA->h, FW->T, conditionHistory);
+	    }
+	    else{
+               FW->FWForest->DisplayElement(BnotA->h, FW->T, false);
+	    }
          }
          else if (AnotB->h.index != 0){
             printf("#Assertion failed.\n");
-            FW->FWForest->FindElement(AnotB->h, FW->T, tup);
-            cond = false;
-   if (history){
-      FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
-   }
-
+	    if (history){
+               FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
+            }
+	    if (exampleClass){
+               FW->FWForest->FindProblemClasses(AnotB->h, FW->T, conditionHistory);
+	    }
+	    else{
+               FW->FWForest->DisplayElement(AnotB->h, FW->T, false);
+	    }
          }
          else{
             printf("#Assertion held.\n");
-            FW->FWForest->FindElement(A->h, FW->T, tup);
-            cond = true;
+            FW->FWForest->DisplayElement(A->h, FW->T, true);
          }
       break;
       case OP_SUBSET:
          if (AnotB->h.index == 0){
 	    printf("#Assertion held.\n");
-            FW->FWForest->FindElement(A->h, FW->T, tup);
-            cond = true;
+            FW->FWForest->DisplayElement(A->h, FW->T, true);
 	 }
 	 else{
 	    printf("#Assertion failed.\n");
-            FW->FWForest->FindElement(AnotB->h, FW->T, tup);
-            cond = false;
-   if (history){
-      FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
-   }
-
-        }
+   	    if (history){
+      	        FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
+            }
+	    if (exampleClass){
+               FW->FWForest->FindProblemClasses(AnotB->h, FW->T, conditionHistory);
+	    }
+	    else{
+               FW->FWForest->DisplayElement(AnotB->h, FW->T, false);
+	    }
+	 }
       break;
       case OP_NOT_IS:
       if (BnotA->h.index != 0){
 	  printf("#Assertion held.\n");
-          FW->FWForest->FindElement(BnotA->h,FW->T, tup);
-          cond = true;
+          FW->FWForest->DisplayElement(BnotA->h,FW->T, true);
       }
       else if (AnotB->h.index !=0){
 	  printf("#Assertion held.\n");
-          FW->FWForest->FindElement(AnotB->h,FW->T, tup);
-          cond = true;
+          FW->FWForest->DisplayElement(AnotB->h,FW->T, true);
       }
       else{
 	  printf("#Assertion failed.\n");
-          FW->FWForest->FindElement(A->h,FW->T, tup);
-          cond = false;
-   if (history){
-      FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
-   }
-
+          if (history){
+             FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
+          }
+	  if (exampleClass){
+               FW->FWForest->FindProblemClasses(AandB->h, FW->T, conditionHistory);
+	  }
+	  else{
+             FW->FWForest->DisplayElement(A->h,FW->T, false);
+	  }
       }
       break;
       case OP_NOT_SUBSET:
       if (AnotB->h.index !=0){
          printf("#Assertion held.\n");
-         FW->FWForest->FindElement(AnotB->h, FW->T, tup);
-         cond = true;
+         FW->FWForest->DisplayElement(AnotB->h, FW->T, true);
       }
       else{
          printf("#Assertion failed.\n");
-         FW->FWForest->FindElement(A->h, FW->T, tup);
-         cond = false;
-   if (history){
-      FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
-   }
+         if (history){
+            FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
+         }
+	 if (exampleClass){
+               FW->FWForest->FindProblemClasses(A->h, FW->T, conditionHistory);
+         }
+	 else{
+            FW->FWForest->DisplayElement(A->h, FW->T, false);
+	 }
       }
       break;
    }
-   if (example){
-      if (cond){
-         printf("#Witness:\n");
-      }
-      else{
-         printf("#Counterexample:\n");
-      }
-      if (tup != NULL){
-         FW->FWForest->PrintElement(FW->T, tup);
-         delete[] tup;
-      }
-   }
 
-   if (history && !cond){
+   if (history){
       mdd_handle resultHistory;
       chain_rule* results;
 
@@ -948,15 +929,6 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          FW->DisplayRule(results->fw_id, results->chain_id, results->rule_id);
          results = results->next;
       }
-/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-//      FW->HistoryForest->PruneMDD(resultHistory);
-//      for (int k=25;k>0;k--)
-//         FW->HistoryForest->Compact(k);
-//      FW->HistoryForest->PrintMDD();
-//      return 0;
-/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-     
-
 
       FW->HistoryForest->Min(conditionHistory, FW->OutputHist, resultHistory);
       results = FW->HistoryForest->GetHistory(resultHistory);

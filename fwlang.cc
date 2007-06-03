@@ -188,7 +188,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 3 "src/fwlang.yy"
+#line 3 "fwlang.yy"
 
 #include <string>
 #include "src/parser.h"
@@ -216,7 +216,7 @@ int yyerror(char* str);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 13 "src/fwlang.yy"
+#line 13 "fwlang.yy"
 {
    int input_chain;
    char dummy;
@@ -236,7 +236,7 @@ typedef union YYSTYPE
    char* val;
    int flag;
 }
-/* Line 193 of yacc.c.  */
+/* Line 187 of yacc.c.  */
 #line 241 "fwlang.cc"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -247,7 +247,7 @@ typedef union YYSTYPE
 
 
 /* Copy the second part of user declarations.  */
-#line 33 "src/fwlang.yy"
+#line 33 "fwlang.yy"
 
 
 YY_DECL;
@@ -1599,362 +1599,362 @@ yyreduce:
   switch (yyn)
     {
         case 9:
-#line 96 "src/fwlang.yy"
+#line 96 "fwlang.yy"
     {(yyval.group_rec) = DefineGroup((yyvsp[(2) - (3)].name), (yyvsp[(3) - (3)].address_rec)); delete[] (yyvsp[(2) - (3)].name);}
     break;
 
   case 10:
-#line 98 "src/fwlang.yy"
+#line 98 "fwlang.yy"
     {(yyval.service_rec) = DefineService((yyvsp[(2) - (3)].name), (yyvsp[(3) - (3)].port_rec)); delete[] (yyvsp[(2) - (3)].name);}
     break;
 
   case 11:
-#line 100 "src/fwlang.yy"
+#line 100 "fwlang.yy"
     {(yyval.address_rec) = AppendAddy((yyvsp[(1) - (2)].address_rec),(yyvsp[(2) - (2)].address_rec));}
     break;
 
   case 12:
-#line 101 "src/fwlang.yy"
+#line 101 "fwlang.yy"
     {(yyval.address_rec) = AppendAddy(NULL, (yyvsp[(1) - (1)].address_rec));}
     break;
 
   case 13:
-#line 103 "src/fwlang.yy"
+#line 103 "fwlang.yy"
     {(yyval.port_rec) = AppendPort((yyvsp[(1) - (2)].port_rec), (yyvsp[(2) - (2)].port_rec));}
     break;
 
   case 14:
-#line 104 "src/fwlang.yy"
+#line 104 "fwlang.yy"
     {(yyval.port_rec) = AppendPort(NULL, (yyvsp[(1) - (1)].port_rec));}
     break;
 
   case 15:
-#line 106 "src/fwlang.yy"
+#line 106 "fwlang.yy"
     {(yyval.query_rec) = PrintClasses(FLAG_NO_HISTORY);}
     break;
 
   case 16:
-#line 107 "src/fwlang.yy"
+#line 107 "fwlang.yy"
     {(yyval.query_rec) = PrintServiceClasses(FLAG_NO_HISTORY);}
     break;
 
   case 17:
-#line 108 "src/fwlang.yy"
+#line 108 "fwlang.yy"
     {(yyval.query_rec) = PrintServiceGraph(FLAG_HISTORY);}
     break;
 
   case 18:
-#line 109 "src/fwlang.yy"
+#line 109 "fwlang.yy"
     {(yyval.query_rec) = PrintClasses(FLAG_HISTORY);}
     break;
 
   case 19:
-#line 110 "src/fwlang.yy"
+#line 110 "fwlang.yy"
     {(yyval.query_rec) = PrintServiceClasses(FLAG_HISTORY);}
     break;
 
   case 20:
-#line 111 "src/fwlang.yy"
+#line 111 "fwlang.yy"
     {(yyval.query_rec) = PerformQuery((yyvsp[(2) - (3)].sub), (yyvsp[(3) - (3)].condition_rec));}
     break;
 
   case 21:
-#line 117 "src/fwlang.yy"
+#line 117 "fwlang.yy"
     {(yyval.assert_rec) = PerformAssertion((yyvsp[(2) - (4)].condition_rec), (yyvsp[(4) - (4)].condition_rec), (yyvsp[(3) - (4)].assert_op), FLAG_NO_EXAMPLE, FLAG_NO_HISTORY);}
     break;
 
   case 22:
-#line 118 "src/fwlang.yy"
+#line 118 "fwlang.yy"
     {(yyval.assert_rec) = PerformAssertion((yyvsp[(3) - (5)].condition_rec), (yyvsp[(5) - (5)].condition_rec), (yyvsp[(4) - (5)].assert_op), FLAG_EXAMPLE, FLAG_NO_HISTORY);}
     break;
 
   case 23:
-#line 119 "src/fwlang.yy"
+#line 119 "fwlang.yy"
     {(yyval.assert_rec) = PerformAssertion((yyvsp[(3) - (5)].condition_rec), (yyvsp[(5) - (5)].condition_rec), (yyvsp[(4) - (5)].assert_op), FLAG_NO_EXAMPLE, FLAG_HISTORY);}
     break;
 
   case 24:
-#line 120 "src/fwlang.yy"
+#line 120 "fwlang.yy"
     {(yyval.assert_rec) = PerformAssertion((yyvsp[(4) - (6)].condition_rec), (yyvsp[(6) - (6)].condition_rec), (yyvsp[(5) - (6)].assert_op), FLAG_EXAMPLE, FLAG_HISTORY);}
     break;
 
   case 25:
-#line 121 "src/fwlang.yy"
+#line 121 "fwlang.yy"
     {(yyval.assert_rec) = PerformAssertion((yyvsp[(4) - (6)].condition_rec), (yyvsp[(6) - (6)].condition_rec), (yyvsp[(5) - (6)].assert_op), FLAG_EXAMPLE, FLAG_HISTORY);}
     break;
 
   case 26:
-#line 124 "src/fwlang.yy"
+#line 124 "fwlang.yy"
     {(yyval.assert_op) = OP_IS;}
     break;
 
   case 27:
-#line 125 "src/fwlang.yy"
+#line 125 "fwlang.yy"
     {(yyval.assert_op)= OP_SUBSET;}
     break;
 
   case 28:
-#line 126 "src/fwlang.yy"
+#line 126 "fwlang.yy"
     {(yyval.assert_op) = OP_NOT_IS;}
     break;
 
   case 29:
-#line 127 "src/fwlang.yy"
+#line 127 "fwlang.yy"
     {(yyval.assert_op) = OP_NOT_SUBSET;}
     break;
 
   case 30:
-#line 130 "src/fwlang.yy"
+#line 130 "fwlang.yy"
     {(yyval.input_chain) = 0;}
     break;
 
   case 31:
-#line 131 "src/fwlang.yy"
+#line 131 "fwlang.yy"
     {(yyval.input_chain) = 1;}
     break;
 
   case 32:
-#line 132 "src/fwlang.yy"
+#line 132 "fwlang.yy"
     {(yyval.input_chain) = 2;}
     break;
 
   case 33:
-#line 135 "src/fwlang.yy"
+#line 135 "fwlang.yy"
     {(yyval.sub)=0;}
     break;
 
   case 34:
-#line 136 "src/fwlang.yy"
+#line 136 "fwlang.yy"
     {(yyval.sub)=1;}
     break;
 
   case 35:
-#line 137 "src/fwlang.yy"
+#line 137 "fwlang.yy"
     {(yyval.sub)=2;}
     break;
 
   case 36:
-#line 138 "src/fwlang.yy"
+#line 138 "fwlang.yy"
     {(yyval.sub)=3;}
     break;
 
   case 37:
-#line 139 "src/fwlang.yy"
+#line 139 "fwlang.yy"
     {(yyval.sub)=4;}
     break;
 
   case 38:
-#line 140 "src/fwlang.yy"
+#line 140 "fwlang.yy"
     {(yyval.sub)=5;}
     break;
 
   case 39:
-#line 144 "src/fwlang.yy"
+#line 144 "fwlang.yy"
     {(yyval.condition_rec) = (yyvsp[(1) - (1)].condition_rec);}
     break;
 
   case 40:
-#line 145 "src/fwlang.yy"
+#line 145 "fwlang.yy"
     {(yyval.condition_rec) = IntersectConditions((yyvsp[(1) - (3)].condition_rec),(yyvsp[(3) - (3)].condition_rec));}
     break;
 
   case 41:
-#line 146 "src/fwlang.yy"
+#line 146 "fwlang.yy"
     {(yyval.condition_rec) = UnionConditions((yyvsp[(1) - (3)].condition_rec),(yyvsp[(3) - (3)].condition_rec));}
     break;
 
   case 42:
-#line 147 "src/fwlang.yy"
+#line 147 "fwlang.yy"
     {(yyval.condition_rec) = NegateCondition((yyvsp[(2) - (2)].condition_rec));}
     break;
 
   case 43:
-#line 148 "src/fwlang.yy"
+#line 148 "fwlang.yy"
     {(yyval.condition_rec) = (yyvsp[(2) - (3)].condition_rec);}
     break;
 
   case 44:
-#line 149 "src/fwlang.yy"
+#line 149 "fwlang.yy"
     { (yyval.condition_rec) = GetLoggedCondition((yyvsp[(2) - (2)].input_chain));}
     break;
 
   case 45:
-#line 152 "src/fwlang.yy"
+#line 152 "fwlang.yy"
     {(yyval.condition_rec)=BuildConditionFromGroup((yyvsp[(2) - (2)].group_rec), 0);}
     break;
 
   case 46:
-#line 153 "src/fwlang.yy"
+#line 153 "fwlang.yy"
     {(yyval.condition_rec)=BuildConditionFromGroup((yyvsp[(2) - (2)].group_rec),1);}
     break;
 
   case 47:
-#line 154 "src/fwlang.yy"
+#line 154 "fwlang.yy"
     {(yyval.condition_rec)=BuildConditionFromService((yyvsp[(2) - (2)].service_rec), 0);}
     break;
 
   case 48:
-#line 155 "src/fwlang.yy"
+#line 155 "fwlang.yy"
     {(yyval.condition_rec)=BuildConditionFromService((yyvsp[(2) - (2)].service_rec), 1);}
     break;
 
   case 49:
-#line 156 "src/fwlang.yy"
+#line 156 "fwlang.yy"
     {(yyval.condition_rec)=BuildConditionFromState((yyvsp[(2) - (2)].sv));}
     break;
 
   case 50:
-#line 157 "src/fwlang.yy"
+#line 157 "fwlang.yy"
     {(yyval.condition_rec)=BuildConditionFromFlag((yyvsp[(2) - (2)].fv));}
     break;
 
   case 51:
-#line 158 "src/fwlang.yy"
+#line 158 "fwlang.yy"
     {(yyval.condition_rec)=BuildConditionFromIface((yyvsp[(2) - (2)].name), 0); delete[] (yyvsp[(2) - (2)].name);}
     break;
 
   case 52:
-#line 159 "src/fwlang.yy"
+#line 159 "fwlang.yy"
     {(yyval.condition_rec)=BuildConditionFromIface((yyvsp[(2) - (2)].name), 1); delete[] (yyvsp[(2) - (2)].name);}
     break;
 
   case 53:
-#line 160 "src/fwlang.yy"
+#line 160 "fwlang.yy"
     {(yyval.condition_rec)=BuildAcceptCondition((yyvsp[(2) - (2)].input_chain));}
     break;
 
   case 54:
-#line 161 "src/fwlang.yy"
+#line 161 "fwlang.yy"
     {(yyval.condition_rec)=BuildDropCondition((yyvsp[(2) - (2)].input_chain));}
     break;
 
   case 55:
-#line 162 "src/fwlang.yy"
+#line 162 "fwlang.yy"
     {(yyval.condition_rec)=BuildAcceptCondition(1);}
     break;
 
   case 56:
-#line 163 "src/fwlang.yy"
+#line 163 "fwlang.yy"
     {(yyval.condition_rec)=BuildDropCondition(1);}
     break;
 
   case 57:
-#line 166 "src/fwlang.yy"
+#line 166 "fwlang.yy"
     {(yyval.group_rec) = GroupLookup((yyvsp[(1) - (1)].name)); delete[] (yyvsp[(1) - (1)].name);}
     break;
 
   case 58:
-#line 167 "src/fwlang.yy"
+#line 167 "fwlang.yy"
     {(yyval.group_rec) = BuildGroupFromAddress((yyvsp[(1) - (1)].address_rec));}
     break;
 
   case 59:
-#line 169 "src/fwlang.yy"
+#line 169 "fwlang.yy"
     {(yyval.service_rec) = ServiceLookup((yyvsp[(1) - (1)].name)); delete[] (yyvsp[(1) - (1)].name);}
     break;
 
   case 60:
-#line 170 "src/fwlang.yy"
+#line 170 "fwlang.yy"
     {(yyval.service_rec) = BuildServiceFromPort((yyvsp[(1) - (1)].port_rec));}
     break;
 
   case 61:
-#line 172 "src/fwlang.yy"
+#line 172 "fwlang.yy"
     {(yyval.sv)=0;}
     break;
 
   case 62:
-#line 172 "src/fwlang.yy"
+#line 172 "fwlang.yy"
     {(yyval.sv)=1;}
     break;
 
   case 63:
-#line 172 "src/fwlang.yy"
+#line 172 "fwlang.yy"
     {(yyval.sv)=2;}
     break;
 
   case 64:
-#line 172 "src/fwlang.yy"
+#line 172 "fwlang.yy"
     {(yyval.sv)=3;}
     break;
 
   case 65:
-#line 174 "src/fwlang.yy"
+#line 174 "fwlang.yy"
     {(yyval.fv)=0;}
     break;
 
   case 66:
-#line 174 "src/fwlang.yy"
+#line 174 "fwlang.yy"
     {(yyval.fv)=1;}
     break;
 
   case 67:
-#line 174 "src/fwlang.yy"
+#line 174 "fwlang.yy"
     {(yyval.fv)=2;}
     break;
 
   case 68:
-#line 174 "src/fwlang.yy"
+#line 174 "fwlang.yy"
     {(yyval.fv)=3;}
     break;
 
   case 69:
-#line 174 "src/fwlang.yy"
+#line 174 "fwlang.yy"
     {(yyval.fv)=4;}
     break;
 
   case 70:
-#line 174 "src/fwlang.yy"
+#line 174 "fwlang.yy"
     {(yyval.fv)=5;}
     break;
 
   case 71:
-#line 176 "src/fwlang.yy"
+#line 176 "fwlang.yy"
     {(yyval.port_rec) = BuildPort((yyvsp[(1) - (2)].prot), (yyvsp[(2) - (2)].port_rec));}
     break;
 
   case 72:
-#line 178 "src/fwlang.yy"
+#line 178 "fwlang.yy"
     {(yyval.prot) = 0;}
     break;
 
   case 73:
-#line 178 "src/fwlang.yy"
+#line 178 "fwlang.yy"
     {(yyval.prot) = 1;}
     break;
 
   case 74:
-#line 178 "src/fwlang.yy"
+#line 178 "fwlang.yy"
     { (yyval.prot) = 2;}
     break;
 
   case 75:
-#line 178 "src/fwlang.yy"
+#line 178 "fwlang.yy"
     { (yyval.prot) = -1;}
     break;
 
   case 76:
-#line 180 "src/fwlang.yy"
+#line 180 "fwlang.yy"
     {(yyval.address_rec) = ParseAddr((yyvsp[(1) - (7)].val),(yyvsp[(3) - (7)].val),(yyvsp[(5) - (7)].val),(yyvsp[(7) - (7)].val)); delete[] (yyvsp[(1) - (7)].val); delete[] (yyvsp[(3) - (7)].val); delete[] (yyvsp[(5) - (7)].val); delete[] (yyvsp[(7) - (7)].val);}
     break;
 
   case 77:
-#line 181 "src/fwlang.yy"
+#line 181 "fwlang.yy"
     {(yyval.address_rec)=ParseAddr((yyvsp[(1) - (5)].val),(yyvsp[(3) - (5)].val),(yyvsp[(5) - (5)].val),NULL); delete[] (yyvsp[(1) - (5)].val); delete[] (yyvsp[(3) - (5)].val); delete[] (yyvsp[(5) - (5)].val);}
     break;
 
   case 78:
-#line 182 "src/fwlang.yy"
+#line 182 "fwlang.yy"
     {(yyval.address_rec)=ParseAddr((yyvsp[(1) - (3)].val),(yyvsp[(3) - (3)].val),NULL,NULL); delete[] (yyvsp[(1) - (3)].val); delete[] (yyvsp[(3) - (3)].val);}
     break;
 
   case 79:
-#line 183 "src/fwlang.yy"
+#line 183 "fwlang.yy"
     {(yyval.address_rec)=ParseAddr((yyvsp[(1) - (1)].val),NULL,NULL,NULL); delete[] (yyvsp[(1) - (1)].val);}
     break;
 
   case 80:
-#line 185 "src/fwlang.yy"
+#line 185 "fwlang.yy"
     {(yyval.port_rec)=ParsePort((yyvsp[(1) - (1)].val)); delete[] (yyvsp[(1) - (1)].val);}
     break;
 
@@ -2174,7 +2174,7 @@ yyreturn:
 }
 
 
-#line 187 "src/fwlang.yy"
+#line 187 "fwlang.yy"
 
 
 int yyerror(char* str){
