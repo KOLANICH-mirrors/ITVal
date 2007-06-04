@@ -247,6 +247,7 @@ protected:
   cache **RestrictCache;
   cache **MaxCache;
   cache **MinCache;
+  cache **EqualsCache;
   cache **ComplementCache;
   cache **BComplementCache;
   cache **LessThanCache;	//Cache for "Less Than" operation
@@ -261,6 +262,8 @@ protected:
   cache **PrintCache;
 
   int Value (level k, node_idx p, int *tup);
+  void InternalGetNodesAtLevel(level l, level k, node_idx p, node_idx* nodeList, int& numNodes);
+  int InternalNumNodesAtLevel(level l, level k, node_idx p);
 
 public:
   int *maxVals;			//Array [0..K] of maximum values for each level.
@@ -320,6 +323,9 @@ public:
 	if (MinCache[k])
 	  delete MinCache[k];
 
+	if (EqualsCache[k])
+	  delete EqualsCache[k];
+
 	if (ComplementCache[k])
 	  delete ComplementCache[k];
 
@@ -365,6 +371,7 @@ public:
     delete[]RestrictCache;
     delete[]MaxCache;
     delete[]MinCache;
+    delete[]EqualsCache;
     delete[]ComplementCache;
     delete[]BComplementCache;
     delete[]ValRestrictCache;
@@ -402,6 +409,7 @@ public:
 
   int Max (mdd_handle p, mdd_handle q, mdd_handle & result);
   int Min (mdd_handle p, mdd_handle q, mdd_handle & result);
+  int Equals (mdd_handle p, mdd_handle q, mdd_handle & result);
   int Complement (mdd_handle p, mdd_handle & result);
   int BinaryComplement (mdd_handle p, mdd_handle & result);
   int LessThan (mdd_handle p, int value, mdd_handle & result);
@@ -451,6 +459,9 @@ public:
   int UnpackNode (level k, arc_idx p, int *&fullarray);
   void DeleteDownstream (level k, node_idx p);
 
+  void GetNodesAtLevel(level l, mdd_handle root, node_idx* nodeList);
+  int NumNodesAtLevel(level l, mdd_handle root);
+
   //Switch levels k1 and k2 in the MDD (maybe save space or time?)
   typedef struct state_triple
   {
@@ -478,6 +489,7 @@ public:
   node_idx InternalRestrict (level k, node_idx p, node_idx q);
   node_idx InternalMax (level k, node_idx p, node_idx q);
   node_idx InternalMin (level k, node_idx p, node_idx q);
+  node_idx InternalEquals (level k, node_idx p, node_idx q);
   node_idx InternalComplement (level k, node_idx p);
   node_idx InternalBComplement (level k, node_idx p);
   node_idx InternalLessThan (level k, node_idx p, int value);

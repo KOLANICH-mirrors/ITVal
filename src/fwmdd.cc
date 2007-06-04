@@ -89,6 +89,20 @@ void fw_fddl_forest::DisplayElement(mdd_handle root, Topology *T, bool cond){
    }
 }
 
+int fw_fddl_forest::FindInternalElement(level l, node_idx p, Topology* T, int*& vals){
+   node_idx newresult;
+   vals = new int[l+1];
+   for (int k=0;k<l+1;k++)
+      vals[k] = 0;
+
+   if (InternalFindElement(l,p, vals) != 0){
+      return SUCCESS;
+   }
+   delete[] vals;
+   vals = NULL;
+   return INVALID_MDD;
+}
+
 int fw_fddl_forest::FindElement(mdd_handle root, Topology* T, int*& vals){
    node_idx newresult;
    if (root.index < 0)

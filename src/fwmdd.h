@@ -82,8 +82,9 @@ class fw_fddl_forest:public fddl_forest {
 
    int NumLevels(){ return K; }
 
-   void DisplayElement(mdd_handle p, Topology* T);
+   void DisplayElement(mdd_handle p, Topology* T, bool cond);
    int FindElement(mdd_handle p, Topology* T, int*& tup);
+   int FindInternalElement(level k, node_idx p, Topology* T, int*& tup);
    node_idx InternalFindElement(level k, node_idx p, int* vals);
    int PrintElement(Topology* T, int* tup);
 

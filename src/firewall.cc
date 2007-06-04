@@ -888,3 +888,54 @@ int Firewall::DisplayRule(int fw_id, int chain_id, int rule_id){
    }
    return 1;
 }
+
+void Firewall::FindProblemClasses(mdd_handle conditionHistory){
+   /*
+    *   1.  Bring firewall_id, chain_id, and rule_id to top of conditionHistory MDD.
+    *   2.  Generate classes over those three fields.
+    *   3.  Print an element from each class.
+    */
+   printf("Not fully implemented.\n");
+   printf("Forward Chain:\n");
+   ProblemClassesInChain(ForwardHist, conditionHistory);
+   printf("Input Chain:\n");
+   ProblemClassesInChain(InputHist, conditionHistory);
+   printf("Output Chain:\n");
+   ProblemClassesInChain(OutputHist, conditionHistory);
+}
+
+void Firewall::ProblemClassesInChain(mdd_handle ruleChain, mdd_handle conditionHistory){
+   mdd_handle newMDD;
+   int* problemClasses;
+   int numClasses;
+   int* tup;
+   
+   HistoryForest->Equals(conditionHistory, ruleChain, newMDD);
+/*  
+   HistoryForest->PruneMDD(newMDD);
+   for (int k=25;k>0;k--)
+      HistoryForest->Compact(k);
+   HistoryForest->PrintMDD();
+   assert(0);
+*/
+   
+   HistoryForest->Shift(newMDD, 1, newMDD);	//Rule id
+   HistoryForest->Shift(newMDD, 1, newMDD);	//Chain id
+   HistoryForest->Shift(newMDD, 1, newMDD);	//Firewall id
+
+   numClasses = HistoryForest->NumNodesAtLevel(TOP_LEVEL, newMDD); //Level below the three history rules.
+   printf("Num Classes: %d\n", numClasses);
+
+   problemClasses = new int[numClasses];
+   HistoryForest->GetNodesAtLevel(TOP_LEVEL, newMDD, problemClasses);
+   for (int i=0;i<numClasses;i++){
+      printf("Class %d:\n", i);
+      tup = new int[TOP_LEVEL+1];
+      HistoryForest->FindInternalElement(TOP_LEVEL, problemClasses[i], T, tup);
+      printf("PC: %d\n", problemClasses[i]);
+      HistoryForest->PrintElement(T, tup);
+      delete[] tup;
+   }
+   printf("\n");
+   delete[] problemClasses;
+}

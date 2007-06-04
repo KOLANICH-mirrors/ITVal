@@ -582,6 +582,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
       //Actually, just assign, since we're interested in the 'critical rule'.
       HistoryForest->Assign(inHistMDD, tup->hlow, tup->hhigh, outHistMDD);
+
       // Since we are doing things in reverse order, it's possible
       // that a packet that matches a log rule later in the chain 
       // has already been inserted into logMDD, but can't get there
@@ -630,8 +631,8 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       //now.  
 
       FWForest->Replace(inMDD, resultMDD, true, outMDD);
-      
       HistoryForest->Replace(inHistMDD, resultHistMDD, true, outHistMDD); //Is this correct?@@@@
+
       FWForest->DestroyMDD(resultMDD);
       HistoryForest->DestroyMDD(resultHistMDD);
       FWForest->DestroyMDD(targetMDD);
@@ -711,13 +712,13 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
 //   hhigh[0] = 1;
    hlow[0] = hhigh[0] = chain->Default;
 
-   hlow[1] = 0;   //Default Policy is rule 0.
-   hhigh[1] = 0;
+   hlow[1] = 0;   //Rule ID.
+   hhigh[1] = 0;  //Default Policy is rule 0.
 
-   hlow[2] = chain->id;
+   hlow[2] = chain->id; //Chain ID.
    hhigh[2] = chain->id;
 
-   hlow[3] = id;
+   hlow[3] = id;  //Firewall ID
    hhigh[3] = id;
 
    // Create an MDD representing the default policy

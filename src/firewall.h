@@ -146,6 +146,9 @@ class Firewall {
    int GetServiceGraph(int* src, int* dst, service* &arcs, int& numArcs);
    int DisplayRule(int fw_id, int chain_id, int rule_id);
    chain* FindChain(int fw_id, int cid);
+
+   void FindProblemClasses(mdd_handle conditionHistory);
+   void ProblemClassesInChain(mdd_handle resultMDD, mdd_handle conditionHistory);
 };
 
 /* Create a META-Firewall from all the independent firewalls.*/

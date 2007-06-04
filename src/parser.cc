@@ -786,7 +786,7 @@ query *PerformQuery(int subject, condition * c)
 }
 
 assert* PerformAssertion(condition* A, condition* B, int assert_op, int example, int history){
-
+   int exampleClass=1;
    mdd_handle conditionHistory;
 
    condition *notA, *notB;
@@ -824,11 +824,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       case OP_IS:
          if (BnotA->h.index != 0){
             printf("#Assertion failed.\n");
-   	    if (history){
-               FW->FWForest->BuildHistoryMDD(BnotA->h, FW->HistoryForest, conditionHistory); 
-            }
+            FW->FWForest->BuildHistoryMDD(BnotA->h, FW->HistoryForest, conditionHistory);
 	    if (exampleClass){
-               FW->FWForest->FindProblemClasses(BnotA->h, FW->T, conditionHistory);
+               FW->FindProblemClasses(conditionHistory);
 	    }
 	    else{
                FW->FWForest->DisplayElement(BnotA->h, FW->T, false);
@@ -836,11 +834,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          }
          else if (AnotB->h.index != 0){
             printf("#Assertion failed.\n");
-	    if (history){
-               FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
-            }
+            FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
 	    if (exampleClass){
-               FW->FWForest->FindProblemClasses(AnotB->h, FW->T, conditionHistory);
+               FW->FindProblemClasses(conditionHistory);
 	    }
 	    else{
                FW->FWForest->DisplayElement(AnotB->h, FW->T, false);
@@ -858,11 +854,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 	 }
 	 else{
 	    printf("#Assertion failed.\n");
-   	    if (history){
-      	        FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
-            }
+      	    FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
 	    if (exampleClass){
-               FW->FWForest->FindProblemClasses(AnotB->h, FW->T, conditionHistory);
+               FW->FindProblemClasses(conditionHistory);
 	    }
 	    else{
                FW->FWForest->DisplayElement(AnotB->h, FW->T, false);
@@ -880,11 +874,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       }
       else{
 	  printf("#Assertion failed.\n");
-          if (history){
-             FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
-          }
+          FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
 	  if (exampleClass){
-               FW->FWForest->FindProblemClasses(AandB->h, FW->T, conditionHistory);
+               FW->FindProblemClasses(conditionHistory);
 	  }
 	  else{
              FW->FWForest->DisplayElement(A->h,FW->T, false);
@@ -898,11 +890,9 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       }
       else{
          printf("#Assertion failed.\n");
-         if (history){
-            FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
-         }
+         FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
 	 if (exampleClass){
-               FW->FWForest->FindProblemClasses(A->h, FW->T, conditionHistory);
+               FW->FindProblemClasses(conditionHistory);
          }
 	 else{
             FW->FWForest->DisplayElement(A->h, FW->T, false);
@@ -936,7 +926,6 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          FW->DisplayRule(results->fw_id, results->chain_id, results->rule_id);
          results = results->next;
       }
-
    }
 
    delete BnotA;
