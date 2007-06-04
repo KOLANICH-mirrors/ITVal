@@ -45,10 +45,13 @@ int num_services = 0;
 // A firewall object 
 Firewall *FW;
 
+bool classOutputFlag;
+
 // Link the Firewall Forest to the Query Engine.
-void InitializeStructures(Firewall * F)
+void InitializeStructures(Firewall * F, bool flag)
 {
    FW = F;
+   classOutputFlag = flag;
 }
 
 // Given the name of a service, find it in the service array and return
@@ -786,7 +789,6 @@ query *PerformQuery(int subject, condition * c)
 }
 
 assert* PerformAssertion(condition* A, condition* B, int assert_op, int example, int history){
-   int exampleClass=1;
    mdd_handle conditionHistory;
 
    condition *notA, *notB;
@@ -825,7 +827,7 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          if (BnotA->h.index != 0){
             printf("#Assertion failed.\n");
             FW->FWForest->BuildHistoryMDD(BnotA->h, FW->HistoryForest, conditionHistory);
-	    if (exampleClass){
+	    if (classOutputFlag){
                FW->FindProblemClasses(conditionHistory);
 	    }
 	    else{
@@ -835,7 +837,7 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
          else if (AnotB->h.index != 0){
             printf("#Assertion failed.\n");
             FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
-	    if (exampleClass){
+	    if (classOutputFlag){
                FW->FindProblemClasses(conditionHistory);
 	    }
 	    else{
@@ -855,7 +857,7 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
 	 else{
 	    printf("#Assertion failed.\n");
       	    FW->FWForest->BuildHistoryMDD(AnotB->h, FW->HistoryForest, conditionHistory); 
-	    if (exampleClass){
+	    if (classOutputFlag){
                FW->FindProblemClasses(conditionHistory);
 	    }
 	    else{
@@ -875,7 +877,7 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       else{
 	  printf("#Assertion failed.\n");
           FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
-	  if (exampleClass){
+	  if (classOutputFlag){
                FW->FindProblemClasses(conditionHistory);
 	  }
 	  else{
@@ -891,7 +893,7 @@ assert* PerformAssertion(condition* A, condition* B, int assert_op, int example,
       else{
          printf("#Assertion failed.\n");
          FW->FWForest->BuildHistoryMDD(AandB->h, FW->HistoryForest, conditionHistory); 
-	 if (exampleClass){
+	 if (classOutputFlag){
                FW->FindProblemClasses(conditionHistory);
          }
 	 else{

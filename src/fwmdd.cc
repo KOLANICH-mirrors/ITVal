@@ -48,7 +48,7 @@ int fw_fddl_forest::PrintElement(Topology* T, int* vals){
 	 printf("#UDP");
       else 
 	 printf("#TCP");
-      printf(" packet from %d.%d.%d.%d:%d[%s] to %d.%d.%d.%d:%d[%s]\n#\t\t in state ",
+      printf(" packet from %d.%d.%d.%d:%d[%s] to %d.%d.%d.%d:%d[%s]\n \t#in state ",
 	    vals[22], vals[21],vals[20], vals[19], 
 	    vals[13]*256+vals[12],
 	    T->LookupInterface(vals[9]),

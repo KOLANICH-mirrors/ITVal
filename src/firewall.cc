@@ -896,11 +896,11 @@ void Firewall::FindProblemClasses(mdd_handle conditionHistory){
     *   3.  Print an element from each class.
     */
    printf("Not fully implemented.\n");
-   printf("Forward Chain:\n");
-   ProblemClassesInChain(ForwardHist, conditionHistory);
-   printf("Input Chain:\n");
+   printf("Input Chain: ");
    ProblemClassesInChain(InputHist, conditionHistory);
-   printf("Output Chain:\n");
+   printf("Forward Chain: ");
+   ProblemClassesInChain(ForwardHist, conditionHistory);
+   printf("Output Chain: ");
    ProblemClassesInChain(OutputHist, conditionHistory);
 }
 
@@ -924,15 +924,14 @@ void Firewall::ProblemClassesInChain(mdd_handle ruleChain, mdd_handle conditionH
    HistoryForest->Shift(newMDD, 1, newMDD);	//Firewall id
 
    numClasses = HistoryForest->NumNodesAtLevel(TOP_LEVEL, newMDD); //Level below the three history rules.
-   printf("Num Classes: %d\n", numClasses);
+   printf("%d classes:\n", numClasses);
 
    problemClasses = new int[numClasses];
    HistoryForest->GetNodesAtLevel(TOP_LEVEL, newMDD, problemClasses);
    for (int i=0;i<numClasses;i++){
-      printf("Class %d:\n", i);
+      printf("  Class %d:\n\t", i);
       tup = new int[TOP_LEVEL+1];
       HistoryForest->FindInternalElement(TOP_LEVEL, problemClasses[i], T, tup);
-      printf("PC: %d\n", problemClasses[i]);
       HistoryForest->PrintElement(T, tup);
       delete[] tup;
    }

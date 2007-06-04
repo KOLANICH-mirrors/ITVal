@@ -23,10 +23,13 @@
  * and Mary Williamsburg, VA 23185 
  */
 
-#define SYNTAX "Syntax: ITVal [options]\n   Options:\n      -q <queryfile> :\
-Specify the query file. <REQUIRED>\n      -t <topology file> : Specify the \
-topology file.\n      -F or -f <rulefile> : Append a filter rule set file. \
-<REQUIRED>\n      -N or -n <natfile> : Append a NAT rule set file.\n\n"
+#define SYNTAX "Syntax: ITVal [options]\n\
+Options:\n\
+-q <queryfile> :Specify the query file. <REQUIRED>\n\
+-t <topology file> : Specify the topology file.\n\
+-F or -f <rulefile> : Append a filter rule set file. <REQUIRED>\n\
+-N or -n <natfile> : Append a NAT rule set file.\n\
+-c enable output of problem classes.\n\n"
 
 #include <stdio.h>
 #include "parser.h"
@@ -53,6 +56,7 @@ int chain::numChains = 0;
 int main(int argc, char **argv)
 {
    int i;
+   bool classOutputFlag;
    char queryName[256];
    Firewall **fws;                        /* Array of independent firewalls   */
    int num_fws;	                          /* Number of firewalls in the array */
@@ -65,6 +69,8 @@ int main(int argc, char **argv)
    Firewall *metaFirewall;
 
    filename_node *fn;
+
+   classOutputFlag = false;
 
    int ranges[TOP_LEVEL+1] = { 256,      /* Target Chain                 */
       1, 1, 1, 1, 1, 1,         /* Flags (FIN, SYN, RST, PSH, ACK, URG) */
@@ -120,6 +126,10 @@ int main(int argc, char **argv)
          default:
             printf(SYNTAX);
             return 1;
+	 case 'c':
+	    classOutputFlag = true;
+	    i = i-1; //No option, so back up one.
+	    break;
          case 'q':
             if (i + 1 >= argc) {
                printf("Error: Flag -q requires an argument!\n");
@@ -232,7 +242,7 @@ int main(int argc, char **argv)
    }
 
    /* Connect the Forest to the Query Engine. */
-   InitializeStructures(metaFirewall);
+   InitializeStructures(metaFirewall, classOutputFlag);
 
    /* Parse and Analyze query file */
    ParseQueryFile(queryName);

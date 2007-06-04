@@ -143,7 +143,7 @@ group *DefineGroup(char *name, address * list);
 service *DefineService(char *name, port * list);
 
 //Create and initialize the MDD forest
-void InitializeStructures(Firewall * F);
+void InitializeStructures(Firewall * F, bool classOutputFlag);
 
 //Set the protocol of port "port" to "protocol"
 port *BuildPort(int protocol, port * port);
