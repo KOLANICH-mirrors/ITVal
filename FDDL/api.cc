@@ -570,10 +570,6 @@ fddl_forest::InternalReplaceStrict(level k, node_idx p, node_idx q)
 	}
 
 	if (k == 0) {
-		if (p == 0)
-			return 0;
-		if (q == 0)
-			return p;
 		return q;
 	}
 
