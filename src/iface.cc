@@ -589,7 +589,6 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
          mdd_handle resultMDD;
          mdd_handle resultHistMDD;
    
-<<<<<<< iface.cc
 	 //Build an MDD representing the packets that match the current rule.
 	 //Terminal of this rule will be the id of the target chain.
          FWForest->MakeMDDFromTuple(cur->low, cur->high, criteriaMDD);
