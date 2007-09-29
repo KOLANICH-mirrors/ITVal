@@ -596,21 +596,21 @@ condition *BuildConditionFromFlag(int flag)
    // Set the appropriate value to 1.
    switch (flag) {
       case 0:                  // FIN
-         low[6] = high[6] = 1;
+         low[1] = high[1] = 1;
          break;
       case 1:                  // SYN
-         low[5] = high[5] = 1;
+         low[2] = high[2] = 1;
       case 2:                  // RST
-         low[4] = high[4] = 1;
-         break;
-      case 3:                  // PSH
          low[3] = high[3] = 1;
          break;
+      case 3:                  // PSH
+         low[4] = high[4] = 1;
+         break;
       case 4:                  // ACK
-         low[2] = high[2] = 1;
+         low[5] = high[5] = 1;
          break;
       case 5:                  // URG
-         low[1] = high[1] = 1;
+         low[6] = high[6] = 1;
          break;
       default:
          printf("Bad TCP flag: %d.\n", flag);

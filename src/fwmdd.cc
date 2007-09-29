@@ -68,9 +68,10 @@ int fw_fddl_forest::PrintElement(Topology* T, int* vals){
       printf(" with flags[");
       for (int i=0;i<6;i++){
          if (vals[i+1] == 1){
-            printf("%c", flagString[i]);
+            printf("%c", flagString[6-i]);
 	 }
-	 else printf(" ");
+	 else 
+            printf(" ");
       }
       printf("].\n");
 }

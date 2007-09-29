@@ -494,7 +494,7 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
    // tables semantics.
     
    if (tup == NULL) {
-      // If we've gotten past the last chain, we just copy the inputMDD
+      // If we've gotten past the last rule, we just copy the inputMDD
       // and return.
       FWForest->Attach(outMDD, inMDD.index);
       HistoryForest->Attach(outHistMDD, inHistMDD.index);
@@ -622,9 +622,9 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
       
       HistoryForest->ProjectOnto(targetHistMDD, historyMDD, resultHistMDD);
 
-      // Clean up criteriaMDD.
+      // Clean up MDDs.
       FWForest->DestroyMDD(criteriaMDD);
-      
+      FWForest->DestroyMDD(targetMDD);
       HistoryForest->DestroyMDD(historyMDD);
 
       //Any rule in the new chain that affects the packet needs to be counted
@@ -635,7 +635,6 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
       FWForest->DestroyMDD(resultMDD);
       HistoryForest->DestroyMDD(resultHistMDD);
-      FWForest->DestroyMDD(targetMDD);
       HistoryForest->DestroyMDD(targetHistMDD);
    }
 }
