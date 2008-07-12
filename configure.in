@@ -1,6 +1,7 @@
-AC_INIT([ITVal],[1.0],[rmmarm@sdf.lonestar.org])
+AC_INIT([ITVal],[1.1],[rmmarm@sdf.lonestar.org])
 AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(ITVal,1.0)
+AC_CONFIG_MACRO_DIR([m4])
+AM_INIT_AUTOMAKE(ITVal,1.1)
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_YACC

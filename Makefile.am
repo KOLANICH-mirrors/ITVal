@@ -15,3 +15,5 @@ ITVal_LDADD = @LEXLIB@ FDDL/libFDDL.la
 EXTRA_DIST = COPYING ChangeLog LICENSE man/ITVal.n src/fwlang.tab.hh fwlang.cc fwlang_scanner.cc RELEASE
 
 SUBDIRS = FDDL doc
+
+ACLOCAL_AMFLAGS = -I m4
