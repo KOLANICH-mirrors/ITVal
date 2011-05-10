@@ -7,6 +7,10 @@ ITVal is a tool for iptables configuration analysis.  It can be used to:
 4.  Generate an equivalence class abstraction of the firewall policy
 that can be used to easily detect many different types of errors.
 
+ITVal-1.2 replaces the antiquated build system based on autoconf with a
+CMake-based system.  A recent (cmake-2.6 or greater) version of cmake is
+now required to build ITVal.
+
 ITVal implements a query engine based on a simple query language that a
 system administrator can use to investigate firewall behaviors.
 
