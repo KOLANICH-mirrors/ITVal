@@ -26,7 +26,7 @@
 
 #define SIZE_OF_LEVEL_18 256
 
-Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H)
+Firewall::Firewall(FirewallForest * F, FirewallForest * H)
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
    FWForest = F;
@@ -38,15 +38,15 @@ Firewall::Firewall(fw_fddl_forest * F, fw_fddl_forest * H)
    for (int i = 0; i < 256; i++) {
       chain_array[i] = nat_chains[i] = NULL;
    }
-   ClassForest = new fw_fddl_forest(5, ranges);
+   ClassForest = new FirewallForest(5, ranges);
    ClassForest->ToggleSparsity(false);
-   ServiceClassForest = new fw_fddl_forest(4, ranges);
+   ServiceClassForest = new FirewallForest(4, ranges);
    ServiceClassForest->ToggleSparsity(false);
    natHead = NULL;
 };
 
-Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
-                   Topology * top, fw_fddl_forest *H)
+Firewall::Firewall(char *filterName, char *natName, FirewallForest * F,
+                   Topology * top, FirewallForest *H)
 {
    int ranges[5] = { 65536, 256, 256, 256, 256 };
    int high[23];
@@ -103,15 +103,15 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    BuildChains(forward_chain, Forward, ForwardLog, ForwardHist);
    BuildChains(input_chain, Input, InputLog, InputHist);
    BuildChains(output_chain, Output, OutputLog, OutputHist);
-   ClassForest = new fw_fddl_forest(5, ranges);
+   ClassForest = new FirewallForest(5, ranges);
    ClassForest->ToggleSparsity(false);
-   ServiceClassForest = new fw_fddl_forest(4, ranges);
+   ServiceClassForest = new FirewallForest(4, ranges);
    ServiceClassForest->ToggleSparsity(false);
    natHead = NULL;
 }
 
-Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
-                   Topology * top, int verbose, fw_fddl_forest * H)
+Firewall::Firewall(char *filterName, char *natName, FirewallForest * F,
+                   Topology * top, int verbose, FirewallForest * H)
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
    int high[23];
@@ -181,9 +181,9 @@ Firewall::Firewall(char *filterName, char *natName, fw_fddl_forest * F,
    }
    HistoryForest->PrintMDD();
 #endif
-   ClassForest = new fw_fddl_forest(5, ranges);
+   ClassForest = new FirewallForest(5, ranges);
    ClassForest->ToggleSparsity(false);
-   ServiceClassForest = new fw_fddl_forest(3, ranges);
+   ServiceClassForest = new FirewallForest(3, ranges);
    ServiceClassForest->ToggleSparsity(false);
    natHead = NULL;
 }
@@ -224,16 +224,16 @@ Firewall::~Firewall() {
 
 int Firewall::PrintClasses()
 {
-   mdd_handle FWSourceClass;
-   mdd_handle INSourceClass;
-   mdd_handle OUTSourceClass;
+   MDDHandle FWSourceClass;
+   MDDHandle INSourceClass;
+   MDDHandle OUTSourceClass;
 
-   mdd_handle FWDestClass;
-   mdd_handle INDestClass;
-   mdd_handle OUTDestClass;
+   MDDHandle FWDestClass;
+   MDDHandle INDestClass;
+   MDDHandle OUTDestClass;
 
-   mdd_handle newChain;
-   mdd_handle resultClass;
+   MDDHandle newChain;
+   MDDHandle resultClass;
 
    int numClasses = 0;
 
@@ -319,16 +319,16 @@ int Firewall::PrintClasses()
 
 int Firewall::GetClasses(group ** &classes, int &numClasses)
 {
-   mdd_handle FWSourceClass;
-   mdd_handle INSourceClass;
-   mdd_handle OUTSourceClass;
+   MDDHandle FWSourceClass;
+   MDDHandle INSourceClass;
+   MDDHandle OUTSourceClass;
 
-   mdd_handle FWDestClass;
-   mdd_handle INDestClass;
-   mdd_handle OUTDestClass;
+   MDDHandle FWDestClass;
+   MDDHandle INDestClass;
+   MDDHandle OUTDestClass;
 
-   mdd_handle newChain;
-   mdd_handle resultClass;
+   MDDHandle newChain;
+   MDDHandle resultClass;
 
    numClasses = 0;
 
@@ -387,16 +387,16 @@ int Firewall::GetClasses(group ** &classes, int &numClasses)
 }
 
 int Firewall::GetServiceGraph(int* src, int* dst, service*& arcs, int& numArcs){
-   mdd_handle FWSourceClass;
-   mdd_handle INSourceClass;
-   mdd_handle OUTSourceClass;
+   MDDHandle FWSourceClass;
+   MDDHandle INSourceClass;
+   MDDHandle OUTSourceClass;
 
-   mdd_handle FWDestClass;
-   mdd_handle INDestClass;
-   mdd_handle OUTDestClass;
+   MDDHandle FWDestClass;
+   MDDHandle INDestClass;
+   MDDHandle OUTDestClass;
 
-   mdd_handle newChain;
-   mdd_handle resultClass;
+   MDDHandle newChain;
+   MDDHandle resultClass;
 /*
    FWForest->Shift(Forward, 12, newChain);      //Grab source port byte 2
    FWForest->Shift(newChain, 12, newChain);     //Grab source port byte 1
@@ -454,16 +454,16 @@ int Firewall::PrintServiceClasses()
 {
    int numClasses;
 
-   mdd_handle FWSourceClass;
-   mdd_handle INSourceClass;
-   mdd_handle OUTSourceClass;
+   MDDHandle FWSourceClass;
+   MDDHandle INSourceClass;
+   MDDHandle OUTSourceClass;
 
-   mdd_handle FWDestClass;
-   mdd_handle INDestClass;
-   mdd_handle OUTDestClass;
+   MDDHandle FWDestClass;
+   MDDHandle INDestClass;
+   MDDHandle OUTDestClass;
 
-   mdd_handle newChain;
-   mdd_handle resultClass;
+   MDDHandle newChain;
+   MDDHandle resultClass;
 
 /* 
    for (level k=3;k>0;k--)
@@ -550,16 +550,16 @@ int Firewall::PrintServiceClasses()
 
 int Firewall::GetServiceClasses(service ** &classes, int &numClasses)
 {
-   mdd_handle FWSourceClass;
-   mdd_handle INSourceClass;
-   mdd_handle OUTSourceClass;
+   MDDHandle FWSourceClass;
+   MDDHandle INSourceClass;
+   MDDHandle OUTSourceClass;
 
-   mdd_handle FWDestClass;
-   mdd_handle INDestClass;
-   mdd_handle OUTDestClass;
+   MDDHandle FWDestClass;
+   MDDHandle INDestClass;
+   MDDHandle OUTDestClass;
 
-   mdd_handle newChain;
-   mdd_handle resultClass;
+   MDDHandle newChain;
+   MDDHandle resultClass;
 
    numClasses = 0;
 
@@ -640,7 +640,7 @@ int Firewall::GetServiceClasses(service ** &classes, int &numClasses)
 
 /* Create a Meta-Firewall */
 /* Need to do something about Topologies, here. */
-Firewall *MergeFWs(fw_fddl_forest * FWForest, Firewall ** fws, int n, fw_fddl_forest * HistoryForest)
+Firewall *MergeFWs(FirewallForest * FWForest, Firewall ** fws, int n, FirewallForest * HistoryForest)
 {
    Topology* tmp;
    Firewall *f;

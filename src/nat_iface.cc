@@ -28,11 +28,11 @@
 #include "firewall.h"
 #include <assert.h>
 
-void Firewall::DoNAT(nat_tuple * tup, mdd_handle inMDD, mdd_handle inHistMDD,
-      mdd_handle & outMDD, mdd_handle & logMDD, mdd_handle & outHistMDD) {
+void Firewall::DoNAT(nat_tuple * tup, MDDHandle inMDD, MDDHandle inHistMDD,
+      MDDHandle & outMDD, MDDHandle & logMDD, MDDHandle & outHistMDD) {
 
-   mdd_handle interMDD;
-   mdd_handle interHistMDD;
+   MDDHandle interMDD;
+   MDDHandle interHistMDD;
 //   int hlow[25];
 //   int hhigh[25];
 
@@ -99,7 +99,7 @@ void Firewall::DoNAT(nat_tuple * tup, mdd_handle inMDD, mdd_handle inHistMDD,
    }
 }
 
-void Firewall::NATChains(int chain_num, mdd_handle inMDD, mdd_handle inHistMDD, mdd_handle & outMDD, mdd_handle & logMDD, mdd_handle & outHistMDD)
+void Firewall::NATChains(int chain_num, MDDHandle inMDD, MDDHandle inHistMDD, MDDHandle & outMDD, MDDHandle & logMDD, MDDHandle & outHistMDD)
 {
    nat_tuple *stack;
 

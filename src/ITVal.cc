@@ -60,8 +60,8 @@ int main(int argc, char **argv)
    filename_node *fileList = NULL;
    char flag;
 
-   fw_fddl_forest *FWForest;
-   fw_fddl_forest *HistoryForest;
+   FirewallForest *FWForest;
+   FirewallForest *HistoryForest;
    Firewall *metaFirewall;
 
    filename_node *fn;
@@ -91,9 +91,9 @@ int main(int argc, char **argv)
       255, 255, 255, 255        /* Source Address               */
    };
 
-   FWForest = new fw_fddl_forest(23, ranges);
+   FWForest = new FirewallForest(23, ranges);
    FWForest->ToggleSparsity(false);     /* @BUG@: Sparse nodes don't work. */
-   HistoryForest = new fw_fddl_forest(25, hranges);
+   HistoryForest = new FirewallForest(25, hranges);
    HistoryForest->ToggleSparsity(false);/* @BUG@: Sparse nodes don't work. */
 
    strncpy(queryName, "NOQUERY", 7);

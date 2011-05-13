@@ -473,15 +473,15 @@ void Firewall::BuildRules(processed_rule * head, rule_tuple * &stack)
 // of the function.
 
 
-void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
-      inHistMDD, rule_tuple * tup, mdd_handle & outMDD, mdd_handle & logMDD,
-      mdd_handle & outHistMDD){
+void Firewall::ProcessChain(chain ** chain_array, MDDHandle inMDD, MDDHandle
+      inHistMDD, rule_tuple * tup, MDDHandle & outMDD, MDDHandle & logMDD,
+      MDDHandle & outHistMDD){
  
    // criteriaMDD represents the set of packets that match the tuple.
-   mdd_handle criteriaMDD;
+   MDDHandle criteriaMDD;
 
    //Matches tuples to the chain/rule pairs that match each tuple.
-   mdd_handle historyMDD;
+   MDDHandle historyMDD;
 
    // We process the rules of the chain in reverse order to preserve IP
    // tables semantics.
@@ -608,14 +608,14 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
       nextChain = chain_array[tup->low[0] - NUM_DEFAULT_TARGETS];
 
-      mdd_handle targetMDD;
-      mdd_handle targetHistMDD;
+      MDDHandle targetMDD;
+      MDDHandle targetHistMDD;
 
       ProcessChain(chain_array, inMDD, inHistMDD, nextChain->tup, targetMDD,
 	    logMDD, targetHistMDD);
 
-      mdd_handle resultMDD;
-      mdd_handle resultHistMDD;
+      MDDHandle resultMDD;
+      MDDHandle resultHistMDD;
    
       FWForest->MakeMDDFromTuple(tup->low, tup->high, criteriaMDD);
       
@@ -666,12 +666,12 @@ void Firewall::ProcessChain(chain ** chain_array, mdd_handle inMDD, mdd_handle
 
 // Initiate construction of outMDD and logMDD.
 void Firewall::AssembleChains(chain ** chain_array, chain * chain,
-                              mdd_handle & outMDD, mdd_handle & logMDD, mdd_handle & outHistMDD)
+                              MDDHandle & outMDD, MDDHandle & logMDD, MDDHandle & outHistMDD)
 {
    // Here we set the default policy for the builtin chain.
 
-   mdd_handle initMDD;
-   mdd_handle initHistMDD;
+   MDDHandle initMDD;
+   MDDHandle initHistMDD;
 
    int low[23], hlow[25];
    int high[23], hhigh[25];

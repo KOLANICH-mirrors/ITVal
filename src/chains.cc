@@ -715,8 +715,8 @@ void Firewall::BuildNATRules(char *fname)
 
 // Build outputMDD, storing the set of all accepted packets
 // and Logged, an MDD storing the set of logged packets.
-void Firewall::BuildChains(int input_chain, mdd_handle & outputMDD,
-                           mdd_handle & Logged, mdd_handle & outHistMDD)
+void Firewall::BuildChains(int input_chain, MDDHandle & outputMDD,
+                           MDDHandle & Logged, MDDHandle & outHistMDD)
 {
    AssembleChains(chain_array, chain_array[input_chain], outputMDD, Logged, outHistMDD);
 }

@@ -39,8 +39,8 @@ enum assertion_operators {OP_IS, OP_SUBSET, OP_NOT_IS, OP_NOT_SUBSET};
 //A query condition.
 class condition {
  public:
-   mdd_handle h;
-   mdd_handle history;
+   MDDHandle h;
+   MDDHandle history;
 };
 
 //A query, consisting of a subject (what info to display) and a

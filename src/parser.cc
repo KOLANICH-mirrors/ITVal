@@ -1067,8 +1067,8 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    notA = new condition;
    notB = new condition;
 
-   mdd_handle mergedHistory;
-   mdd_handle resultHistory;
+   MDDHandle mergedHistory;
+   MDDHandle resultHistory;
   
    FW->HistoryForest->Max(FW->InputHist, FW->OutputHist, mergedHistory);
    FW->HistoryForest->Max(FW->ForwardHist, mergedHistory, mergedHistory);

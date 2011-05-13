@@ -39,6 +39,6 @@ void PrintRuleTuple(rule_tuple * r);
 void BuildRules(processed_rule * head, rule_tuple * &result);
 void ApplyNATRules(processed_nat_rule * head, rule_tuple * &result);
 void AssembleChains(chain ** chain_array, chain * chain,
-                    mdd_handle & outputMDD, mdd_handle & logMDD);
-void NATChains(chain ** nat_chains, int prerouting, mdd_handle & outputMDD,
-               mdd_handle & logMDD);
+                    MDDHandle & outputMDD, MDDHandle & logMDD);
+void NATChains(chain ** nat_chains, int prerouting, MDDHandle & outputMDD,
+               MDDHandle & logMDD);

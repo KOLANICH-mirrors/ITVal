@@ -2,7 +2,7 @@
 #include "fwmdd.h"
 
 void    
-fw_fddl_forest::PrintPort(mdd_handle root, level k)
+FirewallForest::PrintPort(MDDHandle root, level k)
 {
 	node_idx newRoot;
 	portset *p;
@@ -27,7 +27,7 @@ fw_fddl_forest::PrintPort(mdd_handle root, level k)
 }
 
 int 
-fw_fddl_forest::PrintPort(level k, node_idx p, int highByte, level cutoff, 
+FirewallForest::PrintPort(level k, node_idx p, int highByte, level cutoff, 
 		portset * ps)
 {
 	int     i;
@@ -39,11 +39,11 @@ fw_fddl_forest::PrintPort(level k, node_idx p, int highByte, level cutoff,
 	if (k == 0)
 		return (p > 0);
 
-	flag = PrintCache[k]->Hit(p);
+	flag = PrintCache[k]->hit(p);
 	if (flag >= 0)
 		return flag;
 
-	node   *nodeP = &FDDL_NODE(k, p);
+	Node   *nodeP = &FDDL_NODE(k, p);
 
 	if (k == cutoff) {
 		for (int i = 0; i < nodeP->size; i++) {
@@ -62,6 +62,6 @@ fw_fddl_forest::PrintPort(level k, node_idx p, int highByte, level cutoff,
 		if (flag != 0)
 			r = 1;
 	}
-	PrintCache[k]->Add(p, 1);
+	PrintCache[k]->add(p, 1);
 	return r;
 }

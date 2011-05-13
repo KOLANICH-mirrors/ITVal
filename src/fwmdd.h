@@ -42,30 +42,30 @@ Williamsburg, VA 23185
 
 
 /*
- * The class fw_fddl_forest enhances the fddl_forest by providing
+ * The class FirewallForest enhances the fddl_forest by providing
  * certain algorithms specific to firewall representation.  In 
  * particular, we provide algorithms for query intersection, 
  * NAT transformation of the firewall MDD and 
  * printing Firewall query results.
  */
 
-class fw_fddl_forest:public fddl_forest {
+class FirewallForest:public Forest {
  private:
-   cache **FWCache;        //Cache for all firewall specific operations.
+   Cache **FWCache;        //Cache for all firewall specific operations.
 
  public:
 
-    fw_fddl_forest(int numlevels, int *maxvals):fddl_forest(numlevels, maxvals){
+    FirewallForest(int numlevels, int *maxvals):Forest(numlevels, maxvals){
 
-      FWCache = new cache *[K + 1];
+      FWCache = new Cache *[K + 1];
 
       for (int k = 0; k <= K; k++) {
-         FWCache[k] = new cache;
+         FWCache[k] = new Cache;
       } 
    }
 
    //Clean up data structures used by the forest
-   ~fw_fddl_forest() {
+   ~FirewallForest() {
       for (level k = K; k >= 0; k--) {
          if (FWCache[k])
             delete FWCache[k];
@@ -73,68 +73,68 @@ class fw_fddl_forest:public fddl_forest {
       delete[]FWCache;
    }
 
-   int FindElement(mdd_handle p, Topology* T, int*& tup);
+   int FindElement(MDDHandle p, Topology* T, int*& tup);
    node_idx InternalFindElement(level k, node_idx p, int* vals);
    int PrintElement(Topology* T, int* tup);
 
-   int QueryIntersect(mdd_handle p, mdd_handle q, mdd_handle & result);
+   int QueryIntersect(MDDHandle p, MDDHandle q, MDDHandle & result);
    node_idx InternalQIntersect(level k, node_idx p, node_idx q);
-   int HistoryIntersect(mdd_handle p, mdd_handle q, mdd_handle & result);
+   int HistoryIntersect(MDDHandle p, MDDHandle q, MDDHandle & result);
    node_idx InternalHIntersect(level k, node_idx p, node_idx q);
 
-   int Accepted(mdd_handle p, mdd_handle & result);
+   int Accepted(MDDHandle p, MDDHandle & result);
    node_idx InternalAccepted(level k, node_idx p);
-   int Dropped(mdd_handle p, mdd_handle & result);
+   int Dropped(MDDHandle p, MDDHandle & result);
    node_idx InternalDropped(level k, node_idx p);
 
-   int DisplayHistory(mdd_handle root, int* tup);
+   int DisplayHistory(MDDHandle root, int* tup);
    int InternalDisplayHistory(level k, node_idx p, int* tup, int chain);
 
-   int PrintHistory(mdd_handle p);
+   int PrintHistory(MDDHandle p);
    void InternalPrintHistory(level k, node_idx p, int chain_num, int rule_num);
 
-   int DNAT(mdd_handle p, nat_tuple * pnr, mdd_handle & result);
+   int DNAT(MDDHandle p, nat_tuple * pnr, MDDHandle & result);
    node_idx InternalDNAT(level k, node_idx p, node_idx q, nat_tuple * pnr);
-   int SNAT(mdd_handle p, nat_tuple * pnr, mdd_handle & result);
+   int SNAT(MDDHandle p, nat_tuple * pnr, MDDHandle & result);
    node_idx InternalSNAT(level k, node_idx p, node_idx q, nat_tuple * pnr);
-   int NETMAP(mdd_handle p, nat_tuple * pnr, mdd_handle & result);
+   int NETMAP(MDDHandle p, nat_tuple * pnr, MDDHandle & result);
    node_idx InternalNMAP(level k, node_idx p, node_idx q, nat_tuple * pnr);
 
-   int BuildClassMDD(mdd_handle p, fddl_forest * forest, mdd_handle & r,
+   int BuildClassMDD(MDDHandle p, Forest* forest, MDDHandle & r,
                      int &numClasses, int services);
-   int InternalBuildClassMDD(fddl_forest * forest, level k, node_idx p,
+   int InternalBuildClassMDD(Forest* forest, level k, node_idx p,
                              int &numClasses, int services);
    
-   int BuildServiceGraphMDD(mdd_handle p, fddl_forest * forest, mdd_handle & r,
+   int BuildServiceGraphMDD(MDDHandle p, Forest* forest, MDDHandle & r,
                      int &numArcs);
-   int InternalBuildServiceGraphMDD(fddl_forest * forest, level k, node_idx p,
+   int InternalBuildServiceGraphMDD(Forest* forest, level k, node_idx p,
                              int &numArcs);
 
-   int JoinClasses(mdd_handle p, mdd_handle q, mdd_handle & r,
+   int JoinClasses(MDDHandle p, MDDHandle q, MDDHandle & r,
                    int &outNumClasses);
    node_idx InternalJoinClasses(level k, node_idx p, node_idx q,
                                 int &numClasses);
 
-   int PrintClasses(mdd_handle p, int numClasses);
+   int PrintClasses(MDDHandle p, int numClasses);
    void InternalPrintClasses(level k, node_idx p, int *low, int *high,
                              int classNum);
 
-   int PrintServiceClasses(mdd_handle p, int numClasses);
+   int PrintServiceClasses(MDDHandle p, int numClasses);
    void InternalPrintServiceClasses(level k, node_idx p, int *low, int *high,
                                     int classNum);
 
-   int GetClasses(mdd_handle p, group ** &output, int numClasses);
+   int GetClasses(MDDHandle p, group ** &output, int numClasses);
    void InternalGetClasses(level k, node_idx p, int *low, int *high,
                            int classNum, group * head);
 
-   int GetServiceClasses(mdd_handle p, service ** &output, int numClasses);
+   int GetServiceClasses(MDDHandle p, service ** &output, int numClasses);
    void InternalGetServiceClasses(level k, node_idx p, int *low, int *high,
                                   int classNum, service * head);
 
-   int GetServiceArcs(mdd_handle p, int* src, int* dst, service*&output, int& numArcs);
+   int GetServiceArcs(MDDHandle p, int* src, int* dst, service*&output, int& numArcs);
    int InternalGetServiceArcs(level k, node_idx p, int* src, int* dst,
       int* low, int* high, service*&output, int& numArcs);
-  void PrintPort (mdd_handle h, level k);
+  void PrintPort (MDDHandle h, level k);
   int PrintPort (level k, node_idx p, int highByte, int depth, portset * ps);
 };
 

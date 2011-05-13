@@ -35,7 +35,7 @@ void PrintRange(address_range * ar)
 
    cur = ar;
    while (cur != NULL) {
-      printf("%u to %u\n", cur->low, cur->high);
+      printf("%u.%u.%u.%u to %u.%u.%u.%u\n", cur->low[0], cur->low[1],cur->low[2],cur->low[3], cur->high[0], cur->high[1], cur->high[2],cur->high[3]);
       cur = cur->next;
    }
 }
