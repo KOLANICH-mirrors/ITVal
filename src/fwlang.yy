@@ -4,6 +4,9 @@
 #include <string>
 #include "src/parser.h"
 #include "src/structures.h"
+#include <iostream>
+using namespace std;
+
 int yyerror(char* str);
 %}
 
@@ -184,5 +187,5 @@ port: NUM {$$=ParsePort($1); delete[] $1;};
 %%
 
 int yyerror(char* str){
-   printf("%s\n", str);
+   cout << str << endl;
 }

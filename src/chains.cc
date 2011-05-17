@@ -725,7 +725,7 @@ void Firewall::BuildChains(int input_chain, MDDHandle & outputMDD,
 // Return its index in the chain array, or -1 if no such chain can be
 // found.
 
-int Firewall::FindChain(char *name)
+int Firewall::FindChain(const char *name)
 {
    int i;
 
@@ -796,7 +796,7 @@ int Firewall::FindChain(char *name)
    return -1;
 }
 
-int Firewall::FindNATChain(char *name)
+int Firewall::FindNATChain(const char *name)
 {
    int i;
 

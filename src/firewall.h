@@ -121,8 +121,8 @@ class Firewall {
    MDDHandle ForwardHist;
    MDDHandle ForwardLog;
 
-   int FindChain(char *name);
-   int FindNATChain(char *name);
+   int FindChain(const char *name);
+   int FindNATChain(const char *name);
    void NATChains(int input_chain, MDDHandle inMDD, MDDHandle inHistMDD, MDDHandle & outMDD,
                   MDDHandle & logMDD, MDDHandle & outHistMDD);
 
