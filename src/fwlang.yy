@@ -7,7 +7,7 @@
 #include <iostream>
 using namespace std;
 
-int yyerror(char* str);
+int yyerror(const char* str);
 %}
 
 //%debug
@@ -186,6 +186,6 @@ port: NUM {$$=ParsePort($1); delete[] $1;};
 
 %%
 
-int yyerror(char* str){
+int yyerror(const char* str){
    cout << str << endl;
 }
