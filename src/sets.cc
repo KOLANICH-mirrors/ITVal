@@ -13,7 +13,7 @@ FirewallForest::PrintPort(MDDHandle root, level k)
 		FlushCaches(k1);
 	}
 
-	PrintPort(K, root.index, 0, k, p);
+	PrintPort(K, root.index(), 0, k, p);
 
 	p->PrintPorts();
 
@@ -46,7 +46,7 @@ FirewallForest::PrintPort(level k, node_idx p, int highByte, level cutoff,
 	Node   *nodeP = &FDDL_NODE(k, p);
 
 	if (k == cutoff) {
-		for (int i = 0; i < nodeP->size; i++) {
+		for (int i = 0; i < nodeP->size(); i++) {
 			if (PrintPort(k - 1, FDDL_ARC(k, nodeP, i), highByte, cutoff, ps)
 				 == 1)
 				ps->InsertPort(highByte * 256 + i);
@@ -57,7 +57,7 @@ FirewallForest::PrintPort(level k, node_idx p, int highByte, level cutoff,
 	int     r;
 
 	r = 0;
-	for (i = 0; i < nodeP->size; i++) {
+	for (i = 0; i < nodeP->size(); i++) {
 		flag = PrintPort(k - 1, highByte, i, cutoff, ps);
 		if (flag != 0)
 			r = 1;

@@ -25,7 +25,7 @@ Department of Computer Science
 College of William and Mary
 Williamsburg, VA 23185
 */
-#include <FDDL/mdd.h>
+#include <FDDL/forest.h>
 #include "rules.h"
 #include "chains.h"
 

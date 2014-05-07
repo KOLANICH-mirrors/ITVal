@@ -489,9 +489,9 @@ void Firewall::ProcessChain(chain ** chain_array, MDDHandle inMDD, MDDHandle
    if (tup == NULL) {
       // If we've gotten past the last chain, we just copy the inputMDD
       // and return.
-      FWForest->Attach(outMDD, inMDD.index);
+      FWForest->Attach(outMDD, inMDD.index());
 #ifndef NO_HISTORY
-      HistoryForest->Attach(outHistMDD, inHistMDD.index);
+      HistoryForest->Attach(outHistMDD, inHistMDD.index());
 #endif
       return;
    }
@@ -522,14 +522,14 @@ void Firewall::ProcessChain(chain ** chain_array, MDDHandle inMDD, MDDHandle
 //   FWForest->DestroyMDD(inMDD); //bad?
 //   HistoryForest->DestroyMDD(inHistMDD); //bad?
 
-   if (inMDD.index != outMDD.index){
-      FWForest->Attach(inMDD, outMDD.index);
+   if (inMDD.index() != outMDD.index()){
+      FWForest->Attach(inMDD, outMDD.index());
    }
 
 #ifndef NO_HISTORY
-   if (inHistMDD.index != outHistMDD.index){
+   if (inHistMDD.index() != outHistMDD.index()){
 //      HistoryForest->ReallocHandle(inHistMDD);
-      HistoryForest->Attach(inHistMDD, outHistMDD.index);
+      HistoryForest->Attach(inHistMDD, outHistMDD.index());
    }
 #endif
 
@@ -571,12 +571,12 @@ void Firewall::ProcessChain(chain ** chain_array, MDDHandle inMDD, MDDHandle
       tup->hlow[0] = tup->low[0];
       tup->hhigh[0] = tup->high[0];
 #ifdef STACK_DEBUG
-      printf("B: Chain %d, Rule %d: MDD %d\n", tup->chain_id, tup->id, outMDD.index);
+      printf("B: Chain %d, Rule %d: MDD %d\n", tup->chain_id, tup->id, outMDD.index());
       FWForest->PrintMDD();
 #endif
       FWForest->Assign(inMDD, tup->low, tup->high, outMDD);
 #ifdef STACK_DEBUG
-      printf("A: Chain %d, Rule %d: MDD %d\n", tup->chain_id, tup->id, outMDD.index);
+      printf("A: Chain %d, Rule %d: MDD %d\n", tup->chain_id, tup->id, outMDD.index());
       FWForest->PrintMDD();
 #endif
       //Union the input MDD with the intermediate and store in "outHistMDD".
@@ -757,9 +757,9 @@ void Firewall::AssembleChains(chain ** chain_array, chain * chain,
 #endif
    }
    else {
-      FWForest->Attach(outMDD, initMDD.index);
+      FWForest->Attach(outMDD, initMDD.index());
 #ifndef NO_HISTORY
-      HistoryForest->Attach(outHistMDD, initHistMDD.index);
+      HistoryForest->Attach(outHistMDD, initHistMDD.index());
 #endif
    }
 }

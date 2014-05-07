@@ -35,6 +35,8 @@ Williamsburg, VA 23185
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <FDDL/operation.h>
+
 #define MAX(a, b) (a>b ? a : b)
 #define MIN(a, b) (a<b ? a : b)
 
@@ -77,14 +79,14 @@ int FirewallForest::PrintElement(Topology* T, int* vals){
 
 int FirewallForest::FindElement(MDDHandle root, Topology* T, int*& vals){
    node_idx newresult;
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
 
    vals = new int[K+1];
    for (int k=0;k<K+1;k++)
       vals[k]=0;
 
-   if (InternalFindElement(K, root.index, vals) != 0){
+   if (InternalFindElement(K, root.index(), vals) != 0){
       return SUCCESS;
    }
    delete[] vals;
@@ -100,7 +102,7 @@ node_idx FirewallForest::InternalFindElement(level k, node_idx p, int* vals){
       return p != 0;
    }
    nodeP = &FDDL_NODE(k,p);
-   for (int i=0;i<nodeP->size;i++){
+   for (int i=0;i<nodeP->size();i++){
       q = FDDL_ARC(k,nodeP,i);
       if (InternalFindElement(k-1, q, vals) != 0){
 	 vals[k] = i;
@@ -112,10 +114,10 @@ node_idx FirewallForest::InternalFindElement(level k, node_idx p, int* vals){
 
 int FirewallForest::DisplayHistory(MDDHandle root, int* vals){
    node_idx newresult;
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
 
-   if (InternalDisplayHistory(K, root.index, vals, 0) != 0){
+   if (InternalDisplayHistory(K, root.index(), vals, 0) != 0){
       return SUCCESS;
    }
    return INVALID_MDD;
@@ -142,7 +144,7 @@ int* vals, int chain){
    if (k==1){
       int found;
       found = 0;
-      for (int i=0;i<nodeP->size;i++){
+      for (int i=0;i<nodeP->size();i++){
          q = FDDL_ARC(k,nodeP,i);
          if (q != 0 && (InternalDisplayHistory(k-1, q, vals, 0) != 0)){
             printf("Chain %d Rule %d\n", chain, i);
@@ -152,7 +154,7 @@ int* vals, int chain){
       return found;
    }
    if (k==2){
-      for (int i=0;i<nodeP->size;i++){
+      for (int i=0;i<nodeP->size();i++){
          q = FDDL_ARC(k,nodeP,i);
          if (q !=0)
             InternalDisplayHistory(k-1, q, vals, i);
@@ -169,16 +171,16 @@ int* vals, int chain){
 
 int FirewallForest::Accepted(MDDHandle root, MDDHandle& result){
    node_idx newresult;
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
 
    for (level k=K;k>0;k--){
       FWCache[k]->clear();
    }
-   newresult = InternalAccepted(K, root.index);
+   newresult = InternalAccepted(K, root.index());
    //PrintMDD();
    //printf("Accepted:: %d\n", newresult);
-   if (result.index != newresult){
+   if (result.index() != newresult){
       ReallocHandle(result);
       Attach(result, newresult);
    }
@@ -187,14 +189,14 @@ int FirewallForest::Accepted(MDDHandle root, MDDHandle& result){
 
 int FirewallForest::Dropped(MDDHandle root, MDDHandle& result){
    node_idx newresult;
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
 
    for (level k=K;k>0;k--){
       FWCache[k]->clear();
    }
-   newresult = InternalDropped(K, root.index);
-   if (result.index != newresult){
+   newresult = InternalDropped(K, root.index());
+   if (result.index() != newresult){
       ReallocHandle(result);
       Attach(result, newresult);
    }
@@ -216,7 +218,7 @@ node_idx FirewallForest::InternalAccepted(level k, node_idx p){
 
    r = NewNode(k);
    nodeP = &FDDL_NODE(k,p);
-   for (int i=0;i<nodeP->size;i++){
+   for (int i=0;i<nodeP->size();i++){
       node_idx j;
       j = FDDL_ARC(k,nodeP, i);
       SetArc(k,r,i, InternalAccepted(k-1, j));
@@ -256,7 +258,7 @@ node_idx FirewallForest::InternalDropped(level k, node_idx p){
    nodeP = &FDDL_NODE(k,p);
    for (int i=0;i<=maxVals[k];i++){
       node_idx j;
-      if (i<nodeP->size)
+      if (i<nodeP->size())
          j = FDDL_ARC(k,nodeP, i);
       else
          j = 0;
@@ -268,9 +270,9 @@ node_idx FirewallForest::InternalDropped(level k, node_idx p){
 }
 
 int FirewallForest::QueryIntersect(MDDHandle root, MDDHandle root2, MDDHandle & result) {
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
-   if (root2.index < 0)
+   if (root2.index() < 0)
       return INVALID_MDD;
    node_idx newresult;
 
@@ -279,15 +281,15 @@ int FirewallForest::QueryIntersect(MDDHandle root, MDDHandle root2, MDDHandle & 
    }
 #ifdef DEBUG
    PrintMDD();
-   printf("\nQueryIntersect: %d %d\n", root.index, root2.index);
+   printf("\nQueryIntersect: %d %d\n", root.index(), root2.index());
 #endif
-   newresult = InternalQIntersect(K, root.index, root2.index);
+   newresult = InternalQIntersect(K, root.index(), root2.index());
 #ifdef DEBUG
    PrintMDD();
-   printf("\nQueryIntersect (result): %d\n", root.index, newresult);
+   printf("\nQueryIntersect (result): %d\n", root.index(), newresult);
 #endif 
 
-   if (result.index != newresult) {
+   if (result.index() != newresult) {
       ReallocHandle(result);
       Attach(result, newresult);
    }
@@ -295,13 +297,13 @@ int FirewallForest::QueryIntersect(MDDHandle root, MDDHandle root2, MDDHandle & 
 }
 
 int FirewallForest::PrintHistory(MDDHandle root){
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
    FWCache[0] = new Cache;
    for (level k = K; k >= 0; k--) {
       FWCache[k]->clear();
    }
-   InternalPrintHistory(K, root.index, 0,0);
+   InternalPrintHistory(K, root.index(), 0,0);
    delete FWCache[0];
    FWCache[0]=NULL;
    return SUCCESS;
@@ -330,35 +332,113 @@ void FirewallForest::InternalPrintHistory(level k, node_idx p, int chain_num, in
    
    nodeP = &FDDL_NODE(k,p);
    if (k==1){
-      for (int i=0;i<nodeP->size;i++){
+      for (int i=0;i<nodeP->size();i++){
          InternalPrintHistory(k-1, FDDL_ARC(k,nodeP,i), chain_num, i);
       }
    }
    else if (k==2){
-      for (int i=0;i<nodeP->size;i++){
+      for (int i=0;i<nodeP->size();i++){
          InternalPrintHistory(k-1, FDDL_ARC(k,nodeP,i), i, 0);
       }
    }
    else{
-      for (int i=0;i<nodeP->size;i++){
+      for (int i=0;i<nodeP->size();i++){
          InternalPrintHistory(k-1, FDDL_ARC(k,nodeP, i), 0, 0);
       }
    }
    FWCache[k]->add(p, 1, 1);
 }
 
+void FirewallForest::PrintRanges(MDDHandle root, level * mask)
+{
+    node_idx newRoot;
+    PrintNode *p;
+    PrintNode *stack;
+    int *low;
+    int *high;
+    low = new int[K + 1];
+    high = new int[K + 1];
+    newRoot = Projection(K, root.index(), mask);        //Remove extraneous data.
+    stack = NULL;
+
+    for (level k = K; k >= 0; --k)
+        low[k] = high[k] = 0;
+
+    PrintRanges(K, newRoot, mask, stack, low, high);
+    delete[]high;
+    delete[]low;
+    p = stack;
+    while (p != NULL) {
+        p->Print(mask);
+        stack = p;
+        p = p->next;
+        delete stack;
+    }
+    printf("\n");
+}
+
+void FirewallForest::PrintRanges(level k, node_idx p, level * mask, PrintNode * &stack, int *low, int *high)
+{
+    node_idx child;
+    Node *nodeP;
+    node_idx iVal;
+    node_idx lastVal;
+
+    PrintNode *pn;
+
+    if (p == 0)
+        return;
+
+    if (k == 0) {
+        PrintNode *newNode;
+        newNode = new PrintNode(K, maxVals);
+        newNode->next = stack;
+        for (level k1 = K; k1 > 0; --k1) {
+            newNode->low[k1] = low[k1];
+            newNode->high[k1] = high[k1];
+        }
+        stack = newNode;
+        return;
+    }
+
+    nodeP = &FDDL_NODE(k, p);
+    if (mask[k] == 1) {
+        arc_idx cur_low;
+        lastVal = FDDL_ARC(k, nodeP, 0);
+        cur_low = 0;
+        for (arc_idx i = 1; i < nodeP->m_size; ++i) {
+            iVal = FDDL_ARC(k, nodeP, i);
+            if (iVal != lastVal) {
+                low[k] = cur_low;
+                high[k] = i - 1;
+                PrintRanges(k - 1, lastVal, mask, stack, low, high);
+                cur_low = i;
+                lastVal = iVal;
+            }
+        }
+        low[k] = cur_low;
+        high[k] = nodeP->m_size - 1;
+        PrintRanges(k - 1, lastVal, mask, stack, low, high);
+    } else {
+        child = FDDL_ARC(k, nodeP, 0);
+        low[k] = 0;
+        high[k] = maxVals[k];
+        PrintRanges(k - 1, child, mask, stack, low, high);
+    }
+}
+
 int FirewallForest::HistoryIntersect(MDDHandle root, MDDHandle root2, MDDHandle & result) {
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
-   if (root2.index < 0)
+   if (root2.index() < 0)
       return INVALID_MDD;
    node_idx newresult;
 
    for (level k = K; k > 0; k--) {
       FWCache[k]->clear();
    }
-   newresult = InternalHIntersect(K, root.index, root2.index);
-   if (result.index != newresult) {
+   newresult = InternalHIntersect(K, root.index(), root2.index());
+   if (result.index() != newresult) {
       ReallocHandle(result);
       Attach(result, newresult);
    }
@@ -371,10 +451,10 @@ int FirewallForest::JoinClasses(MDDHandle root, MDDHandle root2,
    int numClasses;
    OutNumClasses = 0;
 
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
 
-   if (root2.index < 0)
+   if (root2.index() < 0)
       return INVALID_MDD;
 
    node_idx newresult;
@@ -384,8 +464,8 @@ int FirewallForest::JoinClasses(MDDHandle root, MDDHandle root2,
    }
 
    numClasses = 1;              // Class0 is automatic.
-   newresult = InternalJoinClasses(K, root.index, root2.index, numClasses);
-   if (result.index != newresult) {
+   newresult = InternalJoinClasses(K, root.index(), root2.index(), numClasses);
+   if (result.index() != newresult) {
       ReallocHandle(result);
       Attach(result, newresult);
    }
@@ -396,7 +476,7 @@ int FirewallForest::JoinClasses(MDDHandle root, MDDHandle root2,
 int FirewallForest::SNAT(MDDHandle root, nat_tuple * pnr,
                          MDDHandle & result)
 {
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
    if (pnr == NULL)
       return 0;
@@ -405,8 +485,8 @@ int FirewallForest::SNAT(MDDHandle root, nat_tuple * pnr,
    for (level k = K; k > 0; k--) {
       FWCache[k]->clear();
    }
-   newresult = InternalSNAT(K, root.index, root.index, pnr);
-   if (result.index != newresult) {
+   newresult = InternalSNAT(K, root.index(), root.index(), pnr);
+   if (result.index() != newresult) {
       ReallocHandle(result);
       Attach(result, newresult);
    }
@@ -416,7 +496,7 @@ int FirewallForest::SNAT(MDDHandle root, nat_tuple * pnr,
 int FirewallForest::DNAT(MDDHandle root, nat_tuple * pnr,
                          MDDHandle & result)
 {
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
    if (pnr == NULL)
       return 0;
@@ -425,8 +505,8 @@ int FirewallForest::DNAT(MDDHandle root, nat_tuple * pnr,
    for (level k = K; k > 0; k--) {
       FWCache[k]->clear();
    }
-   newresult = InternalDNAT(K, root.index, root.index, pnr);
-   if (result.index != newresult) {
+   newresult = InternalDNAT(K, root.index(), root.index(), pnr);
+   if (result.index() != newresult) {
       ReallocHandle(result);
       Attach(result, newresult);
    }
@@ -436,7 +516,7 @@ int FirewallForest::DNAT(MDDHandle root, nat_tuple * pnr,
 int FirewallForest::NETMAP(MDDHandle root, nat_tuple * pnr,
                            MDDHandle & result)
 {
-   if (root.index < 0)
+   if (root.index() < 0)
       return INVALID_MDD;
    if (pnr == NULL)
       return 0;
@@ -445,8 +525,8 @@ int FirewallForest::NETMAP(MDDHandle root, nat_tuple * pnr,
    for (level k = K; k > 0; k--) {
       FWCache[k]->clear();
    }
-   newresult = InternalNMAP(K, root.index, root.index, pnr);
-   if (result.index != newresult) {
+   newresult = InternalNMAP(K, root.index(), root.index(), pnr);
+   if (result.index() != newresult) {
       ReallocHandle(result);
       Attach(result, newresult);
    }
@@ -487,7 +567,7 @@ node_idx FirewallForest::InternalSNAT(level k, node_idx p, node_idx q,
          for (int i = 0; i < pnr->low[k]; i++) {        //For arcs before the range, copy P.
             node_idx pchild;
 
-            if (i < nodeP->size)
+            if (i < nodeP->size())
                pchild = FDDL_ARC(k, nodeP, i);
             else
                pchild = 0;
@@ -497,7 +577,7 @@ node_idx FirewallForest::InternalSNAT(level k, node_idx p, node_idx q,
          for (int i = pnr->high[k] + 1; i <= maxVals[k]; i++) { //For arcs after the range, copy P.
             node_idx pchild;
 
-            if (i < nodeP->size)
+            if (i < nodeP->size())
                pchild = FDDL_ARC(k, nodeP, i);
             else
                pchild = 0;
@@ -516,7 +596,7 @@ node_idx FirewallForest::InternalSNAT(level k, node_idx p, node_idx q,
             pchild = 0;
          else {
             nodeP = &FDDL_NODE(k, p);
-            if (i < nodeP->size)
+            if (i < nodeP->size())
                pchild = FDDL_ARC(k, nodeP, i);
             else
                pchild = 0;
@@ -524,7 +604,7 @@ node_idx FirewallForest::InternalSNAT(level k, node_idx p, node_idx q,
 
          node_idx rchild;
 
-         if (i < nodeR->size)
+         if (i < nodeR->size())
             rchild = FDDL_ARC(k, nodeR, i);
          else
             rchild = 0;
@@ -532,7 +612,7 @@ node_idx FirewallForest::InternalSNAT(level k, node_idx p, node_idx q,
          while (cur != NULL) {  //Need a while loop, because NAT rules can load balance.
             nodeQ = &FDDL_NODE(k, q);
             for (int j = cur->low[k]; j <= cur->high[k]; j++) {
-               if (j < nodeQ->size)
+               if (j < nodeQ->size())
                   qchild = FDDL_ARC(k, nodeQ, j);
                else
                   qchild = 0;
@@ -551,11 +631,11 @@ node_idx FirewallForest::InternalSNAT(level k, node_idx p, node_idx q,
       nodeP = &FDDL_NODE(k, p);
       nodeQ = &FDDL_NODE(k, q);
       for (arc_idx i = 0; i <= maxVals[k]; i++) {
-         if (i < nodeP->size)
+         if (i < nodeP->size())
             pchild = FDDL_ARC(k, nodeP, i);
          else
             pchild = 0;
-         if (i < nodeQ->size)
+         if (i < nodeQ->size())
             qchild = FDDL_ARC(k, nodeQ, i);
          else
             qchild = 0;
@@ -603,13 +683,13 @@ node_idx FirewallForest::InternalDNAT(level k, node_idx p, node_idx q,
          return 0;
 
       nodeQ = &FDDL_NODE(k, q);
-      qsize = nodeQ->size;
+      qsize = nodeQ->size();
 
       for (int i = 0; i <= maxVals[k]; i++) {
          node_idx child;
          node_idx rnode;
 
-         if (i < nodeQ->size)
+         if (i < nodeQ->size())
             child = FDDL_ARC(k, nodeQ, i);
          else
             child = 0;
@@ -623,7 +703,7 @@ node_idx FirewallForest::InternalDNAT(level k, node_idx p, node_idx q,
          for (int i = 0; i < pnr->low[k]; i++) {
             node_idx pchild;
 
-            if (i < nodeP->size)
+            if (i < nodeP->size())
                pchild = FDDL_ARC(k, nodeP, i);
             else
                pchild = 0;
@@ -632,7 +712,7 @@ node_idx FirewallForest::InternalDNAT(level k, node_idx p, node_idx q,
          for (int i = pnr->high[k] + 1; i <= maxVals[k]; i++) {
             node_idx pchild;
 
-            if (i < nodeP->size)
+            if (i < nodeP->size())
                pchild = FDDL_ARC(k, nodeP, i);
             else
                pchild = 0;
@@ -650,7 +730,7 @@ node_idx FirewallForest::InternalDNAT(level k, node_idx p, node_idx q,
             pchild = 0;
          else {
             nodeP = &FDDL_NODE(k, p);
-            if (i < nodeP->size)
+            if (i < nodeP->size())
                pchild = FDDL_ARC(k, nodeP, i);
             else
                pchild = 0;
@@ -658,7 +738,7 @@ node_idx FirewallForest::InternalDNAT(level k, node_idx p, node_idx q,
 
          node_idx rchild;
 
-         if (i < nodeR->size)
+         if (i < nodeR->size())
             rchild = FDDL_ARC(k, nodeR, i);
          else
             rchild = 0;
@@ -666,7 +746,7 @@ node_idx FirewallForest::InternalDNAT(level k, node_idx p, node_idx q,
          while (cur != NULL) {
             nodeQ = &FDDL_NODE(k, q);
             for (int j = cur->low[k]; j <= cur->high[k]; j++) {
-               if (j < nodeQ->size)
+               if (j < nodeQ->size())
                   qchild = FDDL_ARC(k, nodeQ, j);
                else
                   qchild = 0;
@@ -720,13 +800,13 @@ node_idx FirewallForest::InternalNMAP(level k, node_idx p, node_idx q,
          return 0;
 
       nodeQ = &FDDL_NODE(k, q);
-      qsize = nodeQ->size;
+      qsize = nodeQ->size();
 
       for (int i = 0; i <= maxVals[k]; i++) {
          node_idx child;
          node_idx rnode;
 
-         if (i < nodeQ->size)
+         if (i < nodeQ->size())
             child = FDDL_ARC(k, nodeQ, i);
          else
             child = 0;
@@ -740,7 +820,7 @@ node_idx FirewallForest::InternalNMAP(level k, node_idx p, node_idx q,
          for (int i = 0; i < pnr->low[k]; i++) {
             node_idx pchild;
 
-            if (i < nodeP->size)
+            if (i < nodeP->size())
                pchild = FDDL_ARC(k, nodeP, i);
             else
                pchild = 0;
@@ -749,7 +829,7 @@ node_idx FirewallForest::InternalNMAP(level k, node_idx p, node_idx q,
          for (int i = pnr->high[k] + 1; i <= maxVals[k]; i++) {
             node_idx pchild;
 
-            if (i < nodeP->size)
+            if (i < nodeP->size())
                pchild = FDDL_ARC(k, nodeP, i);
             else
                pchild = 0;
@@ -767,7 +847,7 @@ node_idx FirewallForest::InternalNMAP(level k, node_idx p, node_idx q,
             pchild = 0;
          else {
             nodeP = &FDDL_NODE(k, p);
-            if (i < nodeP->size)
+            if (i < nodeP->size())
                pchild = FDDL_ARC(k, nodeP, i);
             else
                pchild = 0;
@@ -775,7 +855,7 @@ node_idx FirewallForest::InternalNMAP(level k, node_idx p, node_idx q,
 
          node_idx rchild;
 
-         if (i < nodeR->size)
+         if (i < nodeR->size())
             rchild = FDDL_ARC(k, nodeR, i);
          else
             rchild = 0;
@@ -783,7 +863,7 @@ node_idx FirewallForest::InternalNMAP(level k, node_idx p, node_idx q,
          while (cur != NULL) {
             nodeQ = &FDDL_NODE(k, q);
             for (int j = cur->low[k]; j <= cur->high[k]; j++) {
-               if (j < nodeQ->size)
+               if (j < nodeQ->size())
                   qchild = FDDL_ARC(k, nodeQ, j);
                else
                   qchild = 0;
@@ -834,21 +914,21 @@ node_idx FirewallForest::InternalQIntersect(level k, node_idx p, node_idx q)
    nodeP = &FDDL_NODE(k, p);
    nodeQ = &FDDL_NODE(k, q);
 
-   if (IS_SPARSE(nodeP)) {      //If node <k.p> is stored sparsely, unpack it into a static array of appropriate size
+   if (nodeP->sparse()) {      //If node <k.p> is stored sparsely, unpack it into a static array of appropriate size
       psize = UnpackNode(k, p, ptemp);
    }
    else {
-      psize = nodeP->size;
+      psize = nodeP->size();
       ptemp = new node_idx[psize];
 
       for (i = 0; i < psize; i++)
          ptemp[i] = FULL_ARC(k, nodeP, i);
    }
-   if (IS_SPARSE(nodeQ)) {      //If node <k.q> is stored sparsely, unpack it into a static array of appropriate size
+   if (nodeQ->sparse()) {      //If node <k.q> is stored sparsely, unpack it into a static array of appropriate size
       qsize = UnpackNode(k, q, qtemp);
    }
    else {
-      qsize = nodeQ->size;
+      qsize = nodeQ->size();
       qtemp = new node_idx[qsize];
 
       for (i = 0; i < qsize; i++)
@@ -896,21 +976,21 @@ node_idx FirewallForest::InternalHIntersect(level k, node_idx p, node_idx q)
    nodeP = &FDDL_NODE(k, p);
    nodeQ = &FDDL_NODE(k, q);
 
-   if (IS_SPARSE(nodeP)) {      //If node <k.p> is stored sparsely, unpack it into a static array of appropriate size
+   if (nodeP->sparse()) {      //If node <k.p> is stored sparsely, unpack it into a static array of appropriate size
       psize = UnpackNode(k, p, ptemp);
    }
    else {
-      psize = nodeP->size;
+      psize = nodeP->size();
       ptemp = new node_idx[psize];
 
       for (i = 0; i < psize; i++)
          ptemp[i] = FULL_ARC(k, nodeP, i);
    }
-   if (IS_SPARSE(nodeQ)) {      //If node <k.q> is stored sparsely, unpack it into a static array of appropriate size
+   if (nodeQ->sparse()) {      //If node <k.q> is stored sparsely, unpack it into a static array of appropriate size
       qsize = UnpackNode(k, q, qtemp);
    }
    else {
-      qsize = nodeQ->size;
+      qsize = nodeQ->size();
       qtemp = new node_idx[qsize];
 
       for (i = 0; i < qsize; i++)
@@ -938,7 +1018,7 @@ int FirewallForest::BuildClassMDD(MDDHandle p, Forest * forest,
 
    node_idx newresult;
 
-   if (p.index < 0)
+   if (p.index() < 0)
       return INVALID_MDD;
 
    if (forest == NULL)
@@ -949,8 +1029,8 @@ int FirewallForest::BuildClassMDD(MDDHandle p, Forest * forest,
    }
 
    numClasses = 1;
-   newresult = InternalBuildClassMDD(forest, K, p.index, numClasses, services);
-   if (r.index != newresult) {
+   newresult = InternalBuildClassMDD(forest, K, p.index(), numClasses, services);
+   if (r.index() != newresult) {
       forest->ReallocHandle(r);
       forest->Attach(r, newresult);
    }
@@ -985,7 +1065,7 @@ node_idx FirewallForest::InternalBuildClassMDD(Forest * forest, level k,
    
    for (arc_idx i = 0; i <= maxVals[k]; i++) {
       node_idx j;
-      if (nodeP && i<nodeP->size)
+      if (nodeP && i<nodeP->size())
          j = FDDL_ARC(k, nodeP, i);
       else
          j = 0;
@@ -993,7 +1073,7 @@ node_idx FirewallForest::InternalBuildClassMDD(Forest * forest, level k,
       q = InternalBuildClassMDD(forest, k-1, j, numClasses, services);
       forest->SetArc(newK, r, i, q);
    }
-   if ((*forest->nodes[newK])[r]->size == 0){ // If the node is empty.
+   if ((*forest->nodes[newK])[r]->size() == 0){ // If the node is empty.
       forest->DeleteNode(newK, r);
       r = 0;
    }
@@ -1013,7 +1093,7 @@ int FirewallForest::BuildServiceGraphMDD(MDDHandle p, Forest * forest,
 
    node_idx newresult;
 
-   if (p.index < 0)
+   if (p.index() < 0)
       return INVALID_MDD;
 
    if (forest == NULL)
@@ -1025,8 +1105,8 @@ int FirewallForest::BuildServiceGraphMDD(MDDHandle p, Forest * forest,
 
    numArcs = 0;
    newresult =
-      InternalBuildServiceGraphMDD(forest, K, p.index, numArcs);
-   if (r.index != newresult) {
+      InternalBuildServiceGraphMDD(forest, K, p.index(), numArcs);
+   if (r.index() != newresult) {
       forest->ReallocHandle(r);
       forest->Attach(r, newresult);
    }
@@ -1060,7 +1140,7 @@ node_idx FirewallForest::InternalBuildServiceGraphMDD(Forest * forest, level k,
    r = forest->NewNode(newK);
    Node *nodeP;
    nodeP = &FDDL_NODE(k, p);
-   for (arc_idx i = 0; i < nodeP->size; i++) {
+   for (arc_idx i = 0; i < nodeP->size(); i++) {
       forest->SetArc(newK, r, i,
                      InternalBuildServiceGraphMDD(forest, k - 1,
                                            FDDL_ARC(k, nodeP, i), numArcs));
@@ -1094,7 +1174,7 @@ node_idx FirewallForest::InternalJoinClasses(level k, node_idx p, node_idx q,
 
    if (p == 0) {
       nodeQ = &FDDL_NODE(k, q);
-      for (arc_idx i = 0; i < nodeQ->size; i++) {
+      for (arc_idx i = 0; i < nodeQ->size(); i++) {
          SetArc(k, r, i,
                 InternalJoinClasses(k - 1, 0, FDDL_ARC(k, nodeQ, i),
                                     numClasses));
@@ -1106,7 +1186,7 @@ node_idx FirewallForest::InternalJoinClasses(level k, node_idx p, node_idx q,
 
    if (q == 0) {
       nodeP = &FDDL_NODE(k, p);
-      for (arc_idx i = 0; i < nodeP->size; i++) {
+      for (arc_idx i = 0; i < nodeP->size(); i++) {
          SetArc(k, r, i,
                 InternalJoinClasses(k - 1, FDDL_ARC(k, nodeP, i), 0,
                                     numClasses));
@@ -1120,8 +1200,8 @@ node_idx FirewallForest::InternalJoinClasses(level k, node_idx p, node_idx q,
    for (arc_idx i = 0; i <= maxVals[k]; i++) {
       SetArc(k, r, i,
              InternalJoinClasses(k - 1,
-                                 i < nodeP->size ? FDDL_ARC(k, nodeP, i) : 0,
-                                 i < nodeQ->size ? FDDL_ARC(k, nodeQ, i) : 0,
+                                 i < nodeP->size() ? FDDL_ARC(k, nodeP, i) : 0,
+                                 i < nodeQ->size() ? FDDL_ARC(k, nodeQ, i) : 0,
                                  numClasses));
    }
    r = CheckIn(k, r);
@@ -1133,13 +1213,13 @@ int FirewallForest::PrintClasses(MDDHandle p, int numClasses)
 {
    int *low;
    int *high;
-   if (p.index < 0)
+   if (p.index() < 0)
       return INVALID_MDD;
    low = new int[5];
    high = new int[5];
    for (int i = 1; i < numClasses; i++) {
       printf("Class%d: \n", i);
-      InternalPrintClasses(K, p.index, low, high, i);
+      InternalPrintClasses(K, p.index(), low, high, i);
    }
    delete[]low;
    delete[]high;
@@ -1150,13 +1230,13 @@ int FirewallForest::PrintServiceClasses(MDDHandle p, int numClasses)
 {
    int *low;
    int *high;
-   if (p.index < 0)
+   if (p.index() < 0)
       return INVALID_MDD;
    low = new int[4];
    high = new int[4];
    for (int i = 1; i < numClasses; i++) {
       printf("Class%d: \n", i);
-      InternalPrintServiceClasses(K, p.index, low, high, i);
+      InternalPrintServiceClasses(K, p.index(), low, high, i);
    }
    delete[]low;
    delete[]high;
@@ -1217,13 +1297,13 @@ void FirewallForest::InternalPrintClasses(level k, node_idx p, int *low,
 
    Node *nodeP;
    nodeP = &FDDL_NODE(k, p);
-   if (nodeP->size <1) 
+   if (nodeP->size() <1) 
       return;
    low[k] = 0;
    high[k] = 0;
    lastVal = FDDL_ARC(k, nodeP, 0);
 
-   for (int i = 0; i < nodeP->size; i++) {
+   for (int i = 0; i < nodeP->size(); i++) {
       if (lastVal == FDDL_ARC(k, nodeP, i)) {
          high[k] = i;
       }
@@ -1234,7 +1314,7 @@ void FirewallForest::InternalPrintClasses(level k, node_idx p, int *low,
          lastVal = FDDL_ARC(k, nodeP, i);
       }
    }
-   InternalPrintClasses(k - 1, FDDL_ARC(k, nodeP, nodeP->size - 1), low, high,
+   InternalPrintClasses(k - 1, FDDL_ARC(k, nodeP, nodeP->size() - 1), low, high,
                         classNum);
 }
 
@@ -1303,7 +1383,7 @@ void FirewallForest::InternalPrintServiceClasses(level k, node_idx p,
 
    lastVal = FDDL_ARC(k, nodeP, 0);
 
-   for (int i = 0; i < nodeP->size; i++) {
+   for (int i = 0; i < nodeP->size(); i++) {
       if (lastVal == FDDL_ARC(k, nodeP, i)) {
          high[k] = i;
       }
@@ -1314,7 +1394,7 @@ void FirewallForest::InternalPrintServiceClasses(level k, node_idx p,
          lastVal = FDDL_ARC(k, nodeP, i);
       }
    }
-   InternalPrintServiceClasses(k - 1, FDDL_ARC(k, nodeP, nodeP->size - 1),
+   InternalPrintServiceClasses(k - 1, FDDL_ARC(k, nodeP, nodeP->size() - 1),
                                low, high, classNum);
 }
 
@@ -1322,7 +1402,7 @@ int FirewallForest::GetClasses(MDDHandle p, group ** &output, int numClasses)
 {
    int *low;
    int *high;
-   if (p.index < 0)
+   if (p.index() < 0)
       return INVALID_MDD;
    output = new group *[numClasses];
    for (int i = 1; i < numClasses; i++) {
@@ -1330,7 +1410,7 @@ int FirewallForest::GetClasses(MDDHandle p, group ** &output, int numClasses)
       sprintf(output[i]->name, "Class%d", i);
       low = new int[5];
       high = new int[5];
-      InternalGetClasses(K, p.index, low, high, i, output[i]);
+      InternalGetClasses(K, p.index(), low, high, i, output[i]);
       delete[]low;
       delete[]high;
    }
@@ -1366,7 +1446,7 @@ void FirewallForest::InternalGetClasses(level k, node_idx p, int *low,
 
    lastVal = FDDL_ARC(k, nodeP, 0);
 
-   for (int i = 0; i < nodeP->size; i++) {
+   for (int i = 0; i < nodeP->size(); i++) {
       if (lastVal == FDDL_ARC(k, nodeP, i)) {
          high[k] = i;
       }
@@ -1377,7 +1457,7 @@ void FirewallForest::InternalGetClasses(level k, node_idx p, int *low,
          lastVal = FDDL_ARC(k, nodeP, i);
       }
    }
-   InternalGetClasses(k - 1, FDDL_ARC(k, nodeP, nodeP->size - 1), low, high,
+   InternalGetClasses(k - 1, FDDL_ARC(k, nodeP, nodeP->size() - 1), low, high,
                       classNum, head);
 }
 
@@ -1385,7 +1465,7 @@ int FirewallForest::GetServiceArcs(MDDHandle p, int* src, int* dst, service * &o
 {
    int *low;
    int *high;
-   if (p.index < 0)
+   if (p.index() < 0)
       return INVALID_MDD;
    output = new service();
    sprintf(output->name, "ServiceGraphArc");
@@ -1398,7 +1478,7 @@ int FirewallForest::GetServiceArcs(MDDHandle p, int* src, int* dst, service * &o
    for (level k=K;k>=0;k--)
       FWCache[k]->clear();
    numArcs = 0;
-   InternalGetServiceArcs(K, p.index, src, dst, low, high, output, numArcs);
+   InternalGetServiceArcs(K, p.index(), src, dst, low, high, output, numArcs);
    delete[]low;
    delete[]high;
    return SUCCESS;
@@ -1424,11 +1504,11 @@ int FirewallForest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
 
    Node* nodeP;
    nodeP = &FDDL_NODE(k,p);
-   if (nodeP->size == 0)
+   if (nodeP->size() == 0)
       return 0;
    
    if (k==9){
-      for (int i=0; i<nodeP->size;i++){
+      for (int i=0; i<nodeP->size();i++){
          node_idx q;
          node_idx r;
          q = FDDL_ARC(k,nodeP,i);
@@ -1454,7 +1534,7 @@ int FirewallForest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
       if (r >= 0){
          return r;
       }
-      for (int i=0; i<nodeP->size;i++){
+      for (int i=0; i<nodeP->size();i++){
          node_idx q;
          if (k==7 && i != 1){  //Only look at NEW connections
             continue;
@@ -1473,7 +1553,7 @@ int FirewallForest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
    }
    
    if (k==14){
-      for (int i=0;i<nodeP->size;i++){
+      for (int i=0;i<nodeP->size();i++){
          node_idx q;
          low[0] = i;
          high[0] = i;
@@ -1483,7 +1563,7 @@ int FirewallForest::InternalGetServiceArcs(level k, node_idx p, int* src, int* d
       }
    }
    else if (k<=11 && k >= 10){
-      for (int i=0;i<nodeP->size;i++){
+      for (int i=0;i<nodeP->size();i++){
          node_idx q;
          low[12-k] = i;
          high[12-k] = i;
@@ -1510,7 +1590,7 @@ int FirewallForest::GetServiceClasses(MDDHandle p, service ** &output,
 {
    int *low;
    int *high;
-   if (p.index < 0)
+   if (p.index() < 0)
       return INVALID_MDD;
    output = new service *[numClasses];
    for (int i = 1; i < numClasses; i++) {
@@ -1518,7 +1598,7 @@ int FirewallForest::GetServiceClasses(MDDHandle p, service ** &output,
       sprintf(output[i]->name, "Class%d", i);
       low = new int[4];
       high = new int[4];
-      InternalGetServiceClasses(K, p.index, low, high, i, output[i]);
+      InternalGetServiceClasses(K, p.index(), low, high, i, output[i]);
       delete[]low;
       delete[]high;
    }
@@ -1575,7 +1655,7 @@ void FirewallForest::InternalGetServiceClasses(level k, node_idx p, int *low,
 
    lastVal = FDDL_ARC(k, nodeP, 0);
 
-   for (int i = 0; i < nodeP->size; i++) {
+   for (int i = 0; i < nodeP->size(); i++) {
       if (lastVal == FDDL_ARC(k, nodeP, i)) {
          high[k] = i;
       }
@@ -1586,7 +1666,7 @@ void FirewallForest::InternalGetServiceClasses(level k, node_idx p, int *low,
          lastVal = FDDL_ARC(k, nodeP, i);
       }
    }
-   InternalGetServiceClasses(k - 1, FDDL_ARC(k, nodeP, nodeP->size - 1), low,
+   InternalGetServiceClasses(k - 1, FDDL_ARC(k, nodeP, nodeP->size() - 1), low,
                              high, classNum, head);
 }
 

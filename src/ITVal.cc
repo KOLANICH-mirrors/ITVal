@@ -33,7 +33,7 @@ topology file.\n      -F or -f <rulefile> : Append a filter rule set file. \
 #include "chains.h"
 #include "rule_parser.h"
 #include "firewall.h"
-#include <FDDL/mdd.h>
+#include <FDDL/forest.h>
 #include "topology.h"
 
 typedef struct filename_node {

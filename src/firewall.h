@@ -28,7 +28,10 @@
 #include "topology.h"
 #include "structures.h"
 
+#include <FDDL/set_complement.h>
+
 class Firewall {
+   private:
    int num_chains;
    int num_nat_chains;
 
@@ -120,6 +123,10 @@ class Firewall {
    MDDHandle Forward;
    MDDHandle ForwardHist;
    MDDHandle ForwardLog;
+
+   //MDD Operations
+   SetComplementOperation *complement;
+   SetComplementOperation *history_complement;
 
    int FindChain(const char *name);
    int FindNATChain(const char *name);

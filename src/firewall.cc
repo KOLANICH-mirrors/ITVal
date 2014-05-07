@@ -23,10 +23,11 @@
  * and Mary Williamsburg, VA 23185 
  */
 #include "firewall.h"
+#include <FDDL/operation.h>
 
 #define SIZE_OF_LEVEL_18 256
 
-Firewall::Firewall(FirewallForest * F, FirewallForest * H)
+Firewall::Firewall(FirewallForest * F, FirewallForest * H) : complement(new SetComplementOperation(F)), history_complement(new SetComplementOperation(H))
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
    FWForest = F;
@@ -46,7 +47,8 @@ Firewall::Firewall(FirewallForest * F, FirewallForest * H)
 };
 
 Firewall::Firewall(char *filterName, char *natName, FirewallForest * F,
-                   Topology * top, FirewallForest *H)
+                   Topology * top, FirewallForest *H) : complement(new SetComplementOperation(F)), history_complement(new SetComplementOperation(H))
+
 {
    int ranges[5] = { 65536, 256, 256, 256, 256 };
    int high[23];
@@ -71,7 +73,7 @@ Firewall::Firewall(char *filterName, char *natName, FirewallForest * F,
    // Create and Initialize the Log MDDs
    for (level k = 0; k < 23; k++) {
       low[k] = 0;
-      high[k] = F->GetMaxVal(k);
+      high[k] = F->max_val(k);
    }
    high[0] = 0;
 
@@ -111,7 +113,8 @@ Firewall::Firewall(char *filterName, char *natName, FirewallForest * F,
 }
 
 Firewall::Firewall(char *filterName, char *natName, FirewallForest * F,
-                   Topology * top, int verbose, FirewallForest * H)
+                   Topology * top, int verbose, FirewallForest * H) : complement(new SetComplementOperation(F)), history_complement(new SetComplementOperation(H))
+
 {
    int ranges[5] = { 65536, 255, 255, 255, 255 };
    int high[23];
@@ -136,7 +139,7 @@ Firewall::Firewall(char *filterName, char *natName, FirewallForest * F,
    // Create and Initialize the Log MDDs
    for (level k = 0; k < 23; k++) {
       low[k] = 0;
-      high[k] = F->GetMaxVal(k);
+      high[k] = F->max_val(k);
    }
    high[0] = 0;
 
@@ -169,13 +172,13 @@ Firewall::Firewall(char *filterName, char *natName, FirewallForest * F,
    BuildChains(output_chain, Output, OutputLog, OutputHist);
 
 #ifdef DEBUG
-   printf("Forward:%d Input:%d Output:%d\n", Forward.index, Input.index, Output.index);
+   printf("Forward:%d Input:%d Output:%d\n", Forward.index(), Input.index(), Output.index());
    for (level k = 22; k > 0; k--)
       FWForest->Compact(k);
    FWForest->PrintMDD();
 #endif 
 #ifdef DEBUG
-   printf("ForwardHist: %d InputHist: %d OutputHist %d\n", ForwardHist.index, InputHist.index, OutputHist.index);
+   printf("ForwardHist: %d InputHist: %d OutputHist %d\n", ForwardHist.index(), InputHist.index(), OutputHist.index());
    for (level k = 24; k > 0; k--){
       HistoryForest->Compact(k);
    }
@@ -239,7 +242,7 @@ int Firewall::PrintClasses()
 
    //FWForest->PrintMDD();
    FWForest->BuildClassMDD(Forward, ClassForest, FWSourceClass, numClasses, 0);
-//   printf("FWSourceClass: %d\n", FWSourceClass.index);
+//   printf("FWSourceClass: %d\n", FWSourceClass.index());
 //   HistoryForest->PrintMDD();
 
 //   printf("There are %d Forward Source classes:\n", numClasses);
@@ -273,7 +276,7 @@ int Firewall::PrintClasses()
    //Debug
 //   printf("There are %d Forward Destination classes:\n", numClasses);
 //   ClassForest->PrintClasses(FWDestClass, numClasses);
-//   printf("FWDestClass: %d\n", FWDestClass.index);
+//   printf("FWDestClass: %d\n", FWDestClass.index());
 //   ClassForest->PrintMDD();
    //End Debug
 
@@ -644,23 +647,23 @@ Firewall *MergeFWs(FirewallForest * FWForest, Firewall ** fws, int n, FirewallFo
       fws[0]->NATChains(postrouting, fws[n - 1]->Output, fws[n - 1]->OutputHist, f->Output, f->OutputLog, f->OutputHist);
    }
    else {
-      FWForest->Attach(f->Forward, fws[0]->Forward.index);
+      FWForest->Attach(f->Forward, fws[0]->Forward.index());
 #ifndef NO_HISTORY
-      HistoryForest->Attach(f->ForwardHist, fws[0]->ForwardHist.index);
+      HistoryForest->Attach(f->ForwardHist, fws[0]->ForwardHist.index());
 #endif
-      FWForest->Attach(f->ForwardLog, fws[0]->ForwardLog.index);
+      FWForest->Attach(f->ForwardLog, fws[0]->ForwardLog.index());
 
-      FWForest->Attach(f->Input, fws[0]->Input.index);
+      FWForest->Attach(f->Input, fws[0]->Input.index());
 #ifndef NO_HISTORY
-      HistoryForest->Attach(f->InputHist, fws[0]->InputHist.index);
+      HistoryForest->Attach(f->InputHist, fws[0]->InputHist.index());
 #endif
-      FWForest->Attach(f->InputLog, fws[0]->InputLog.index);
+      FWForest->Attach(f->InputLog, fws[0]->InputLog.index());
 
-      FWForest->Attach(f->Output, fws[n - 1]->Output.index);
+      FWForest->Attach(f->Output, fws[n - 1]->Output.index());
 #ifndef NO_HISTORY
-      HistoryForest->Attach(f->OutputHist, fws[n - 1]->OutputHist.index);
+      HistoryForest->Attach(f->OutputHist, fws[n - 1]->OutputHist.index());
 #endif
-      FWForest->Attach(f->OutputLog, fws[n - 1]->OutputLog.index);
+      FWForest->Attach(f->OutputLog, fws[n - 1]->OutputLog.index());
    }
 
    for (i = 1; i < n; i++) {

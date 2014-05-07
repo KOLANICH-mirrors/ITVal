@@ -26,7 +26,7 @@
 #include <string.h>
 #include "nat.h"
 #include <stdlib.h>
-#include <FDDL/mdd.h>
+#include <FDDL/forest.h>
 #include "firewall.h"
 
 
@@ -43,7 +43,7 @@ void BreakMASQPorts(char *str, nat_range * &NATRange, char prot, Firewall * FW){
    NATRange->ports.next = NULL;
    for (int i = 0; i < 23; i++) {
       NATRange->low[i] = 0;
-      NATRange->high[i] = FW->FWForest->GetMaxVal(i);
+      NATRange->high[i] = FW->FWForest->max_val(i);
    }
    if (prot == 'a') {
       NATRange->low[14] = 0;
@@ -98,7 +98,7 @@ void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW, char* 
    NATRange->ports.next = NULL;
    for (int i = 0; i < 23; i++) {
       NATRange->low[i] = 0;
-      NATRange->high[i] = FW->FWForest->GetMaxVal(i);
+      NATRange->high[i] = FW->FWForest->max_val(i);
    }
 
    str += 3;                    // Advance past "to:"
@@ -228,7 +228,7 @@ void BreakNMAP(char *str, nat_range * &NATRange, Firewall * FW)
    NATRange->next = NULL;
    for (int i = 0; i < 23; i++) {
       NATRange->low[i] = 0;
-      NATRange->high[i] = FW->FWForest->GetMaxVal(i);
+      NATRange->high[i] = FW->FWForest->max_val(i);
    }
 
    length = strlen(str);
@@ -295,7 +295,7 @@ processed_nat_rule* ConvertToDNAT(processed_nat_rule * p, Firewall * FW){
 	 newRange->ports.next = NULL;
 	 for (int i=0;i<23;i++){
             newRange->low[i] = 0;
-	    newRange->high[i] = FW->FWForest->GetMaxVal(i);
+	    newRange->high[i] = FW->FWForest->max_val(i);
 	 }
 	 char* name;
 	 name = FW->T->LookupInterface(outFace);
@@ -379,7 +379,7 @@ processed_nat_rule* ConvertToDNAT(processed_nat_rule * p, Firewall * FW){
 	 newRange->ports.next = NULL;
 	 for (int i=0;i<23;i++){
             newRange->low[i] = 0;
-	    newRange->high[i] = FW->FWForest->GetMaxVal(i);
+	    newRange->high[i] = FW->FWForest->max_val(i);
 	 }
 	 char* name;
 	 name = FW->T->LookupInterface(p->out);
@@ -470,7 +470,7 @@ processed_nat_rule* ConvertToSNAT(processed_nat_rule * p, Firewall * FW){
 	 newRange->ports.next = NULL;
 	 for (int i=0;i<23;i++){
             newRange->low[i] = 0;
-	    newRange->high[i] = FW->FWForest->GetMaxVal(i);
+	    newRange->high[i] = FW->FWForest->max_val(i);
 	 }
 	 char* name;
 	 name = FW->T->LookupInterface(inFace);
@@ -554,7 +554,7 @@ processed_nat_rule* ConvertToSNAT(processed_nat_rule * p, Firewall * FW){
 	 newRange->ports.next = NULL;
 	 for (int i=0;i<23;i++){
             newRange->low[i] = 0;
-	    newRange->high[i] = FW->FWForest->GetMaxVal(i);
+	    newRange->high[i] = FW->FWForest->max_val(i);
 	 }
 	 char* name;
 	 name = FW->T->LookupInterface(p->in);

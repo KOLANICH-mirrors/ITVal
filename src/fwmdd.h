@@ -34,12 +34,96 @@ Williamsburg, VA 23185
 #   include <iostream>
 #   include <assert.h>
 
-#   include <FDDL/mdd.h>
+#   include <FDDL/forest.h>
 #   include "nat.h"
 #   include "structures.h"
 #   include "sets.h"
 #   include "topology.h"
 
+
+class PrintNode {
+        int K;
+
+ public:
+        int *low;
+        int *high;
+        PrintNode *next;
+        int *mV;
+
+         PrintNode(int num_levels, int *maxVals) {
+                K = num_levels;
+                low = new int[K + 1];
+                 high = new int[K + 1];
+                 mV = maxVals;
+        }
+
+        ~PrintNode() {
+                delete[]low;
+                delete[]high;
+        }
+
+        void Print(int *mask) {
+                char ch;
+                for (int k = K; k > 0; --k) {
+                        if (mask[k] == 1) {
+                                if (k == 14) {
+                                        if (low[k] == 0 && high[k] == mV[k]) {
+                                                cout << ("ALL ");
+                                                continue;
+                                        } else {
+                                                for (int i = low[k]; i <= high[k]; ++i) {
+                                                        if (i == 0) {
+                                                                cout <<
+                                                                    ("ICMP ");
+                                                        } else if (i == 1) {
+                                                                cout <<
+                                                                    ("UDP ");
+                                                        } else if (i == 2) {
+                                                                cout <<
+                                                                    ("TCP ");
+                                                        }
+                                                }
+                                                continue;
+                                        }
+                                }
+                                if (k == 13 || k == 11) {
+                                        if (low[k] == 0 && high[k] == mV[k]
+                                            && low[k - 1] == 0
+                                            && high[k - 1] == mV[k - 1]) {
+                                                cout << ("*");
+                                        } else if (low[k] == high[k]
+                                                   && low[k - 1] == high[k - 1])
+                                                cout << low[k] * 256 + low[k -
+                                                                           1];
+                                        else
+                                                cout << low[k] * 256 + low[k -
+                                                                           1] <<
+                                                    "-" << high[k] * 256 +
+                                                    high[k - 1];
+                                        continue;
+                                }
+                                if (k == 12 || k == 10)
+                                        continue;
+
+                                ch = ' ';
+                                if (k <= 22 && k >= 20)
+                                        ch = '.';
+                                if (k <= 18 && k >= 13)
+                                        ch = '.';
+                                if (low[k] == high[k]) {
+                                        cout << "[" << high[k] << "]" << ch <<
+                                            endl;
+                                } else if (low[k] == 0 && high[k] == mV[k]) {
+                                        cout << ch;
+                                } else {
+                                        cout << "[" << low[k] << "-" << high[k]
+                                            << "]" << ch;
+                                }
+                        }
+                }
+                cout << " ";
+        }
+};
 
 /*
  * The class FirewallForest enhances the fddl_forest by providing
@@ -52,10 +136,9 @@ Williamsburg, VA 23185
 class FirewallForest:public Forest {
  private:
    Cache **FWCache;        //Cache for all firewall specific operations.
-
  public:
 
-    FirewallForest(int numlevels, int *maxvals):Forest(numlevels, maxvals){
+    FirewallForest(int numlevels, int *maxvals):Forest(numlevels, maxvals) {
 
       FWCache = new Cache *[K + 1];
 
@@ -92,6 +175,9 @@ class FirewallForest:public Forest {
 
    int PrintHistory(MDDHandle p);
    void InternalPrintHistory(level k, node_idx p, int chain_num, int rule_num);
+
+   void PrintRanges(MDDHandle root, level * mask);
+   void PrintRanges(level k, node_idx p, level * mask, PrintNode* &stack, int *low, int *high);
 
    int DNAT(MDDHandle p, nat_tuple * pnr, MDDHandle & result);
    node_idx InternalDNAT(level k, node_idx p, node_idx q, nat_tuple * pnr);

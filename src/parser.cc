@@ -233,21 +233,21 @@ condition *GetLoggedCondition(int input_chain)
    sc = new condition;
    switch(input_chain){
       case 0:
-         FW->FWForest->Attach(sc->h, FW->InputLog.index); 
+         FW->FWForest->Attach(sc->h, FW->InputLog.index()); 
 #ifndef NO_HISTORY
-         FW->HistoryForest->Attach(sc->history, FW->InputHist.index); 
+         FW->HistoryForest->Attach(sc->history, FW->InputHist.index()); 
 #endif
 	 break;
       case 1:
-         FW->FWForest->Attach(sc->h, FW->ForwardLog.index);
+         FW->FWForest->Attach(sc->h, FW->ForwardLog.index());
 #ifndef NO_HISTORY
-         FW->HistoryForest->Attach(sc->history, FW->ForwardHist.index); 
+         FW->HistoryForest->Attach(sc->history, FW->ForwardHist.index()); 
 #endif
 	 break;
       case 2:
-         FW->FWForest->Attach(sc->h, FW->OutputLog.index);  
+         FW->FWForest->Attach(sc->h, FW->OutputLog.index());  
 #ifndef NO_HISTORY
-         FW->HistoryForest->Attach(sc->history, FW->OutputHist.index); 
+         FW->HistoryForest->Attach(sc->history, FW->OutputHist.index()); 
 #endif
 	 break;
       default:
@@ -255,7 +255,7 @@ condition *GetLoggedCondition(int input_chain)
 	 break;
    }
 #ifdef ASSERT_DEBUG
-   printf("Logged: %d\n", sc->h.index);
+   printf("Logged: %d\n", sc->h.index());
 #endif
    return sc;
 }
@@ -289,7 +289,7 @@ condition* BuildAcceptCondition(int input_chain)
 	 break;
    }
 #ifdef ASSERT_DEBUG
-   printf("Accept Condition: %d\n", sc->h.index);
+   printf("Accept Condition: %d\n", sc->h.index());
    for (int k=22;k>0;k--)
       FW->FWForest->Compact(k);
    FW->FWForest->PrintMDD();
@@ -328,11 +328,11 @@ condition* BuildDropCondition(int input_chain)
    /*
    for (int k=22;k>0;k--)
       FW->FWForest->Compact(k);
-   printf("Dropped(%d):%d\n",input_chain, sc->h.index);
+   printf("Dropped(%d):%d\n",input_chain, sc->h.index());
    FW->FWForest->PrintMDD();
    */
 #ifdef ASSERT_DEBUG
-   printf("DROPPED Condition: %d\n", sc->h.index);
+   printf("DROPPED Condition: %d\n", sc->h.index());
    for (int k=22;k>0;k--)
       FW->FWForest->Compact(k);
    FW->FWForest->PrintMDD();
@@ -375,10 +375,10 @@ condition *BuildConditionFromGroup(group * g, int op)
       // Initialize all elements of the tuple to [0-MAX]
       for (i = 22; i >= 1; i--) {
          low[i] = 0;
-         high[i] = FW->FWForest->GetMaxVal(i);
+         high[i] = FW->FWForest->max_val(i);
 #ifndef NO_HISTORY         
          hlow[i+2] = 0;
-         hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
+         hhigh[i+2] = FW->HistoryForest->max_val(i+2);
 #endif
       }
       // If it's a source address group, copy the values into positions
@@ -393,10 +393,10 @@ condition *BuildConditionFromGroup(group * g, int op)
 #endif
             if (cur->high[22 - i] < 0) {
                low[i] = 0;
-               high[i] = FW->FWForest->GetMaxVal(i);
+               high[i] = FW->FWForest->max_val(i);
 #ifndef NO_HISTORY
                hlow[i+2] = 0;
-               hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
+               hhigh[i+2] = FW->HistoryForest->max_val(i+2);
 #endif
             }
          }
@@ -414,10 +414,10 @@ condition *BuildConditionFromGroup(group * g, int op)
 #endif
             if (cur->high[18 - i] < 0) {
                low[i] = 0;
-               high[i] = FW->FWForest->GetMaxVal(i);
+               high[i] = FW->FWForest->max_val(i);
 #ifndef NO_HISTORY
                hlow[i+2] = 0;
-               hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
+               hhigh[i+2] = FW->HistoryForest->max_val(i+2);
 #endif
             }
          }
@@ -428,11 +428,11 @@ condition *BuildConditionFromGroup(group * g, int op)
       hlow[0] = hhigh[0] = 1;
 
       hlow[1] = hlow[2] = 0;
-      hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+      hhigh[1] = hhigh[2] = FW->HistoryForest->max_val(2);
 #endif
       // If this is the first address, we use MakeMDDFromTuple
       // Otherwise, we use Assign.
-      if (sc->h.index == -1)
+      if (sc->h.index() == -1)
          FW->FWForest->MakeMDDFromTuple(low, high, sc->h);
       else
          FW->FWForest->Assign(sc->h, low, high, sc->h);
@@ -455,7 +455,7 @@ condition *BuildConditionFromGroup(group * g, int op)
    if (g->named == 0)
       delete g;
 #ifdef ASSERT_DEBUG
-   printf("\nGroup: %d\n", sc->h.index);
+   printf("\nGroup: %d\n", sc->h.index());
 #endif
    return sc;
 }
@@ -493,10 +493,10 @@ condition *BuildConditionFromService(service * s, int op)
       // Initialize all values to [0-MAX]
       for (i = 22; i >= 1; i--) {
          low[i] = 0;
-         high[i] = FW->FWForest->GetMaxVal(i);
+         high[i] = FW->FWForest->max_val(i);
 #ifndef NO_HISTORY
          hlow[i+2] = 0;
-         hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
+         hhigh[i+2] = FW->HistoryForest->max_val(i+2);
 #endif
       }
       // If it's a source port, break it into two bytes
@@ -557,12 +557,12 @@ condition *BuildConditionFromService(service * s, int op)
 #ifndef NO_HISTORY
       hlow[0] = hlow[1] = 0;
 
-      hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+      hhigh[1] = hhigh[2] = FW->HistoryForest->max_val(2);
       hhigh[0] = hlow[0] = 1;
 #endif
       // If this is the first port, use MakeMDDFromTuple.
       // Otherwise, use Assign.
-      if (sc->h.index == -1)
+      if (sc->h.index() == -1)
          FW->FWForest->MakeMDDFromTuple(low, high, sc->h);
       else
          FW->FWForest->Assign(sc->h, low, high, sc->h);
@@ -572,7 +572,7 @@ condition *BuildConditionFromService(service * s, int op)
 	 hhigh[k+2] = high[k];
       }
       hlow[1] = hlow[2] = 0;
-      hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+      hhigh[1] = hhigh[2] = FW->HistoryForest->max_val(2);
       hlow[0] = hhigh[0] = 1;
       FW->HistoryForest->Assign(sc->history, hlow, hhigh, sc->history);
 #endif
@@ -603,7 +603,7 @@ condition *BuildConditionFromService(service * s, int op)
       delete s;
 
 #ifdef ASSERT_DEBUG
-   printf("Service: %d\n", sc->h.index);
+   printf("Service: %d\n", sc->h.index());
 #endif
    return sc;
 }
@@ -635,10 +635,10 @@ condition *BuildConditionFromState(int state)
    // Initialize all elements to [0-MAX]
    for (i = 22; i >= 1; i--) {
       low[i] = 0;
-      high[i] = FW->FWForest->GetMaxVal(i);
+      high[i] = FW->FWForest->max_val(i);
 #ifndef NO_HISTORY
       hlow[i+2] = 0;
-      hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
+      hhigh[i+2] = FW->HistoryForest->max_val(i+2);
 #endif
    }
    // Set position 7 according to the value of state.  
@@ -652,7 +652,7 @@ condition *BuildConditionFromState(int state)
    hhigh[0] = hlow[0] = 1;
 
    hlow[1] = hlow[2] = 0;
-   hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+   hhigh[1] = hhigh[2] = FW->HistoryForest->max_val(2);
 #endif
    // Make an MDD from the tuple.
    FW->FWForest->MakeMDDFromTuple(low, high, sc->h);
@@ -667,7 +667,7 @@ condition *BuildConditionFromState(int state)
 #endif
 
 #ifdef ASSERT_DEBUG
-   printf("State: %d\n", sc->h.index);
+   printf("State: %d\n", sc->h.index());
 #endif
    return sc;
 }
@@ -696,10 +696,10 @@ condition *BuildConditionFromIface(char *name, int in_out)
    // Initialize all elements to [0-MAX]
    for (i = 22; i >= 1; i--) {
       low[i] = 0;
-      high[i] = FW->FWForest->GetMaxVal(i);
+      high[i] = FW->FWForest->max_val(i);
 #ifndef NO_HISTORY
       hlow[i+2] = 0;
-      hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
+      hhigh[i+2] = FW->HistoryForest->max_val(i+2);
 #endif
    }
 
@@ -707,7 +707,7 @@ condition *BuildConditionFromIface(char *name, int in_out)
       low[0] = high[0] = 1;
 #ifndef NO_HISTORY
       hlow[0] = hlow[1] = 0;
-      hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+      hhigh[1] = hhigh[2] = FW->HistoryForest->max_val(2);
       hhigh[0] = hlow[0] = 1;
 #endif
       // Make an MDD from the tuple.
@@ -748,7 +748,7 @@ condition *BuildConditionFromIface(char *name, int in_out)
    hhigh[0] = hlow[0] = 1;
 
    hlow[1] = hlow[2] = 0;
-   hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+   hhigh[1] = hhigh[2] = FW->HistoryForest->max_val(2);
 #endif
    // Make an MDD from the tuple.
    FW->FWForest->MakeMDDFromTuple(low, high, newCond->h);
@@ -796,10 +796,10 @@ condition *BuildConditionFromFlag(int flag)
    // Initialize all elements to [0-MAX]
    for (i = 22; i >= 1; i--) {
       low[i] = 0;
-      high[i] = FW->FWForest->GetMaxVal(i);
+      high[i] = FW->FWForest->max_val(i);
 #ifndef NO_HISTORY
       hlow[i+2] = 0;
-      hhigh[i+2] = FW->HistoryForest->GetMaxVal(i+2);
+      hhigh[i+2] = FW->HistoryForest->max_val(i+2);
 #endif
    }
 
@@ -851,7 +851,7 @@ condition *BuildConditionFromFlag(int flag)
    hlow[0] = hhigh[0] = 1;
 
    hlow[1] = hlow[2] = 0;   
-   hhigh[1] = hhigh[2] = FW->HistoryForest->GetMaxVal(2);
+   hhigh[1] = hhigh[2] = FW->HistoryForest->max_val(2);
 #endif
    // Make an MDD from the tuple.
    FW->FWForest->MakeMDDFromTuple(low, high, newCond->h);
@@ -877,13 +877,13 @@ condition *NegateCondition(condition * c)
 
    // Use the binary complement operator, which stores the
    // result in newCond->h.
-   FW->FWForest->BinaryComplement(c->h, newCond->h);
+   FW->complement->apply(c->h, newCond->h);
 #ifndef NO_HISTORY
-   FW->HistoryForest->BinaryComplement(c->history, newCond->history);
+   FW->history_complement->apply(c->history, newCond->history);
 #endif
 
 #ifdef ASSERT_DEBUG
-   printf("OldCondition: %d\n", c->h.index);
+   printf("OldCondition: %d\n", c->h.index());
 #endif
    // We can now free the initial condition
    FW->FWForest->DestroyMDD(c->h);
@@ -896,7 +896,7 @@ condition *NegateCondition(condition * c)
    FW->FWForest->PrintMDD();
 #endif
 #ifdef ASSERT_DEBUG
-   printf("Negate: %d\n", newCond->h.index);
+   printf("Negate: %d\n", newCond->h.index());
 #endif
    return newCond;
 }
@@ -931,7 +931,7 @@ condition *UnionConditions(condition * c1, condition * c2)
    FW->FWForest->PrintMDD();
 #endif
 #ifdef ASSERT_DEBUG
-   printf("Union: %d\n", newCond->h.index);
+   printf("Union: %d\n", newCond->h.index());
 #endif
    return newCond;
 }
@@ -966,7 +966,7 @@ condition *IntersectConditions(condition * c1, condition * c2)
    printf("Intersect\n");
 #endif
 #ifdef ASSERT_DEBUG
-   printf("Intersect: %d\n", newCond->h.index);
+   printf("Intersect: %d\n", newCond->h.index());
 #endif
    return newCond;
 }
@@ -982,7 +982,7 @@ query *PerformQuery(int subject, condition * c)
    // Intersect the set of accepted packets with the set of packets
    // relevant to the query (stored in condition "c").
 #ifdef DEBUG
-   printf("Rules: %d Query: %d\n", FW->Forward.index, c->h.index);
+   printf("Rules: %d Query: %d\n", FW->Forward.index(), c->h.index());
    //FW->FWForest->PruneMDD(c->h);
    for (level k = 22; k > 0; k--)
       FW->FWForest->Compact(k);
@@ -996,7 +996,7 @@ query *PerformQuery(int subject, condition * c)
          for (level k = 22; k > 0; k--)
             FW->FWForest->Compact(k);
          FW->FWForest->PrintMDD();
-         // FW->FWForest->PrintStates(c->h.index);
+         // FW->FWForest->PrintStates(c->h.index());
          break;
       case 1:
          printf("# Ports: ");
@@ -1073,21 +1073,16 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    FW->HistoryForest->Max(FW->InputHist, FW->OutputHist, mergedHistory);
    FW->HistoryForest->Max(FW->ForwardHist, mergedHistory, mergedHistory);
   
-   FW->FWForest->BinaryComplement(left->h, notA->h);
-   FW->FWForest->BinaryComplement(right->h, notB->h);
+   FW->complement->apply(left->h, notA->h);
+   FW->complement->apply(right->h, notB->h);
    
-   FW->HistoryForest->BinaryComplement(left->history, notA->history);
-//   printf("Left: %d notA: %d\n", left->history.index, notA->history.index);
-//   for (int k=25;k>0;k--)
-//      FW->HistoryForest->Compact(k);
-//   FW->HistoryForest->PrintMDD();
-   
-   FW->HistoryForest->BinaryComplement(right->history, notB->history);
+   FW->history_complement->apply(left->history, notA->history);
+   FW->history_complement->apply(right->history, notB->history);
 
    #ifdef EXAMPLE_DEBUG
    printf("ASSERT_OP: %d\n", assert_op);
-   printf("NotA: %d\n", notA->h.index);
-   printf("NotB: %d\n", notB->h.index);
+   printf("NotA: %d\n", notA->h.index());
+   printf("NotB: %d\n", notB->h.index());
    #endif
 
    FW->FWForest->Min(notA->h, right->h, resultA->h);
@@ -1102,22 +1097,22 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    FW->FWForest->Min(left->history, right->history, resultD->history);
 
 #ifdef EXAMPLE_DEBUG
-	    printf("Left: %d Right:%d\n", left->h.index, right->h.index);
-	    printf("ResultA: %d\n", resultA->h.index);
-	    printf("ResultB: %d\n", resultB->h.index);
-	    printf("ResultC: %d\n", resultC->h.index);
-	    printf("ResultD: %d\n", resultD->h.index);
+	    printf("Left: %d Right:%d\n", left->h.index(), right->h.index());
+	    printf("ResultA: %d\n", resultA->h.index());
+	    printf("ResultB: %d\n", resultB->h.index());
+	    printf("ResultC: %d\n", resultC->h.index());
+	    printf("ResultD: %d\n", resultD->h.index());
 #endif
    
    switch (assert_op){
       case OP_IS:
-         if (resultA->h.index != 0){
+         if (resultA->h.index() != 0){
             printf("#Assertion failed.\n");
             FW->FWForest->FindElement(resultA->h, FW->T, tup);
             FW->HistoryForest->Min(mergedHistory, resultA->history, resultHistory);
             cond = false;
          }
-         else if (resultB->h.index != 0){
+         else if (resultB->h.index() != 0){
             printf("#Assertion failed.\n");
             FW->FWForest->FindElement(resultB->h, FW->T, tup);
             FW->HistoryForest->Min(mergedHistory, resultB->history, resultHistory);
@@ -1131,7 +1126,7 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
          }
       break;
       case OP_SUBSET:
-         if (resultB->h.index == 0){
+         if (resultB->h.index() == 0){
 	    printf("#Assertion held.\n");
             FW->FWForest->FindElement(left->h, FW->T, tup);
             FW->HistoryForest->Min(mergedHistory, left->history, resultHistory);
@@ -1145,13 +1140,13 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
         }
       break;
       case OP_NOT_IS:
-      if (resultA->h.index != 0){
+      if (resultA->h.index() != 0){
 	  printf("#Assertion held.\n");
           FW->FWForest->FindElement(resultA->h,FW->T, tup);
           FW->HistoryForest->Min(mergedHistory, resultA->history, resultHistory);
           cond = true;
       }
-      else if (resultB->h.index !=0){
+      else if (resultB->h.index() !=0){
 	  printf("#Assertion held.\n");
           FW->FWForest->FindElement(resultB->h,FW->T, tup);
           FW->HistoryForest->Min(mergedHistory, resultB->history, resultHistory);
@@ -1165,7 +1160,7 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
       }
       break;
       case OP_NOT_SUBSET:
-      if (resultB->h.index !=0){
+      if (resultB->h.index() !=0){
          printf("#Assertion held.\n");
          FW->FWForest->FindElement(resultB->h, FW->T, tup);
          FW->HistoryForest->Min(mergedHistory, resultB->history, resultHistory);
@@ -1192,7 +1187,7 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
          if (history){
             printf("Critical Rules:\n");
             FW->HistoryForest->DisplayHistory(resultHistory, tup);
-//            printf("History MDD:%d\n", resultHistory.index);
+//            printf("History MDD:%d\n", resultHistory.index());
 //            for (int k=25;k>0;k--)
 //               FW->HistoryForest->Compact(k);
 //            FW->HistoryForest->PrintMDD();
