@@ -1182,7 +1182,7 @@ void FirewallForest::InternalPrintClasses(level k, node_idx p, int *low,
             if (i==4){
                char addy[16];
                struct in_addr *addr;
-               sprintf(addy, "%d.%d.%d.%d\0", low[4], low[3],low[2],low[1]);
+               sprintf(addy, "%d.%d.%d.%d", low[4], low[3],low[2],low[1]);
                addr = new in_addr;
                if (inet_aton(addy,addr) != 0){
                   h = gethostbyaddr(addr, sizeof(addr), AF_INET);
