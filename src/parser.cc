@@ -1347,7 +1347,7 @@ query *PrintServiceGraph()
          }
          while (curPort != NULL){
             if (curPort->protocol != lastProt || curPort->low != lastVal - 1){
-               printf("%d\n", curPort->protocol, curPort->high);
+               printf("%d-%d\n", curPort->protocol, curPort->high);
                printf("%d Port %d-", curPort->protocol, curPort->low);
             }
             lastVal = curPort->high;
