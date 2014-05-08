@@ -910,9 +910,9 @@ condition *UnionConditions(condition * c1, condition * c2)
 
    // We use the "MAX" operation on MDDs, which stores
    // the result in newCond->h.
-   FW->FWForest->Max(c1->h, c2->h, newCond->h);
+   FW->FWForest->max_op->apply(c1->h, c2->h, newCond->h);
 #ifndef NO_HISTORY
-   FW->HistoryForest->Max(c1->history, c2->history, newCond->history);
+   FW->HistoryForest->max_op->apply(c1->history, c2->history, newCond->history);
 #endif
    // Now c1 and c2 are no longer useful, so they can be freed.
    FW->FWForest->DestroyMDD(c1->h);
@@ -1070,8 +1070,8 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    MDDHandle mergedHistory;
    MDDHandle resultHistory;
   
-   FW->HistoryForest->Max(FW->InputHist, FW->OutputHist, mergedHistory);
-   FW->HistoryForest->Max(FW->ForwardHist, mergedHistory, mergedHistory);
+   FW->HistoryForest->max_op->apply(FW->InputHist, FW->OutputHist, mergedHistory);
+   FW->HistoryForest->max_op->apply(FW->ForwardHist, mergedHistory, mergedHistory);
   
    FW->complement->apply(left->h, notA->h);
    FW->complement->apply(right->h, notB->h);
@@ -1090,8 +1090,8 @@ assert* PerformAssertion(condition* left, condition* right, int assert_op, int e
    FW->FWForest->Min(left->h, notB->h, resultB->h);
    FW->HistoryForest->Min(left->history, notB->history, resultB->history);
 
-   FW->FWForest->Max(resultA->h, resultB->h, resultC->h);
-   FW->HistoryForest->Max(resultA->history, resultB->history, resultC->history);
+   FW->FWForest->max_op->apply(resultA->h, resultB->h, resultC->h);
+   FW->HistoryForest->max_op->apply(resultA->history, resultB->history, resultC->history);
 
    FW->FWForest->Min(left->h, right->h, resultD->h);
    FW->FWForest->Min(left->history, right->history, resultD->history);

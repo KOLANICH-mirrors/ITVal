@@ -616,8 +616,7 @@ node_idx FirewallForest::InternalSNAT(level k, node_idx p, node_idx q,
                   qchild = FDDL_ARC(k, nodeQ, j);
                else
                   qchild = 0;
-               u = InternalMax(k - 1, rchild,
-                               InternalSNAT(k - 1, pchild, qchild, pnr));
+               u = max_op->internal_apply(k - 1, rchild, InternalSNAT(k - 1, pchild, qchild, pnr));
                SetArc(k, result, i, u);
             }
             cur = cur->next;
@@ -750,8 +749,7 @@ node_idx FirewallForest::InternalDNAT(level k, node_idx p, node_idx q,
                   qchild = FDDL_ARC(k, nodeQ, j);
                else
                   qchild = 0;
-               u = InternalMax(k - 1, rchild,
-                               InternalDNAT(k - 1, pchild, qchild, pnr));
+               u = max_op->internal_apply(k - 1, rchild, InternalDNAT(k - 1, pchild, qchild, pnr));
                SetArc(k, result, i, u);
             }
             cur = cur->next;
@@ -867,8 +865,7 @@ node_idx FirewallForest::InternalNMAP(level k, node_idx p, node_idx q,
                   qchild = FDDL_ARC(k, nodeQ, j);
                else
                   qchild = 0;
-               u = InternalMax(k - 1, rchild,
-                               InternalNMAP(k - 1, pchild, qchild, pnr));
+               u = max_op->internal_apply(k - 1, rchild, InternalNMAP(k - 1, pchild, qchild, pnr));
                SetArc(k, result, i, u);
             }
             cur = cur->next;
