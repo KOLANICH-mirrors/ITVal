@@ -29,8 +29,8 @@
 
 void ProcessInfo(char *info, processed_rule * p, rule_parser * rp)
 {
-   char port[1024];                       // String representation of the port
-   char which[1024];                      // Which protocol the port is for
+   char port[1025];                       // String representation of the port
+   char which[1025];                      // Which protocol the port is for
 
    // (tcp, udp, or icmp)
    int port_val;                          // Integer representation of the port 
@@ -43,8 +43,8 @@ void ProcessInfo(char *info, processed_rule * p, rule_parser * rp)
 
    int state;                             // States to match
 
-   char word1[1024];                      // Key name
-   char word2[1024];                      // Value 
+   char word1[1025];                      // Key name
+   char word2[1025];                      // Value 
 
    int flags[6];                          // Which TCP flags to match
 

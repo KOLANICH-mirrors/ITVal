@@ -44,7 +44,7 @@ class Topology {
       if (!iFile)
          return;
       while (EOF !=
-             fscanf(iFile, "%256s %3d.%3d.%3d.%3d", name, &ip[0], &ip[1],
+             fscanf(iFile, "%255s %3d.%3d.%3d.%3d", name, &ip[0], &ip[1],
                     &ip[2], &ip[3])) {
          ifaces[numIfaces] = new Interface(name, ip);
          numIfaces++;

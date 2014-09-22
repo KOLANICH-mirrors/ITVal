@@ -130,9 +130,9 @@ int* vals, int chain){
    
 #ifdef HISTORY_DEBUG
    if (k>=2)
-      printf("DH: <%d,%d>[%d],%d,%d\n", k,p,vals[k-2],chain);
+      printf("DH: <%d,%d>[%d],%d\n", k,p,vals[k-2], chain);
    else
-      printf("DH: <%d,%d>[-],%d,%d\n", k,p,chain);
+      printf("DH: <%d,%d>[-],%d\n", k,p,chain);
 #endif
    if (p==0){
       return 0;

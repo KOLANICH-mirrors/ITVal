@@ -35,14 +35,17 @@ class   portset {
 
 	int     numPorts;
 
-	        portset() {
+	portset() {
 		numPorts = 0;
 		for (int i = 0; i < 8192; i++) {
 			ports[i] = 0;
-	}} void InsertPort(int p) {
-		if ((ports[p / 8]) % (p%8) == 0)
+		}
+	} 
+
+	void InsertPort(int p) {
+		if ((ports[p / 8]) & (1 << (p%8)) == 0)
 			numPorts++;
-		ports[p/8] |= (p%8);
+		ports[p/8] |= (1 << (p%8));
 	}
 
 	void    PrintPorts() {
@@ -51,7 +54,7 @@ class   portset {
 		}
 		else {
 			for (int i = 0; i < 65536; i++) {
-				if ((ports[i/8] % (i%8)) != 0)
+				if ((ports[i/8] & (1 << (i%8))) != 0)
 					cout << i << " ";
 			}
 		}

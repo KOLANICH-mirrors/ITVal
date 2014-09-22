@@ -32,8 +32,8 @@
 
 void BreakMASQPorts(char *str, nat_range * &NATRange, char prot, Firewall * FW){
    char *ch;
-   char word3[1024];
-   char word4[1024];
+   char word3[1025];
+   char word4[1025];
    int length;
    //printf("MASQUERADE AND REDIRECT ports have not been implemented yet.\n");
    NATRange = new nat_range;
@@ -84,10 +84,10 @@ void BreakMASQPorts(char *str, nat_range * &NATRange, char prot, Firewall * FW){
 void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW, char* target)
 {
    char *ch;
-   char word1[1024];
-   char word2[1024];
-   char word3[1024];
-   char word4[1024];
+   char word1[1025];
+   char word2[1025];
+   char word3[1025];
+   char word4[1025];
    int length;
    int offset;
 
@@ -221,7 +221,7 @@ void BreakNAT(char *str, nat_range * &NATRange, char prot, Firewall * FW, char* 
 void BreakNMAP(char *str, nat_range * &NATRange, Firewall * FW)
 {
    char *ch;
-   char word1[1024];
+   char word1[1025];
    int length;
 
    NATRange = new nat_range;
@@ -600,8 +600,8 @@ processed_nat_rule* ConvertToSNAT(processed_nat_rule * p, Firewall * FW){
 void ProcessNATInfo(char *info, processed_nat_rule * p, Firewall * FW,
                     rule_parser * rp)
 {
-   char port[1024];                       // String representation of the port
-   char which[1024];                      // Which protocol the port is for
+   char port[1025];                       // String representation of the port
+   char which[1025];                      // Which protocol the port is for
 
    // (tcp, udp, or icmp)
    int port_val;                          // Integer representation of the port 
@@ -618,8 +618,8 @@ void ProcessNATInfo(char *info, processed_nat_rule * p, Firewall * FW,
 
    nat_range *NATRange;                   // NATted Address
 
-   char word1[1024];                      // Key name
-   char word2[1024];                      // Value 
+   char word1[1025];                      // Key name
+   char word2[1025];                      // Value 
 
    int flags[6];                          // Which TCP flags to match
 

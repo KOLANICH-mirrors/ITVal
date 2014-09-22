@@ -65,7 +65,7 @@ void
 void rule_parser::BreakState(char *word, int *state)
 {
    // The current word to examine
-   char curword[1024];
+   char curword[1025];
 
    // The current character to copy
    char *ch;
@@ -127,8 +127,8 @@ void rule_parser::BreakPktType(char *word, int& pktcond){
 
 void rule_parser::BreakFlags(char *word, int *flags)
 {
-   char word1[1024];                      // Flags to examine (Hex string)
-   char word2[1024];                      // Flags that must be set to match 
+   char word1[1025];                      // Flags to examine (Hex string)
+   char word2[1025];                      // Flags that must be set to match 
 
    // (Hex string)
 
@@ -297,17 +297,17 @@ int rule_parser::ReadRule(rule * newRule, char *line, size_t length)
 // Read a rule from the rule file.  Store it in a rule struct.
 int rule_parser::ReadVerboseRule(rule * newRule, char *line, size_t length)
 {
-   char target[1024];
-   char protocol[1024];
-   char opt[1024];
-   char in[1024];
-   char out[1024];
-   char source[1024];
-   char destination[1024];
-   char info[1024];
+   char target[1025];
+   char protocol[1025];
+   char opt[1025];
+   char in[1025];
+   char out[1025];
+   char source[1025];
+   char destination[1025];
+   char info[1025];
    int numcons;
 
-   for (int i = 0; i < 1024; i++)
+   for (int i = 0; i < 1025; i++)
       info[i] = (char) 0x0;
 
    numcons = 0;
