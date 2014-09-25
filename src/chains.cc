@@ -123,6 +123,7 @@ void Firewall::BuildFWRules(char *fname)
 
    // First, parse the rule file into rule structs.
    cur = new rule;
+   bufsize = 0;
    length = getline(&line, &bufsize, ruleFile);
    lineNo++;
    oldLine = line;
@@ -143,6 +144,7 @@ void Firewall::BuildFWRules(char *fname)
       if (length == 0) {        // If the line is empty, ignore.
          free(oldLine);
          line = NULL;
+	 bufsize = 0;
          length = getline(&line, &bufsize, ruleFile);
          lineNo++;
          oldLine = line;
@@ -184,6 +186,7 @@ void Firewall::BuildFWRules(char *fname)
          // Consume the "header display" line
          free(oldLine);
          line = NULL;
+	 bufsize = 0;
          length = getline(&line, &bufsize, ruleFile);
          lineNo++;
          oldLine = line;
@@ -191,6 +194,7 @@ void Firewall::BuildFWRules(char *fname)
          // Priming read
          free(oldLine);
          line = NULL;
+	 bufsize = 0;
          length = getline(&line, &bufsize, ruleFile);
          lineNo++;
          oldLine = line;
@@ -216,6 +220,7 @@ void Firewall::BuildFWRules(char *fname)
          // Do priming read
          free(oldLine);
          line = NULL;
+	 bufsize = 0;
          length = getline(&line, &bufsize, ruleFile);
          lineNo++;
          oldLine = line;
@@ -342,6 +347,7 @@ void Firewall::BuildVerboseFWRules(char *fname)
 
    // First, parse the rule file into rule structs.
    cur = new rule;
+   bufsize = 0;
    length = getline(&line, &bufsize, ruleFile);
    lineNo++;
    oldLine = line;
@@ -362,6 +368,7 @@ void Firewall::BuildVerboseFWRules(char *fname)
       if (length == 0) {        // If the line is empty, ignore.
          free(oldLine);
          line = NULL;
+	 bufsize = 0;
          length = getline(&line, &bufsize, ruleFile);
          lineNo++;
          oldLine = line;
@@ -400,6 +407,7 @@ void Firewall::BuildVerboseFWRules(char *fname)
          // Consume the "header display" line
          free(oldLine);
          line = NULL;
+	 bufsize = 0;
          length = getline(&line, &bufsize, ruleFile);
          lineNo++;
          oldLine = line;
@@ -407,6 +415,7 @@ void Firewall::BuildVerboseFWRules(char *fname)
          // Priming read
          free(oldLine);
          line = NULL;
+	 bufsize = 0;
          length = getline(&line, &bufsize, ruleFile);
          lineNo++;
          oldLine = line;
@@ -435,6 +444,7 @@ void Firewall::BuildVerboseFWRules(char *fname)
          // Do priming read
          free(oldLine);
          line = NULL;
+ 	 bufsize = 0;
          length = getline(&line, &bufsize, ruleFile);
          lineNo++;
          oldLine = line;
@@ -565,6 +575,7 @@ void Firewall::BuildNATRules(char *fname)
 
    // First, parse the rule file into rule structs.
    cur = new rule;
+   bufsize = 0;
    length = getline(&line, &bufsize, natFile);
    lineNo++;
    oldLine = line;
