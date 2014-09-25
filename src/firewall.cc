@@ -219,6 +219,8 @@ Firewall::~Firewall() {
 
       delete ClassForest;
       delete ServiceClassForest;
+      delete complement;
+      delete history_complement;
       if (T)
          delete T;
       T = NULL;
