@@ -95,8 +95,8 @@ COMMENT "#".*
 "EXAMPLE" {ECHO; return EXAMPLE;}
 "HISTORY" {ECHO; return HISTORY;}
 "\." {ECHO; return DOT;}
-{NUM} { ECHO; yylval->val = new char[256]; strncpy(yylval->val, yytext, 256); return NUM;}
-{ALPHANUM} { ECHO; yylval->name = new char[256]; strncpy(yylval->name,yytext,256); return NAME;} 
+{NUM} { ECHO; strncpy(yylval->val, yytext, 256); return NUM;}
+{ALPHANUM} { ECHO; strncpy(yylval->name,yytext,256); return NAME;} 
 "\t" {ECHO;}
 " " {ECHO;}
 "\n" {ECHO; FWLANG_LINE_NO++;}

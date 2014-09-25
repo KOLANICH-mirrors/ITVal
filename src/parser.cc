@@ -1371,11 +1371,13 @@ void PrintAddyList(address * list)
 }
 
 int yyparse();
+int yylex_destroy();
 
 void ParseQueryFile(char *filename){
    FILE* in;
    in = fopen(filename, "r");
    yyin = in;
    yyparse();
+   yylex_destroy();
    fclose(in);
 }

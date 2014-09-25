@@ -26,10 +26,10 @@ int yyerror(const char* str);
    int fv;
    int assert_op;
    port* port_rec;
-   char *name;
+   char name[256];
    address* address_rec;
    int prot;
-   char* val;
+   char val[256];
    int flag;
 };
 
@@ -96,9 +96,9 @@ expression: group_expression SEMI
         | SEMI
         ;
         
-group_expression: GROUP NAME addy_list {$$ = DefineGroup($2, $3); delete[] $2;};
+group_expression: GROUP NAME addy_list {$$ = DefineGroup($2, $3); };
 
-service_expression: SERVICE NAME port_list {$$ = DefineService($2, $3); delete[] $2;};
+service_expression: SERVICE NAME port_list {$$ = DefineService($2, $3); };
 
 addy_list: addy_list addr {$$ = AppendAddy($1,$2);}
             | addr {$$ = AppendAddy(NULL, $1);};
@@ -155,18 +155,18 @@ simple_condition: FROM compound_addy {$$=BuildConditionFromGroup($2, 0);}
         | FOR compound_port {$$=BuildConditionFromService($2, 1);}
         | IN state_value {$$=BuildConditionFromState($2);}
         | WITH flag_name {$$=BuildConditionFromFlag($2);}
-	| INFACE NAME {$$=BuildConditionFromIface($2, 0); delete[] $2;}
-	| OUTFACE NAME {$$=BuildConditionFromIface($2, 1); delete[] $2;}
+	| INFACE NAME {$$=BuildConditionFromIface($2, 0);}
+	| OUTFACE NAME {$$=BuildConditionFromIface($2, 1);}
 	| ACCEPTED input_chain {$$=BuildAcceptCondition($2);}
 	| DROPPED input_chain {$$=BuildDropCondition($2);} 
 	| ACCEPTED {$$=BuildAcceptCondition(1);}
 	| DROPPED {$$=BuildDropCondition(1);} 
         ;
 
-compound_addy: NAME {$$ = GroupLookup($1); delete[] $1;}
+compound_addy: NAME {$$ = GroupLookup($1);}
                 | addr {$$ = BuildGroupFromAddress($1);};
 
-compound_port: NAME {$$ = ServiceLookup($1); delete[] $1;}
+compound_port: NAME {$$ = ServiceLookup($1);}
                 | complete_port {$$ = BuildServiceFromPort($1);};
 
 state_value: T_INVALID{$$=0;} | T_NEW{$$=1;} | T_ESTABLISHED{$$=2;} | T_RELATED{$$=3;};
@@ -177,12 +177,12 @@ complete_port: protocol port {$$ = BuildPort($1, $2);};
 
 protocol: ICMP {$$ = 0;} | UDP {$$ = 1;} | TCP { $$ = 2;} | BOTH { $$ = -1;};
 
-addr: NUM DOT NUM DOT NUM DOT NUM {$$ = ParseAddr($1,$3,$5,$7); delete[] $1; delete[] $3; delete[] $5; delete[] $7;} 
-    | NUM DOT NUM DOT NUM {$$=ParseAddr($1,$3,$5,NULL); delete[] $1; delete[] $3; delete[] $5;} 
-    | NUM DOT NUM{$$=ParseAddr($1,$3,NULL,NULL); delete[] $1; delete[] $3;} 
-    | NUM {$$=ParseAddr($1,NULL,NULL,NULL); delete[] $1;};
+addr: NUM DOT NUM DOT NUM DOT NUM {$$ = ParseAddr($1,$3,$5,$7);} 
+    | NUM DOT NUM DOT NUM {$$=ParseAddr($1,$3,$5,NULL);} 
+    | NUM DOT NUM{$$=ParseAddr($1,$3,NULL,NULL);} 
+    | NUM {$$=ParseAddr($1,NULL,NULL,NULL);};
 
-port: NUM {$$=ParsePort($1); delete[] $1;};
+port: NUM {$$=ParsePort($1);};
 
 %%
 
