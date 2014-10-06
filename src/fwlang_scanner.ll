@@ -43,7 +43,7 @@ COMMENT "#".*
 //# define YY_USER_ACTION yylloc->columns (yyleng);
 %}
 %%
-{COMMENT} { ECHO; } //Comments
+{COMMENT} { ECHO; }
 "GROUP" { ECHO; return GROUP; }
 "SERVICE" { ECHO; return SERVICE; }
 "QUERY" { ECHO; return QUERY; }

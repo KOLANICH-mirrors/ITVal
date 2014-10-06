@@ -33,6 +33,7 @@
 #include "firewall.h"
 
 extern FILE* yyin;
+extern int yydebug;
 
 // Limit of 256 address groups
 group *groups[256];
@@ -1377,6 +1378,7 @@ void ParseQueryFile(char *filename){
    FILE* in;
    in = fopen(filename, "r");
    yyin = in;
+   yydebug = 1;
    yyparse();
    yylex_destroy();
    fclose(in);

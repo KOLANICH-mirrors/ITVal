@@ -8,6 +8,7 @@
 using namespace std;
 
 int yyerror(const char* str);
+#define YYDEBUG 1
 %}
 
 //%debug
@@ -85,15 +86,18 @@ YY_DECL;
 %left <condition_rec> AND			      "AND"
 %left <condition_rec> OR			      "OR"
 %right <condition_rec> NOT			      "NOT"
-%left <condition_rec> FROM TO FOR ON IN WITH INFACE OUTFACE ACCEPTED DROPPED"query primitive"
+%left <condition_rec> FROM TO FOR ON IN WITH INFACE OUTFACE ACCEPTED DROPPED "query primitive"
 
 %%
-statement: expression | expression statement;
-expression: group_expression SEMI 
-        | service_expression SEMI 
-        | query_expression SEMI
-	| assert_expression SEMI
-        | SEMI
+%start statement;
+statement: expression SEMI
+	| expression SEMI statement 
+	;
+
+expression: group_expression 
+        | service_expression 
+        | query_expression 
+	| assert_expression 
         ;
         
 group_expression: GROUP NAME addy_list {$$ = DefineGroup($2, $3); };
