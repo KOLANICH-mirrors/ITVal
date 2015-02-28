@@ -39,9 +39,6 @@ NUM [0-9]*|"*"|"["[0-9]*"-"[0-9]*"]"
 ALPHANUM [a-zA-Z][_a-zA-Z0-9\+\*]*
 COMMENT "#".*
 
-%{
-//# define YY_USER_ACTION yylloc->columns (yyleng);
-%}
 %%
 {COMMENT} { ECHO; }
 "GROUP" { ECHO; return GROUP; }
