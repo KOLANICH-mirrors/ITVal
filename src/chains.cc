@@ -127,7 +127,7 @@ void Firewall::BuildFWRules(char *fname)
    length = getline(&line, &bufsize, ruleFile);
    lineNo++;
    oldLine = line;
-   if (line == NULL || strstr(line, "Chain") < 0) {
+   if (line == NULL || strstr(line, "Chain") == NULL) {
       cout << "File <" << fname << ">" << "is not a valid rule file." << endl;
       exit(-1);
    }
@@ -351,7 +351,7 @@ void Firewall::BuildVerboseFWRules(char *fname)
    length = getline(&line, &bufsize, ruleFile);
    lineNo++;
    oldLine = line;
-   if (line == NULL || strstr(line, "Chain") < 0) {
+   if (line == NULL || strstr(line, "Chain") == NULL) {
       cout << "File <" << fname << "> is not a valid rule file." << endl;
       exit(-1);
    }
